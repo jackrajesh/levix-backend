@@ -5,5 +5,8 @@ psycopg2-binary
 requests
 python-dotenv
 cryptography
-email-validator
+python-jose[cryptography]
 passlib[bcrypt]
+python-multipart
+pydantic[email]
+pydantic-settings
