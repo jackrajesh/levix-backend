@@ -1,5 +1,7 @@
-fastapi
+﻿fastapi
 uvicorn
 sqlalchemy
-psycopg2 / asyncpg
+psycopg2-binary
 requests
+python-dotenv
+cryptography
