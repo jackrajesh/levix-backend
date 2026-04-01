@@ -1,0 +1,105 @@
+{
+  "inventory": [
+    {
+      "id": 2,
+      "name": "Chilli Powder",
+      "aliases": [
+        "chilli powder",
+        "chilli masala"
+      ],
+      "status": "available"
+    },
+    {
+      "id": 3,
+      "name": "Gara Masala Powder",
+      "aliases": [
+        "gara masala powder"
+      ],
+      "status": "out_of_stock"
+    },
+    {
+      "id": 4,
+      "name": "tomato",
+      "aliases": [
+        "tomato",
+        "thakkali"
+      ],
+      "status": "available"
+    },
+    {
+      "id": 5,
+      "name": "soap",
+      "aliases": [
+        "soap"
+      ],
+      "status": "available"
+    },
+    {
+      "id": 6,
+      "name": "biscuit",
+      "aliases": [
+        "biscuit"
+      ],
+      "status": "available"
+    },
+    {
+      "id": 7,
+      "name": "Chiken masla",
+      "aliases": [
+        "chiken masla"
+      ],
+      "status": "available"
+    },
+    {
+      "id": 8,
+      "name": "Butter",
+      "aliases": [
+        "butter"
+      ],
+      "status": "available"
+    },
+    {
+      "id": 9,
+      "name": "Lays",
+      "aliases": [
+        "lays",
+        "chips"
+      ],
+      "status": "coming_soon"
+    },
+    {
+      "id": 10,
+      "name": "Milk",
+      "aliases": [
+        "milk"
+      ],
+      "status": "available"
+    },
+    {
+      "id": 14,
+      "name": "Bread",
+      "aliases": [
+        "bread",
+        "bun"
+      ],
+      "status": "available"
+    },
+    {
+      "id": 15,
+      "name": "Cheese",
+      "aliases": [
+        "cheese"
+      ],
+      "status": "available"
+    },
+    {
+      "id": 16,
+      "name": "Curd",
+      "aliases": [
+        "thayir",
+        "curd"
+      ],
+      "status": "available"
+    }
+  ]
+}

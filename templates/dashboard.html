@@ -1,0 +1,2747 @@
+<!DOCTYPE html>
+<html lang="en" style="-webkit-text-size-adjust: 100%;">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Levix | Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --accent-yes: #22c55e;
+            --accent-no: #ef4444;
+            --accent-yes-hover: #16a34a;
+            --accent-no-hover: #dc2626;
+            --accent-blue: #3b82f6;
+            --accent-orange: #f59e0b;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.5;
+            padding: 2rem;
+            overflow-x: hidden;
+            width: 100%;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .dashboard-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+            width: 100%;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-weight: 700;
+            font-size: 1.875rem;
+            color: var(--text-primary);
+            line-height: 1.2;
+        }
+
+        .brand-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .subtitle {
+            font-size: 0.8125rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-top: 2px;
+            letter-spacing: 0.025em;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        #shop-name-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        #display-shop-name {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--text-primary);
+            white-space: nowrap;
+        }
+
+        #edit-shop-name-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            transition: color 0.2s;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        #edit-shop-name-btn:hover {
+            color: var(--accent-blue);
+        }
+
+        #logoutBtn {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            min-height: 36px;
+            width: auto;
+            white-space: nowrap;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .tab-btn.active {
+            color: var(--accent-blue);
+            border-bottom: 2px solid var(--accent-blue);
+            margin-bottom: -0.625rem;
+        }
+
+        #pending-count {
+            font-size: 0.8em;
+            font-weight: 700;
+            color: var(--accent-no);
+            margin-left: 4px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .refresh-status {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .dot {
+            height: 8px;
+            width: 8px;
+            background-color: var(--accent-yes);
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+
+        .card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        #pending-list .card {
+            flex-direction: column;
+            align-items: flex-start;
+            max-width: 650px;
+            gap: 1.25rem;
+        }
+
+        #pending-list .card .info {
+            width: 100%;
+        }
+
+        #pending-list .card .actions {
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .info {
+            flex: 1;
+        }
+
+        .info h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        .info p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-count {
+            background: #eff6ff;
+            color: var(--accent-blue);
+        }
+
+        .badge-oos {
+            background: #fef2f2;
+            color: var(--accent-no);
+        }
+
+        .badge-coming {
+            background-color: #f5f3ff;
+            color: #7c3aed;
+            border: 1px solid #ddd6fe;
+        }
+
+        .badge-score {
+            background-color: #ecfdf5;
+            color: #059669;
+            font-weight: 700;
+        }
+
+        .is-system-warning {
+            border-left: 4px solid var(--accent-no) !important;
+            background-color: #fffafb !important;
+        }
+
+        .is-coming-soon {
+            border-left: 4px solid #7c3aed !important;
+            background-color: #f5f3ff !important;
+        }
+
+        .actions {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        /* Controls */
+        select,
+        input.edit-input,
+        input.date-input {
+            padding: 0.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+            font-size: 0.875rem;
+            font-weight: 500;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .status-select {
+            width: 140px;
+            cursor: pointer;
+        }
+
+        .status-select:hover {
+            border-color: var(--accent-blue);
+        }
+
+        input.edit-input {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+
+        button {
+            padding: 0.5rem 1.25rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-yes {
+            background-color: var(--accent-yes);
+            color: white;
+        }
+
+        .btn-no {
+            background-color: var(--accent-no);
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: #fee2e2;
+            color: var(--accent-no);
+        }
+
+        .btn-primary {
+            background-color: var(--accent-blue);
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: #e2e8f0;
+            color: var(--text-primary);
+        }
+
+        .btn-icon {
+            padding: 0.5rem;
+            background: none;
+            color: var(--text-secondary);
+        }
+
+        .btn-icon:hover {
+            color: var(--accent-blue);
+            background: #f1f5f9;
+        }
+
+        .btn-yes:hover:not(:disabled) {
+            background-color: var(--accent-yes-hover);
+        }
+
+        .btn-no:hover:not(:disabled) {
+            background-color: var(--accent-no-hover);
+        }
+
+        /* Search & Filters */
+        .filter-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+        }
+
+        .search-container {
+            flex: 1;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            padding-left: 2.75rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        /* Searchable Dropdown */
+        .searchable-dropdown {
+            position: relative;
+            width: 100%;
+        }
+
+        .searchable-dropdown .dropdown-selected {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+            font-size: 0.9375rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-primary);
+            transition: border-color 0.2s;
+        }
+
+        .searchable-dropdown .dropdown-selected:hover {
+            border-color: var(--accent-blue);
+        }
+
+        .searchable-dropdown .dropdown-selected .placeholder {
+            color: var(--text-secondary);
+        }
+
+        .searchable-dropdown .dropdown-panel {
+            display: none;
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            z-index: 100;
+            overflow: hidden;
+        }
+
+        .searchable-dropdown.open .dropdown-panel {
+            display: block;
+        }
+
+        .searchable-dropdown .dropdown-search {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: none;
+            border-bottom: 1px solid var(--border-color);
+            background: transparent;
+            font-size: 0.9375rem;
+            outline: none;
+            color: var(--text-primary);
+        }
+
+        .searchable-dropdown .dropdown-list {
+            max-height: 180px;
+            overflow-y: auto;
+            padding: 0.25rem 0;
+        }
+
+        .searchable-dropdown .dropdown-item {
+            padding: 0.625rem 1rem;
+            cursor: pointer;
+            font-size: 0.9375rem;
+            transition: background 0.15s;
+            color: var(--text-primary);
+        }
+
+        .searchable-dropdown .dropdown-item:hover {
+            background: #f1f5f9;
+        }
+
+        .searchable-dropdown .dropdown-item.selected {
+            background: #e0f2fe;
+            font-weight: 600;
+        }
+
+        .searchable-dropdown .dropdown-empty {
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        /* Pagination */
+        .pagination-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .page-size-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .page-size-selector select {
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-primary);
+            outline: none;
+        }
+
+        .page-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .page-btn {
+            min-width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            border: 1px solid transparent;
+            background: transparent;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .page-btn:hover:not(.active) {
+            background: #f1f5f9;
+        }
+
+        .page-btn.active {
+            background: var(--accent-blue);
+            color: white;
+            font-weight: 600;
+        }
+
+        .page-dots {
+            color: var(--text-secondary);
+            padding: 0 0.25rem;
+        }
+
+        @media (max-width: 600px) {
+            .pagination-container {
+                justify-content: center;
+                flex-direction: column;
+            }
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+            outline: none;
+            /* Remove any unintended outlines */
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        /* Analytics Tab */
+        .analytics-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 2rem;
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .date-filters {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .demand-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .demand-table th,
+        .demand-table td {
+            text-align: left;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .demand-table th {
+            background: #f1f5f9;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .loading-spinner {
+            width: 14px;
+            height: 14px;
+            border: 2px solid #ffffff;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .is-loading .loading-spinner {
+            display: block;
+        }
+
+        .is-loading span:not(.loading-spinner) {
+            display: none;
+        }
+
+        .card:not(.is-editing) .edit-mode {
+            display: none !important;
+        }
+
+        .card.is-editing .view-mode {
+            display: none !important;
+        }
+
+        .insight-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+
+        .trend-up {
+            color: var(--accent-yes);
+        }
+
+        .trend-down {
+            color: var(--accent-no);
+        }
+
+        /* Toast Notifications */
+        #toast-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .toast {
+            background: #1e293b;
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            box-shadow: var(--shadow-md);
+            animation: slideIn 0.3s ease-out;
+            min-width: 250px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .toast.success {
+            background: var(--accent-yes);
+        }
+
+        .toast.error {
+            background: var(--accent-no);
+        }
+
+        .toast.warning {
+            background: var(--accent-orange);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Confirmation Modal */
+        #confirm-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #confirm-modal .modal-card {
+            background: var(--card-bg);
+            width: 400px;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            text-align: center;
+            animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes modalPop {
+            from {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        #confirm-modal h3 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        #confirm-modal p {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            font-size: 0.9375rem;
+        }
+
+        .modal-btns {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .modal-btns button {
+            flex: 1;
+            justify-content: center;
+        }
+
+        /* Responsive Utilities */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .sales-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 1.5rem;
+        }
+
+        /* Tablet (769px - 1024px) */
+        @media (max-width: 1024px) {
+            body {
+                padding: 1.5rem;
+            }
+
+            .container {
+                max-width: 100%;
+            }
+
+            .dashboard-container {
+                max-width: 100%;
+            }
+
+            .sales-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .analytics-overview-grid {
+                grid-template-columns: 1fr 1fr !important;
+            }
+        }
+
+        /* Mobile (max-width: 768px) */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem 0.5rem;
+            }
+
+            .dashboard-container {
+                padding: 10px;
+            }
+
+            header {
+                flex-direction: column;
+                align-items: center;
+                gap: 1.25rem;
+                text-align: center;
+                margin-bottom: 2rem;
+            }
+
+            .brand-container {
+                margin-bottom: 0;
+            }
+
+            .header-controls {
+                flex-direction: column;
+                width: 100%;
+                gap: 0.75rem;
+                align-items: center;
+            }
+
+            #shop-name-container {
+                width: 100%;
+                justify-content: center;
+                padding: 0;
+            }
+
+            #edit-shop-name-form {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            #input-shop-name {
+                width: 100% !important;
+                max-width: 180px;
+                min-height: 36px;
+                text-align: center;
+            }
+
+            #logoutBtn {
+                width: auto;
+                min-width: 100px;
+                max-width: 150px;
+                margin-left: 0;
+                justify-content: center;
+            }
+
+            /* Removed old card styles replaced by new layout */
+            .edit-mode.actions button {
+                flex: 1;
+                max-width: 120px;
+            }
+
+            .view-mode.actions {
+                width: 100%;
+                justify-content: center;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .tabs {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 0.75rem;
+                border-bottom: none;
+                padding-bottom: 1rem;
+            }
+
+            .tab-btn {
+                padding: 0.875rem 0.5rem;
+                /* Slightly larger targets */
+                border: 1px solid var(--border-color);
+                border-radius: 10px;
+                text-align: center;
+                min-height: 48px;
+                width: 100%;
+                font-size: 0.9375rem;
+            }
+
+            .tab-btn.active {
+                background-color: var(--card-bg);
+                box-shadow: var(--shadow-sm);
+                border-color: var(--accent-blue);
+            }
+
+            .tab-btn.active {
+                border-bottom: 2px solid var(--accent-blue);
+                background-color: #f1f5f9;
+                margin-bottom: 0;
+            }
+
+            .filter-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .analytics-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1.5rem;
+                text-align: left;
+            }
+
+            .date-filters {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+
+            .date-filters div {
+                width: 100%;
+            }
+
+            .sales-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .analytics-overview-grid {
+                grid-template-columns: 1fr !important;
+            }
+
+            .card {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+
+            .actions {
+                width: 100%;
+                justify-content: flex-start;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .actions button {
+                flex: 1 1 auto;
+                justify-content: center;
+                padding: 0.75rem;
+                min-height: 44px;
+            }
+
+            input,
+            select,
+            .btn-primary,
+            .btn-secondary,
+            .btn-yes,
+            .btn-no {
+                width: 100% !important;
+                min-height: 44px;
+                font-size: 16px;
+            }
+
+            #pending-list .card {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: left;
+            }
+
+            #pending-list .actions {
+                flex-direction: column;
+                width: 100%;
+                gap: 0.75rem;
+            }
+
+            #pending-list .actions button {
+                width: 100% !important;
+                margin: 0;
+            }
+
+            #pending-list .info div {
+                flex-direction: column;
+                align-items: flex-start !important;
+                gap: 0.25rem;
+            }
+
+            .btn-icon {
+                width: auto !important;
+                min-height: 44px;
+                padding: 0 1rem;
+            }
+
+            #sale-modal>div {
+                width: 95% !important;
+                max-width: 400px;
+                margin: 0 auto;
+                padding: 1.5rem;
+            }
+
+            .stat-card {
+                padding: 1.25rem;
+                width: 100%;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .table-responsive {
+                margin: 0 -0.5rem;
+                width: calc(100% + 1rem);
+            }
+        }
+        .badge-qty {
+            background: #eef2ff;
+            color: #4f46e5;
+            font-weight: 700;
+            border: 1px solid #e0e7ff;
+        }
+
+        .qty-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #f8fafc;
+            padding: 0.25rem 0.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .qty-btn {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            color: var(--text-primary);
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .qty-btn:hover {
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+            background: #f0f7ff;
+        }
+
+        .qty-btn:active {
+            transform: scale(0.9);
+        }
+
+        .edit-input-qty {
+            width: 80px !important;
+        }
+
+        .badge-warning {
+            background: #fff7ed;
+            color: #c2410c;
+            border: 1px solid #fdba74;
+            font-weight: 700;
+        }
+
+        #inventory-list .card.is-low-stock {
+            border-left: 4px solid #f97316;
+            background: #fffaf5;
+        }
+
+        #inventory-list .card.is-out-of-stock {
+            border-left: 4px solid var(--accent-no);
+        }
+
+        #inventory-list .card.is-available {
+            border-left: 4px solid var(--accent-yes);
+        }
+
+        .restock-container {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            margin-left: 0.5rem;
+            padding-left: 0.5rem;
+            border-left: 1px solid var(--border-color);
+        }
+
+        .restock-input {
+            width: 45px;
+            height: 28px;
+            padding: 0 0.25rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            text-align: center;
+        }
+        /* New Inventory Card Layout */
+        /* New Responsive Inventory Card Layout */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.25rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            transition: all 0.2s;
+            margin-bottom: 1.25rem;
+        }
+
+        .inventory-card-header {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            width: 100%;
+        }
+
+        /* Essential for making children available for card-level row/grid layout */
+        .inventory-card-controls.view-mode {
+            display: contents;
+        }
+
+        .qty-control-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #f1f5f9;
+            padding: 4px 8px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            width: fit-content;
+        }
+
+        .inventory-card-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            justify-content: flex-end;
+        }
+
+        /* Desktop Layout (> 1100px) */
+        @media (min-width: 1101px) {
+            .card {
+                flex-direction: row;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 1.5rem;
+            }
+
+            .inventory-card-header {
+                flex: 1 1 100%;
+                margin-bottom: -0.5rem;
+            }
+
+            .inventory-card-actions {
+                margin-left: auto;
+            }
+        }
+
+        /* Tablet Layout (600px - 1100px) */
+        @media (min-width: 600px) and (max-width: 1100px) {
+            .card {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(100px, auto));
+                gap: 0.75rem 1.5rem;
+                align-items: center;
+            }
+
+            .inventory-card-header {
+                grid-column: 1 / -1;
+            }
+
+            /* Row 1: Qty, Status, Price */
+            .qty-control-group { grid-row: 2; }
+            .status-select { grid-row: 2; width: auto !important; }
+            .inventory-card-controls.view-mode > span.badge { grid-row: 2; }
+
+            /* Row 2: Metrics and Actions */
+            .inventory-card-controls.view-mode > div[style*="margin-left: auto"] {
+                grid-row: 3;
+                grid-column: 1 / -1;
+                margin-left: 0 !important;
+                margin-top: 0.5rem;
+            }
+
+            .inventory-card-actions {
+                grid-row: 3;
+                grid-column: 1 / -1;
+                justify-content: flex-end;
+                margin-top: 0.5rem;
+                border-top: 1px solid var(--border-color);
+                padding-top: 0.75rem;
+            }
+        }
+
+        /* Mobile Layout (< 600px) */
+        @media (max-width: 599px) {
+            .card {
+                align-items: stretch !important;
+                padding: 1.25rem !important;
+                text-align: left !important;
+            }
+
+            .inventory-card-controls.view-mode {
+                display: flex !important; /* Re-enable flex for simple stacking */
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 1rem !important;
+            }
+
+            .inventory-card-controls.view-mode > * {
+                width: 100% !important;
+                margin: 0 !important;
+            }
+
+            .qty-control-group {
+                justify-content: center !important;
+                width: auto !important;
+                align-self: center !important;
+            }
+
+            .status-select {
+                width: 100% !important;
+                max-width: none !important;
+            }
+
+            .inventory-card-actions {
+                justify-content: center !important;
+                border-top: 1px solid var(--border-color) !important;
+                padding-top: 1rem !important;
+                margin-top: 0.5rem !important;
+            }
+
+            .inventory-card-controls.view-mode .badge {
+                justify-content: center !important;
+                text-align: center !important;
+            }
+
+            /* Fix badge container on mobile */
+            .inventory-card-controls.view-mode div[style*="margin-left: auto"] {
+                margin-left: 0 !important;
+                justify-content: center !important;
+                flex-direction: row !important;
+                gap: 0.5rem !important;
+            }
+            
+            .inventory-card-controls.view-mode div[style*="margin-left: auto"] .badge {
+                width: auto !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="toast-container"></div>
+    <div class="dashboard-container">
+        <header>
+            <div class="brand-container">
+                <h1>LEVIX</h1>
+                <span class="subtitle">Intelligent Store Management</span>
+            </div>
+            <div class="header-controls">
+                <div id="shop-name-container">
+                    <span id="display-shop-name">Loading...</span>
+                    <button id="edit-shop-name-btn" onclick="startEditShopName()" title="Edit Shop Name">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div id="edit-shop-name-form" style="display: none; align-items: center; gap: 0.5rem;">
+                    <input type="text" id="input-shop-name" class="search-input"
+                        style="padding: 0.25rem 0.5rem; width: 140px; min-height: 32px; font-size: 0.875rem;">
+                    <button class="btn-primary" onclick="saveShopName(this)"
+                        style="padding: 0.25rem 0.5rem; min-height: 32px; font-size: 0.75rem;">SAVE</button>
+                    <button class="btn-secondary" onclick="cancelEditShopName()"
+                        style="padding: 0.25rem 0.5rem; min-height: 32px; font-size: 0.75rem;">CANCEL</button>
+                </div>
+                <button id="logoutBtn" class="btn-secondary">Logout</button>
+            </div>
+        </header>
+
+        <nav class="tabs">
+            <button class="tab-btn active" id="tab-pending" onclick="switchTab('pending')">Pending <span
+                    id="pending-count"></span></button>
+            <button class="tab-btn" id="tab-inventory" onclick="switchTab('inventory')">Inventory</button>
+            <button class="tab-btn" id="tab-sales" onclick="switchTab('sales')">Sales Tracking</button>
+            <button class="tab-btn" id="tab-analytics" onclick="switchTab('analytics')">Analytics & Insights</button>
+        </nav>
+
+        <!-- Pending Tab -->
+        <div id="pending-tab" class="tab-content active">
+            <div id="pending-list" class="list">
+                <div class="empty-state">Loading pending requests...</div>
+            </div>
+        </div>
+
+        <!-- Inventory Tab -->
+        <div id="inventory-tab" class="tab-content">
+            <div class="filter-row">
+                <div class="search-container">
+                    <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" class="search-input" id="inventory-search" placeholder="Search products..."
+                        oninput="handleSearch()">
+                </div>
+                <button class="btn-primary" onclick="showAddForm()">+ADD PRODUCT</button>
+            </div>
+            <div id="add-form-container" style="display: none; margin-bottom: 2rem;">
+                <div class="stat-card" style="text-align: left;">
+                    <h3 style="margin-bottom: 1rem;">Add New Product</h3>
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <input type="text" id="new-name" placeholder="Product Name" style="flex: 2; min-width: 200px;">
+                        <input type="text" id="new-aliases" placeholder="Aliases (comma separated)"
+                            style="flex: 2; min-width: 200px;">
+                        <input type="number" id="new-qty" placeholder="Qty" value="1" min="0" style="flex: 0.5; min-width: 80px;">
+                        <input type="number" id="new-price" placeholder="Price (₹)" value="0" min="0" step="0.01" style="flex: 0.5; min-width: 80px;">
+                        <button class="btn-primary" onclick="addProduct(this)">SAVE</button>
+                        <button class="btn-secondary" onclick="hideAddForm()">CANCEL</button>
+                    </div>
+                </div>
+            </div>
+            <div id="inventory-list" class="list">
+                <div class="empty-state">Loading inventory insights...</div>
+            </div>
+            <div class="pagination-container" id="inventory-pagination" style="display: none;">
+                <div class="page-size-selector">
+                    <label>Items per page:</label>
+                    <select id="inventory-page-size" onchange="changePageSize(this.value)">
+                        <option value="5">5</option>
+                        <option value="10" selected>10</option>
+                        <option value="20">20</option>
+                    </select>
+                </div>
+                <div class="page-controls" id="inventory-page-controls">
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Tab -->
+        <div id="analytics-tab" class="tab-content">
+            <div class="analytics-header">
+                <div>
+                    <h2 style="font-size: 1.25rem; margin-bottom: 0.5rem;">Demand Overview</h2>
+                    <p style="font-size: 0.875rem; color: var(--text-secondary);">Filter insights by specific date range
+                    </p>
+                </div>
+                <div class="date-filters">
+                    <div>
+                        <label
+                            style="display:block; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem;">START
+                            DATE</label>
+                        <input type="date" id="start-date" class="date-input">
+                    </div>
+                    <div>
+                        <label style="display:block; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem;">END
+                            DATE</label>
+                        <input type="date" id="end-date" class="date-input">
+                    </div>
+                    <button class="btn-primary" onclick="fetchAnalytics()"
+                        style="padding: 0.625rem 1rem;">APPLY</button>
+                </div>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-total">0</div>
+                    <div class="stat-label">TOTAL REQUESTS</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-fulfilled">0%</div>
+                    <div class="stat-label">AVAILABILITY RATE</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-pending">0</div>
+                    <div class="stat-label">NEW DEMAND (PENDING)</div>
+                </div>
+            </div>
+            <div class="analytics-overview-grid"
+                style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                <div class="stat-card" style="text-align: left;">
+                    <h3 style="font-size: 1rem; margin-bottom: 1rem; color: var(--text-secondary);">TOP REQUESTED</h3>
+                    <div id="top-requested-list" class="list" style="gap: 0.75rem;"></div>
+                </div>
+                <div class="stat-card" style="text-align: left;">
+                    <h3 style="font-size: 1rem; margin-bottom: 1rem; color: var(--text-secondary);">TOP SOLD</h3>
+                    <div id="top-sold-list" class="list" style="gap: 0.75rem;"></div>
+                </div>
+                <div class="stat-card" style="text-align: left;">
+                    <h3 style="font-size: 1rem; margin-bottom: 1rem; color: var(--text-secondary);">LOW DEMAND (REQUESTS)</h3>
+                    <div id="low-requested-list" class="list" style="gap: 0.75rem;"></div>
+                </div>
+                <div class="stat-card" style="text-align: left;">
+                    <h3 style="font-size: 1rem; margin-bottom: 1rem; color: var(--text-secondary);">LOW DEMAND (SALES)</h3>
+                    <div id="low-sold-list" class="list" style="gap: 0.75rem;"></div>
+                </div>
+            </div>
+            <div class="stat-card" style="text-align: left; margin-bottom: 2rem;">
+                <h3 style="font-size: 1rem; margin-bottom: 1rem; color: var(--text-secondary);">CRITICAL STOCK</h3>
+                <div id="stock-insights-list" class="list" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem;"></div>
+            </div>
+            <h3 style="margin-bottom: 1rem;">Demand Intelligence Table</h3>
+            <div class="table-responsive">
+                <table class="demand-table">
+                    <thead>
+                        <tr>
+                            <th>PRODUCT</th>
+                            <th>TOTAL ASKS</th>
+                            <th>OOS COUNT</th>
+                            <th>DAILY RATE</th>
+                            <th>LAST ASKED</th>
+                        </tr>
+                    </thead>
+                    <tbody id="demand-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Sales Tab -->
+        <div id="sales-tab" class="tab-content">
+            <div class="sales-grid">
+                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    <!-- Manual Entry Panel -->
+                    <div class="stat-card" style="text-align: left; height: fit-content;">
+                        <h3 style="font-size: 1.125rem; margin-bottom: 1rem;">Manual Sales Entry</h3>
+                        <div style="display: flex; flex-direction: column; gap: 1rem;">
+                            <div>
+                                <label
+                                    style="display:block; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem;">PRODUCT
+                                    NAME</label>
+                                <input type="text" id="manual-sale-name" class="edit-input"
+                                    placeholder="Type product name...">
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                                <div>
+                                    <label
+                                        style="display:block; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem;">DATE</label>
+                                    <input type="date" id="manual-sale-date" class="date-input" style="width: 100%;">
+                                </div>
+                                <div>
+                                    <label
+                                        style="display:block; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem;">QUANTITY</label>
+                                    <input type="number" id="manual-sale-qty" class="edit-input" value="1" min="0">
+                                </div>
+                            </div>
+                            <button class="btn-primary" onclick="submitManualSale(this)"
+                                style="width: 100%; justify-content: center;">
+                                <span class="loading-spinner"></span>
+                                <span>RECORD SALE</span>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Inventory Entry Panel -->
+                    <div class="stat-card" style="text-align: left; height: fit-content;">
+                        <h3 style="font-size: 1.125rem; margin-bottom: 1rem;">Inventory Sales Entry</h3>
+                        <div style="display: flex; flex-direction: column; gap: 1rem;">
+                            <div>
+                                <label
+                                    style="display:block; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem;">SELECT
+                                    PRODUCT</label>
+                                <input type="hidden" id="inventory-sale-id" value="">
+                                <div class="searchable-dropdown" id="product-dropdown">
+                                    <div class="dropdown-selected" onclick="toggleProductDropdown()">
+                                        <span id="dropdown-label" class="placeholder">Choose product...</span>
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2.5">
+                                            <polyline points="6 9 12 15 18 9"></polyline>
+                                        </svg>
+                                    </div>
+                                    <div class="dropdown-panel">
+                                        <input type="text" class="dropdown-search" id="dropdown-product-search"
+                                            placeholder="Search product..." oninput="filterInventoryProducts()">
+                                        <div class="dropdown-list" id="dropdown-product-list"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                                <div>
+                                    <label
+                                        style="display:block; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem;">DATE</label>
+                                    <input type="date" id="inventory-sale-date" class="date-input" style="width: 100%;">
+                                </div>
+                                <div>
+                                    <label
+                                        style="display:block; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem;">QUANTITY</label>
+                                    <input type="number" id="inventory-sale-qty" class="edit-input" value="1" min="0">
+                                </div>
+                            </div>
+                            <button class="btn-primary" onclick="submitInventorySale(this)"
+                                style="width: 100%; justify-content: center;">
+                                <span class="loading-spinner"></span>
+                                <span>RECORD SALE</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Sales View Panel -->
+                <div>
+                    <div class="analytics-header" style="margin-bottom: 1.5rem;">
+                        <div>
+                            <h2 style="font-size: 1.25rem; margin-bottom: 0.5rem;">Sales History</h2>
+                            <p style="font-size: 0.875rem; color: var(--text-secondary);">View and export sales data</p>
+                        </div>
+                        <div style="display: flex; gap: 1rem; align-items: flex-end;">
+                            <div class="date-filters" style="align-items: flex-end;">
+                                <div>
+                                    <label
+                                        style="display:block; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem;">FROM</label>
+                                    <input type="date" id="sales-start-date" class="date-input">
+                                </div>
+                                <div>
+                                    <label
+                                        style="display:block; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem;">TO</label>
+                                    <input type="date" id="sales-end-date" class="date-input">
+                                </div>
+                                <button class="btn-secondary" onclick="fetchSales()"
+                                    style="padding: 0.625rem 1rem; height: 38px;">APPLY</button>
+                            </div>
+                            <button class="btn-primary" onclick="exportSales()" title="Download CSV">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                </svg>EXPORT
+                            </button>
+                        </div>
+                    </div>
+                    <div class="search-container" style="margin-bottom: 1.5rem;">
+                        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <input type="text" id="sales-search" class="search-input"
+                            placeholder="Search sales by product..." oninput="filterSales()">
+                    </div>
+                    <div style="margin-bottom: 1.5rem;">
+                        <h3 style="font-size: 1rem; margin-bottom: 0.75rem; color: var(--text-secondary);">AGGREGATED
+                            TOTALS</h3>
+                        <div id="sales-totals" style="display: flex; gap: 0.75rem; flex-wrap: wrap;"></div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="demand-table">
+                            <thead>
+                                <tr>
+                                    <th>PRODUCT</th>
+                                    <th>DATE</th>
+                                    <th>QUANTITY</th>
+                                    <th style="text-align: right;">ACTION</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sales-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirm-modal">
+        <div class="modal-card">
+            <h3 id="confirm-title">Confirm Action</h3>
+            <p id="confirm-message">Are you sure you want to proceed?</p>
+            <div class="modal-btns">
+                <button class="btn-secondary" onclick="closeConfirm()">CANCEL</button>
+                <button class="btn-primary" id="confirm-btn">CONFIRM</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sale Modal -->
+    <div id="sale-modal"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+        <div class="stat-card" style="width: 400px; text-align: left; background: white;">
+            <h3 id="modal-title" style="margin-bottom: 1.5rem;">Record Sale</h3>
+            <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+                <input type="hidden" id="modal-product-id">
+                <div>
+                    <label
+                        style="display:block; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem;">DATE</label>
+                    <input type="date" id="modal-sale-date" class="date-input" style="width: 100%;">
+                </div>
+                <div>
+                    <label
+                        style="display:block; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem;">QUANTITY</label>
+                    <input type="number" id="modal-sale-qty" class="edit-input" value="1" min="0">
+                </div>
+                <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
+                    <button class="btn-primary" onclick="submitModalSale(this)"
+                        style="flex: 1; justify-content: center;">
+                        <span class="loading-spinner"></span><span>SAVE SALE</span>
+                    </button>
+                    <button class="btn-secondary" onclick="closeSaleModal()"
+                        style="flex: 1; justify-content: center;">CANCEL</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Add to Inventory Modal -->
+    <div id="add-pending-modal"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+        <div class="stat-card" style="width: 400px; text-align: left; background: white;">
+            <h3 style="margin-bottom: 1.5rem;">Add to Inventory</h3>
+            <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+                <input type="hidden" id="pending-req-id">
+                <div>
+                    <label style="display:block; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem;">PRODUCT
+                        NAME</label>
+                    <input type="text" id="pending-add-name" class="edit-input" style="width: 100%;">
+                </div>
+                <div>
+                    <label style="display:block; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem;">ALIAS
+                        (comma separated)</label>
+                    <input type="text" id="pending-add-aliases" class="edit-input" style="width: 100%;">
+                </div>
+                <div>
+                    <label
+                        style="display:block; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem;">STATUS</label>
+                    <select id="pending-add-status" class="status-select" style="width: 100%;">
+                        <option value="available">Available</option>
+                        <option value="out_of_stock">Out of Stock</option>
+                    </select>
+                </div>
+                <div>
+                    <label
+                        style="display:block; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem;">INITIAL QUANTITY</label>
+                    <input type="number" id="pending-add-qty" class="edit-input" value="1" min="0" style="width: 100%;">
+                </div>
+                <div>
+                    <label
+                        style="display:block; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.25rem;">PRICE (₹)</label>
+                    <input type="number" id="pending-add-price" class="edit-input" value="0" min="0" step="0.01" style="width: 100%;">
+                </div>
+                <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
+                    <button class="btn-primary" onclick="submitAddFromPending(this)"
+                        style="flex: 1; justify-content: center;">
+                        <span class="loading-spinner"></span><span>ADD TO INVENTORY</span>
+                    </button>
+                    <button class="btn-secondary" onclick="closeAddPendingModal()"
+                        style="flex: 1; justify-content: center;">CANCEL</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        const API_BASE = '';
+
+        // --- Server-Sent Events for Real-Time Pending Updates ---
+        const eventSource = new EventSource('/events');
+
+        eventSource.addEventListener('pending_created', () => {
+            fetchPending();
+        });
+
+        eventSource.addEventListener('pending_updated', () => {
+            fetchPending();
+        });
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                toast.style.transition = 'all 0.3s ease-in';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        async function authFetch(url, options = {}) {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/';
+                throw new Error('No token found');
+            }
+            options.headers = {
+                ...options.headers,
+                'Authorization': `Bearer ${token}`
+            };
+            const res = await fetch(url, options);
+            if (res.status === 401) {
+                localStorage.removeItem('token');
+                window.location.href = '/';
+                throw new Error('Unauthorized');
+            }
+            return res;
+        }
+
+        let currentTab = 'pending';
+        let fullInventory = [];
+        let currentFilteredInventory = [];
+        let currentPage = 1;
+        let pageSize = 10;
+        let inventoryInsights = [];
+        let isSaving = false;
+        let editingProductId = null;
+
+        function disableInventoryActions(disabled) {
+            const list = document.getElementById('inventory-list');
+            if (!list) return;
+            const elements = list.querySelectorAll('button, select');
+            elements.forEach(el => el.disabled = disabled);
+        }
+
+        let confirmCallback = null;
+        function showConfirm(title, message, onConfirm) {
+            document.getElementById('confirm-title').innerText = title;
+            document.getElementById('confirm-message').innerText = message;
+            document.getElementById('confirm-modal').style.display = 'flex';
+            confirmCallback = onConfirm;
+        }
+
+        function closeConfirm() {
+            document.getElementById('confirm-modal').style.display = 'none';
+            confirmCallback = null;
+        }
+
+        document.getElementById('confirm-btn').addEventListener('click', () => {
+            if (confirmCallback) confirmCallback();
+            closeConfirm();
+        });
+
+        function switchTab(tabId) {
+            if (editingProductId !== null) cancelEdit(editingProductId);
+            currentTab = tabId;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn.id === `tab-${tabId}`));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.toggle('active', content.id === `${tabId}-tab`));
+            fetchData();
+        }
+
+        async function fetchData() {
+            if (currentTab === 'pending') fetchPending();
+            else if (currentTab === 'inventory') fetchInventory();
+            else if (currentTab === 'sales') {
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('manual-sale-date').value = today;
+                document.getElementById('inventory-sale-date').value = today;
+                fetchSales();
+                populateInventoryDropdown();
+            }
+            else if (currentTab === 'analytics') fetchAnalytics();
+        }
+
+        async function fetchPending() {
+            try {
+                // Ensure inventory is loaded to check existence
+                if (fullInventory.length === 0) await fetchInventory();
+
+                const response = await authFetch(`${API_BASE}/pending`);
+                const data = await response.json();
+                renderPending(data);
+
+                // Update counter
+                const countSpan = document.getElementById('pending-count');
+                countSpan.textContent = data.length > 0 ? `(${data.length})` : '';
+            } catch (err) {
+                document.getElementById('pending-list').innerHTML = '<div class="empty-state">Failed to connect to backend</div>';
+            }
+        }
+
+        function renderPending(items) {
+            const container = document.getElementById('pending-list');
+            if (items.length === 0) {
+                container.innerHTML = '<div class="empty-state">No pending requests. Great job!</div>';
+                return;
+            }
+            container.innerHTML = items.map(item => {
+                const searchName = item.product.toLowerCase();
+                const inInventory = fullInventory.some(i =>
+                    i.name.toLowerCase() === searchName ||
+                    (i.aliases && i.aliases.some(a => a.toLowerCase() === searchName))
+                );
+                const timeStr = item.created_at ? new Date(item.created_at).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' }) : 'Unknown time';
+
+                const isSystemWarning = item.request_type === 'oos_warning';
+                return `
+                <div class="card ${isSystemWarning ? 'is-system-warning' : ''}" id="req-${item.id}">
+                    <div class="info">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 0.5rem;">
+                            <h3 style="margin:0;">${isSystemWarning ? 'System Warning' : item.product}</h3>
+                            <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 500;">${timeStr}</span>
+                        </div>
+                        <p style="color: var(--text-primary); ${isSystemWarning ? 'background: #fff1f2; color: #991b1b; border: 1px solid #fecaca;' : 'background: #f1f5f9;'} padding: 0.75rem; border-radius: 8px; margin-bottom: 0.75rem; font-style: italic; font-size: 0.9375rem;">
+                            ${item.customer_message || 'No message provided'}
+                        </p>
+                    </div>
+                    <div class="actions">
+                        <button class="${isSystemWarning ? 'btn-danger' : 'btn-yes'}" onclick="resolveStock(${item.id}, 'available', this)">
+                            <span class="loading-spinner"></span><span>${isSystemWarning ? 'Mark Out Of Stock' : 'STOCK'}</span>
+                        </button>
+                        <button class="${isSystemWarning ? 'btn-secondary' : 'btn-no'}" onclick="resolveStock(${item.id}, 'out_of_stock', this)">
+                            <span class="loading-spinner"></span><span>${isSystemWarning ? 'Ignore Warning' : 'OUT OF STOCK'}</span>
+                        </button>
+                        ${(!inInventory && !isSystemWarning) ? `
+                        <button class="btn-primary" onclick="openAddPendingModal(${item.id}, '${item.product.replace(/'/g, "\\'")}')">
+                            <span>ADD TO INVENTORY</span>
+                        </button>` : ''}
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        async function resolveStock(requestId, status, btn) {
+            btn.classList.add('is-loading');
+            try {
+                // The backend /yes/{id} marks as available, /no/{id} marks as out_of_stock
+                const type = status === 'available' ? 'yes' : 'no';
+                const res = await authFetch(`${API_BASE}/${type}/${requestId}`, { method: 'POST' });
+                if (res.ok) {
+                    showToast(`Product marked as ${status.replace('_', ' ')}`, 'success');
+                    fetchPending();
+                    fetchInventory();
+                } else {
+                    showToast('Failed to resolve request', 'error');
+                }
+            } catch (err) {
+                showToast('Error connecting to backend', 'error');
+            } finally {
+                btn.classList.remove('is-loading');
+            }
+        }
+
+        function openAddPendingModal(id, name) {
+            document.getElementById('pending-req-id').value = id;
+            document.getElementById('pending-add-name').value = name;
+            document.getElementById('pending-add-aliases').value = name;
+            document.getElementById('pending-add-status').value = 'available';
+            document.getElementById('pending-add-qty').value = 1;
+            document.getElementById('add-pending-modal').style.display = 'flex';
+        }
+
+        function closeAddPendingModal() {
+            document.getElementById('add-pending-modal').style.display = 'none';
+        }
+
+        async function submitAddFromPending(btn) {
+            const requestId = document.getElementById('pending-req-id').value;
+            const name = document.getElementById('pending-add-name').value.trim();
+            const aliasInput = document.getElementById('pending-add-aliases').value;
+            const status = document.getElementById('pending-add-status').value;
+
+            if (!name) return showToast('Name required', 'warning');
+
+            let aliases = aliasInput.split(',').map(a => a.trim()).filter(a => a.length > 0);
+            if (aliases.length === 0) aliases = [name];
+
+            btn.classList.add('is-loading');
+            try {
+                // 1. Add to inventory
+                const addRes = await authFetch(`${API_BASE}/inventory/add`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        name, 
+                        aliases, 
+                        status, 
+                        quantity: parseInt(document.getElementById('pending-add-qty').value) || 0,
+                        price: parseFloat(document.getElementById('pending-add-price').value) || 0
+                    })
+                });
+
+                if (addRes.ok) {
+                    // 2. Delete pending request
+                    const delRes = await authFetch(`${API_BASE}/pending/${requestId}`, { method: 'DELETE' });
+                    if (delRes.ok) {
+                        showToast('Added to inventory and resolved', 'success');
+                        closeAddPendingModal();
+                        fetchPending();
+                        fetchInventory();
+                    } else {
+                        showToast('Added to inventory but failed to remove request', 'warning');
+                    }
+                } else {
+                    const error = await addRes.json();
+                    showToast(error.detail || 'Failed to add to inventory', 'error');
+                }
+            } catch (err) {
+                showToast('Network error', 'error');
+            } finally {
+                btn.classList.remove('is-loading');
+            }
+        }
+
+
+        async function fetchInventory() {
+            try {
+                const [invRes, insRes] = await Promise.all([
+                    authFetch(`${API_BASE}/inventory`),
+                    authFetch(`${API_BASE}/inventory/insights`)
+                ]);
+
+                if (!invRes.ok || !insRes.ok) throw new Error('Fetch failed');
+
+                const invData = await invRes.json();
+                fullInventory = invData.inventory.sort((a, b) => a.name.localeCompare(b.name));
+                inventoryInsights = await insRes.json();
+
+                handleSearch(true); // Triggers pagination and rendering
+                populateInventoryDropdown();
+            } catch (err) {
+                document.getElementById('inventory-list').innerHTML = '<div class="empty-state">Failed to load inventory. Check backend connection.</div>';
+            }
+        }
+
+        function handleSearch(preservePage = false) {
+            const query = document.getElementById('inventory-search').value.toLowerCase().trim();
+            currentFilteredInventory = fullInventory.filter(item => item.name.toLowerCase().includes(query) || item.aliases.some(a => a.toLowerCase().includes(query)));
+            if (!preservePage) {
+                currentPage = 1;
+            }
+            renderInventoryPage();
+        }
+
+        function renderInventoryPage() {
+            const totalItems = currentFilteredInventory.length;
+            const totalPages = Math.ceil(totalItems / pageSize) || 1;
+            if (currentPage > totalPages) currentPage = totalPages;
+
+            const startIdx = (currentPage - 1) * pageSize;
+            const endIdx = startIdx + pageSize;
+            const pageItems = currentFilteredInventory.slice(startIdx, endIdx);
+
+            renderInventory(pageItems);
+            renderPagination(totalItems, totalPages);
+        }
+
+        function renderPagination(totalItems, totalPages) {
+            const container = document.getElementById('inventory-pagination');
+            const controls = document.getElementById('inventory-page-controls');
+
+            if (totalItems === 0) {
+                container.style.display = 'none';
+                return;
+            }
+
+            container.style.display = 'flex';
+
+            let html = `
+                <button class="btn-icon" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                </button>
+            `;
+
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                    html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
+                } else if (i === currentPage - 2 || i === currentPage + 2) {
+                    html += `<span class="page-dots">...</span>`;
+                }
+            }
+
+            html += `
+                <button class="btn-icon" onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </button>
+            `;
+
+            controls.innerHTML = html;
+        }
+
+        function changePage(page) {
+            const totalPages = Math.ceil(currentFilteredInventory.length / pageSize) || 1;
+            if (page >= 1 && page <= totalPages) {
+                currentPage = page;
+                renderInventoryPage();
+                // Optionally scroll to top of inventory list so they don't lose context
+                document.getElementById('inventory-tab').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function changePageSize(size) {
+            pageSize = parseInt(size);
+            currentPage = 1;
+            renderInventoryPage();
+        }
+
+        function renderInventory(items) {
+            const container = document.getElementById('inventory-list');
+            if (items.length === 0) {
+                container.innerHTML = '<div class="empty-state">No products found.</div>';
+                return;
+            }
+            container.innerHTML = items.map(item => {
+                const insight = inventoryInsights.find(i => i.id === item.id) || {};
+                const lastAsked = insight.last_requested_timestamp ? new Date(insight.last_requested_timestamp).toLocaleDateString() : 'N/A';
+                const isLow = item.quantity > 0 && item.quantity <= 5;
+                const statusClass = item.status === 'out_of_stock' ? 'is-out-of-stock' : (isLow ? 'is-low-stock' : 'is-available');
+                
+                const isEditing = editingProductId === item.id;
+                
+                return `
+                    <div class="card ${statusClass} ${isEditing ? 'is-editing' : ''}" id="prod-${item.id}">
+                        <!-- header -->
+                        <div class="inventory-card-header">
+                            <h3 style="margin: 0;">${item.name}</h3>
+                            <p style="margin: 0; color: var(--text-secondary); font-size: 0.875rem;">Aliases: ${item.aliases.join(', ')}</p>
+                        </div>
+
+                        <!-- controls -->
+                        <div class="inventory-card-controls view-mode">
+                            <div class="qty-control-group">
+                                <button class="qty-btn" onclick="adjustQuantity(${item.id}, -1)">–</button>
+                                <span style="font-weight: 700; min-width: 24px; text-align: center;">${item.quantity}</span>
+                                <button class="qty-btn" onclick="adjustQuantity(${item.id}, 1)">+</button>
+                            </div>
+                            
+                            <select class="status-select" onchange="updateStatus(${item.id}, this.value)">
+                                <option value="available" ${item.status === 'available' ? 'selected' : ''}>Available</option>
+                                <option value="out_of_stock" ${item.status === 'out_of_stock' ? 'selected' : ''}>Out of Stock</option>
+                                <option value="coming_soon" ${item.status === 'coming_soon' ? 'selected' : ''}>Coming Soon</option>
+                            </select>
+
+                            <span class="badge" style="background: #ecfdf5; color: #059669; font-weight: 700; border: 1px solid #d1fae5; padding: 0.5rem 0.75rem;">
+                                Price: ₹${item.price.toFixed(2)}
+                            </span>
+
+                            <div style="display:flex; gap: 0.5rem; align-items:center; flex-wrap: wrap; margin-left: auto;">
+                                <span class="badge ${isLow ? 'badge-warning' : 'badge-qty'}">Qty: ${item.quantity}</span>
+                                ${isLow ? '<span class="badge badge-warning badge-low-stock" style="font-size:0.65rem">LOW STOCK</span>' : ''}
+                                <span class="badge badge-count" title="Total Requests">&#128100; ${insight.total_requests || 0}</span>
+                                <span class="badge badge-oos" title="Out of Stock Count">&#9888;&#65039; ${insight.out_of_stock_count || 0}</span>
+                                <span class="badge badge-count" style="background:#f1f5f9; color:#475569">&#128197; ${lastAsked}</span>
+                            </div>
+                        </div>
+
+                        <!-- edit mode -->
+                        <div class="edit-mode" style="display: flex; flex-direction: column; gap: 1rem;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div>
+                                    <label style="font-size: 0.7rem; font-weight: 600; color: var(--text-secondary);">PRODUCT NAME</label>
+                                    <input type="text" class="edit-input" id="edit-name-${item.id}" value="${item.name}" placeholder="Name">
+                                </div>
+                                <div>
+                                    <label style="font-size: 0.7rem; font-weight: 600; color: var(--text-secondary);">ALIASES</label>
+                                    <input type="text" class="edit-input" id="edit-aliases-${item.id}" value="${item.aliases.join(', ')}" placeholder="Aliases">
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;">
+                                <div style="width: 80px;">
+                                    <label style="font-size: 0.7rem; font-weight: 600; color: var(--text-secondary);">QTY</label>
+                                    <input type="number" class="edit-input edit-input-qty" id="edit-qty-${item.id}" value="${item.quantity}" min="0">
+                                </div>
+                                <div style="flex: 1; min-width: 140px;">
+                                    <label style="font-size: 0.7rem; font-weight: 600; color: var(--text-secondary);">STATUS</label>
+                                    <select class="status-select" id="edit-status-${item.id}" style="width: 100%;">
+                                        <option value="available" ${item.status === 'available' ? 'selected' : ''}>Available</option>
+                                        <option value="out_of_stock" ${item.status === 'out_of_stock' ? 'selected' : ''}>Out of Stock</option>
+                                        <option value="coming_soon" ${item.status === 'coming_soon' ? 'selected' : ''}>Coming Soon</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label style="font-size: 0.7rem; font-weight: 600; color: var(--text-secondary);">PRICE (₹)</label>
+                                <input type="number" class="edit-input" id="edit-price-${item.id}" value="${item.price}" min="0" step="0.01">
+                            </div>
+                        </div>
+
+                        <!-- actions -->
+                        <div class="inventory-card-actions">
+                            <div class="view-mode" style="display: flex; gap: 0.5rem;">
+                                <button class="btn-icon" onclick="openSaleModal(${item.id}, '${item.name.replace(/'/g, "\\'")}')" title="Add Sale">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                </button>
+                                <button class="btn-icon" onclick="startEdit(${item.id})" title="Edit Product">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                </button>
+                                <button class="btn-danger" onclick="deleteProduct(${item.id}, this)" style="padding: 0.5rem 0.75rem; font-size: 0.75rem;">
+                                    <span class="loading-spinner"></span><span>REMOVE</span>
+                                </button>
+                            </div>
+                            <div class="edit-mode" style="display: flex; gap: 0.5rem;">
+                                <button class="btn-primary" id="save-btn-${item.id}" onclick="saveEdit(${item.id}, this)">
+                                    <span class="loading-spinner"></span><span>SAVE</span>
+                                </button>
+                                <button class="btn-secondary" id="cancel-btn-${item.id}" onclick="cancelEdit(${item.id})">CANCEL</button>
+                            </div>
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        async function updateStatus(productId, newStatus) {
+            try {
+                const res = await authFetch(`${API_BASE}/inventory/update-status/${productId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                if (res.ok) {
+                    showToast('Status updated', 'success');
+                    fetchInventory();
+                } else {
+                    showToast('Failed to update status', 'error');
+                }
+            } catch (err) {
+                showToast('Error updating status', 'error');
+            }
+        }
+
+        async function adjustQuantity(productId, amount) {
+            try {
+                const res = await authFetch(`${API_BASE}/inventory/${productId}/quantity`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ amount: amount })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    // Local UI update for immediate feedback
+                    const card = document.getElementById(`prod-${productId}`);
+                    if (card) {
+                        const isLow = data.quantity > 0 && data.quantity <= 5;
+                        
+                        // Update card class
+                        const statusClass = data.new_status === 'out_of_stock' ? 'is-out-of-stock' : (data.new_status === 'coming_soon' ? 'is-coming-soon' : (isLow ? 'is-low-stock' : 'is-available'));
+                        card.className = `card ${statusClass}`;
+                        if (editingProductId === productId) card.classList.add('is-editing');
+
+                        // Update quantity badge
+                        const qtyBadge = card.querySelector('.badge-qty, .badge-warning');
+                        if (qtyBadge) {
+                            qtyBadge.className = `badge ${isLow ? 'badge-warning' : 'badge-qty'}`;
+                            qtyBadge.textContent = `Qty: ${data.quantity}`;
+                        }
+                        
+                        // Add or remove Low Stock badge next to qty badge
+                        let lowBadge = card.querySelector('.badge-low-stock');
+                        if (lowBadge) lowBadge.remove(); // Reliability: always clear previous
+                        
+                        if (isLow) {
+                            const controlDiv = card.querySelector('.inventory-card-controls.view-mode');
+                            if (controlDiv) {
+                                // Find the container with badges (the one with margin-left: auto)
+                                const badgeContainer = controlDiv.querySelector('div[style*="margin-left: auto"]');
+                                if (badgeContainer) {
+                                    const b = document.createElement('span');
+                                    b.className = 'badge badge-warning badge-low-stock';
+                                    b.style.fontSize = '0.65rem';
+                                    b.textContent = 'LOW STOCK';
+                                    // Insert after first badge (qty badge)
+                                    badgeContainer.insertBefore(b, badgeContainer.children[1]);
+                                }
+                            }
+                        }
+
+                        const qtyValues = card.querySelectorAll('.qty-control-group span');
+                        qtyValues.forEach(s => s.textContent = data.quantity);
+
+                        // Update ALL status selects on the card (view-mode + edit-mode)
+                        const statusSelects = card.querySelectorAll('.status-select');
+                        statusSelects.forEach(sel => sel.value = data.new_status);
+
+                        // Also update fullInventory in background
+                        const itemIdx = fullInventory.findIndex(i => i.id === productId);
+                        if (itemIdx !== -1) {
+                            fullInventory[itemIdx].quantity = data.quantity;
+                            fullInventory[itemIdx].status = data.new_status;
+                        }
+                    }
+                } else {
+                    showToast('Failed to adjust quantity', 'error');
+                }
+            } catch (err) {
+                showToast('Error adjusting quantity', 'error');
+            }
+        }
+
+        function startEdit(id) {
+            if (isSaving) return; // Silent return
+
+            // State Synchronization: Check if ghost lock exists
+            if (editingProductId !== null) {
+                const currentEl = document.getElementById(`prod-${editingProductId}`);
+                if (!currentEl || !currentEl.classList.contains('is-editing')) {
+                    console.warn('Ghost edit lock detected and cleared for id:', editingProductId);
+                    editingProductId = null;
+                    isPaused = false;
+                }
+            }
+
+            if (editingProductId === id) return; // Prevent double-click spam
+            if (editingProductId !== null) {
+                showToast('Please save or cancel the current edit first.', 'warning');
+                return;
+            }
+            editingProductId = id; isPaused = true;
+            const el = document.getElementById(`prod-${id}`);
+            if (el) el.classList.add('is-editing');
+        }
+
+        function cancelEdit(id) {
+            if (editingProductId === id) {
+                editingProductId = null;
+                isPaused = false;
+            }
+            const el = document.getElementById(`prod-${id}`);
+            if (el) el.classList.remove('is-editing');
+        }
+
+        async function saveEdit(id, btn) {
+            if (isSaving) return;
+            const name = document.getElementById(`edit-name-${id}`).value.trim();
+            const aliasInput = document.getElementById(`edit-aliases-${id}`).value;
+            const quantity = Math.max(0, parseInt(document.getElementById(`edit-qty-${id}`).value) || 0);
+            const price = Math.max(0, parseFloat(document.getElementById(`edit-price-${id}`).value) || 0);
+            const status = document.getElementById(`edit-status-${id}`).value;
+
+            // Refined Alias Policy: Trim and filter
+            let aliases = aliasInput.split(',').map(a => a.trim()).filter(a => a.length > 0);
+
+            // If empty after filtering, auto-fill with product name
+            if (aliases.length === 0 && name) {
+                aliases = [name];
+                document.getElementById(`edit-aliases-${id}`).value = name;
+                showToast('Alias auto-filled with product name', 'info');
+            }
+
+            if (!name) return showToast('Name required', 'warning');
+
+            isSaving = true;
+            btn.classList.add('is-loading');
+            try {
+                const res = await authFetch(`${API_BASE}/inventory/edit/${id}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, aliases, quantity, price, status })
+                });
+                if (res.ok) {
+                    showToast('Product updated successfully', 'success');
+                    await fetchInventory();
+                    // State reset ONLY on success to prevent race conditions
+                    editingProductId = null;
+                    isPaused = false;
+                    const el = document.getElementById(`prod-${id}`);
+                    if (el) el.classList.remove('is-editing');
+                }
+                else showToast((await res.json()).detail, 'error');
+            } catch (err) {
+                showToast('Error saving', 'error');
+            } finally {
+                isSaving = false;
+                btn.classList.remove('is-loading');
+            }
+        }
+
+
+        async function addProduct(btn) {
+            if (isSaving) return;
+            const name = document.getElementById('new-name').value.trim();
+            const aliasInput = document.getElementById('new-aliases').value;
+            const quantity = parseInt(document.getElementById('new-qty').value) || 0;
+            const price = parseFloat(document.getElementById('new-price').value) || 0;
+
+            // Refined Alias Policy: Trim and filter
+            let aliases = aliasInput.split(',').map(a => a.trim()).filter(a => a.length > 0);
+
+            // If empty after filtering, auto-fill with product name
+            if (aliases.length === 0 && name) {
+                aliases = [name];
+                document.getElementById('new-aliases').value = name;
+                showToast('Alias auto-filled with product name', 'info');
+            }
+
+            if (!name) return showToast('Name required', 'warning');
+
+            isSaving = true;
+            btn.classList.add('is-loading');
+            try {
+                const res = await authFetch(`${API_BASE}/inventory/add`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, aliases, quantity, price })
+                });
+                if (res.ok) {
+                    document.getElementById('new-name').value = '';
+                    document.getElementById('new-aliases').value = '';
+                    hideAddForm();
+                    fetchInventory();
+                    showToast('Product added successfully', 'success');
+                }
+                else showToast((await res.json()).detail, 'error');
+            } catch (err) {
+                showToast('Save failed', 'error');
+            } finally {
+                isSaving = false;
+                btn.classList.remove('is-loading');
+            }
+        }
+
+        function showAddForm() { document.getElementById('add-form-container').style.display = 'block'; }
+        function hideAddForm() { document.getElementById('add-form-container').style.display = 'none'; }
+
+        function startEditShopName() {
+            document.getElementById('shop-name-container').style.display = 'none';
+            document.getElementById('edit-shop-name-form').style.display = 'flex';
+            document.getElementById('input-shop-name').focus();
+        }
+
+        function cancelEditShopName() {
+            document.getElementById('edit-shop-name-form').style.display = 'none';
+            document.getElementById('shop-name-container').style.display = 'flex';
+            document.getElementById('input-shop-name').value = document.getElementById('display-shop-name').textContent;
+        }
+
+        async function saveShopName(btn) {
+            const newName = document.getElementById('input-shop-name').value.trim();
+            if (!newName) return showToast('Shop name cannot be empty', 'warning');
+
+            btn.classList.add('is-loading');
+            try {
+                const res = await authFetch(`${API_BASE}/shop/name`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ shop_name: newName })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    document.getElementById('display-shop-name').textContent = data.shop_name;
+                    cancelEditShopName();
+                    showToast('Shop name updated', 'success');
+                } else {
+                    const error = await res.json();
+                    showToast(error.detail || 'Failed to update shop name', 'error');
+                }
+            } catch (err) {
+                showToast('Update failed. Check connection.', 'error');
+            } finally {
+                btn.classList.remove('is-loading');
+            }
+        }
+
+        async function deleteProduct(id, btn) {
+            if (isSaving) return;
+            showConfirm('Remove Product', 'Are you sure you want to permanently remove this product?', async () => {
+                disableInventoryActions(true);
+                isSaving = true;
+                btn.classList.add('is-loading');
+                try {
+                    const res = await authFetch(`${API_BASE}/inventory/${id}`, { method: 'DELETE' });
+                    if (res.ok) {
+                        document.getElementById(`prod-${id}`).remove();
+                        showToast('Product removed', 'success');
+                        // Explicit state reset on success
+                        editingProductId = null;
+                        isPaused = false;
+                    } else {
+                        showToast('Remove failed', 'error');
+                    }
+                } catch (err) {
+                    showToast('Remove failed', 'error');
+                } finally {
+                    isSaving = false;
+                    disableInventoryActions(false);
+                    btn.classList.remove('is-loading');
+                }
+            });
+        }
+
+        async function fetchAnalytics() {
+            const start = document.getElementById('start-date').value;
+            const end = document.getElementById('end-date').value;
+            const query = (start && end) ? `?start_date=${start}&end_date=${end}` : '';
+            try {
+                const [statsRes, insRes] = await Promise.all([
+                    authFetch(`${API_BASE}/analytics${query}`),
+                    authFetch(`${API_BASE}/inventory/insights${query}`)
+                ]);
+                const stats = await statsRes.json();
+                const insights = await insRes.json();
+                renderAnalytics(stats, insights);
+            } catch (err) { showToast('Failed to fetch analytics', 'error'); }
+        }
+
+        async function fetchSales() {
+            const start = document.getElementById('sales-start-date').value;
+            const end = document.getElementById('sales-end-date').value;
+            const query = (start && end) ? `?start_date=${start}&end_date=${end}` : '';
+            try {
+                const res = await authFetch(`${API_BASE}/sales${query}`);
+                const data = await res.json();
+                renderSales(data);
+                const searchInput = document.getElementById('sales-search');
+                if (searchInput && searchInput.value.trim()) filterSales();
+            } catch (err) { showToast('Failed to fetch sales', 'error'); }
+        }
+
+        function filterSales() {
+            const query = document.getElementById('sales-search').value.toLowerCase().trim();
+            const rows = document.querySelectorAll('#sales-table-body tr');
+            rows.forEach(row => {
+                const productCell = row.querySelector('td');
+                if (!productCell) return;
+                const productName = productCell.textContent.toLowerCase();
+                row.style.display = productName.includes(query) ? '' : 'none';
+            });
+        }
+
+        function renderSales(data) {
+            const tbody = document.getElementById('sales-table-body');
+            const totalsDiv = document.getElementById('sales-totals');
+            if (data.records.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="empty-state">No sales recorded for this range.</td></tr>';
+                totalsDiv.innerHTML = '<span class="badge" style="background:#f1f5f9; color:#64748b">No data</span>';
+                return;
+            }
+            tbody.innerHTML = data.records.map(r => `
+                <tr id="sale-${r.id}">
+                    <td style="font-weight:600">${r.product_name}</td>
+                    <td>${r.date}</td>
+                    <td>${r.quantity}</td>
+                    <td style="text-align: right;">
+                        <button class="btn-icon" onclick="deleteSale(${r.id}, this)" title="Delete Sale" style="color: var(--accent-no);">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+            totalsDiv.innerHTML = data.totals.map(t => `<span class="badge badge-count">${t.product_name}: ${t.total_quantity}</span>`).join('');
+        }
+
+        async function deleteSale(id, btn) {
+            showConfirm('Delete Sale', 'Are you sure you want to delete this sale?', async () => {
+                btn.classList.add('is-loading');
+                try {
+                    const res = await authFetch(`${API_BASE}/sales/${id}`, { method: 'DELETE' });
+                    if (res.ok) {
+                        showToast('Sale removed successfully', 'success');
+                        fetchSales(); // Refresh the table and recalculate totals
+                    } else {
+                        showToast('Failed to remove sale', 'error');
+                        btn.classList.remove('is-loading');
+                    }
+                } catch (err) {
+                    showToast('Failed to connect to backend', 'error');
+                    btn.classList.remove('is-loading');
+                }
+            });
+        }
+
+        function openSaleModal(id, name) {
+            document.getElementById('modal-product-id').value = id;
+            document.getElementById('modal-title').innerText = `Record Sale: ${name}`;
+            document.getElementById('modal-sale-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('modal-sale-qty').value = 1;
+            document.getElementById('sale-modal').style.display = 'flex';
+            isPaused = true;
+        }
+
+        function closeSaleModal() { document.getElementById('sale-modal').style.display = 'none'; isPaused = false; }
+
+        async function submitModalSale(btn) {
+            const productId = parseInt(document.getElementById('modal-product-id').value);
+            const date = document.getElementById('modal-sale-date').value;
+            const quantity = parseInt(document.getElementById('modal-sale-qty').value);
+            if (!date || isNaN(quantity)) return showToast('Invalid input', 'warning');
+            btn.classList.add('is-loading');
+            try {
+                const res = await authFetch(`${API_BASE}/sales/set`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ product_id: productId, date, quantity })
+                });
+                if (res.ok) {
+                    closeSaleModal();
+                    showToast('Sale recorded successfully', 'success');
+                    fetchInventory(); // Refresh quantity
+                }
+                else showToast((await res.json()).detail, 'error');
+            } catch (err) { showToast('Failed to save sale', 'error'); }
+            btn.classList.remove('is-loading');
+        }
+
+        async function submitManualSale(btn) {
+            const productName = document.getElementById('manual-sale-name').value.trim();
+            const date = document.getElementById('manual-sale-date').value;
+            const quantity = parseInt(document.getElementById('manual-sale-qty').value);
+            if (!productName || !date || isNaN(quantity)) return showToast('All fields required', 'warning');
+            btn.classList.add('is-loading');
+            try {
+                const res = await authFetch(`${API_BASE}/sales/set`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ product_name: productName, date, quantity })
+                });
+                if (res.ok) {
+                    document.getElementById('manual-sale-qty').value = 1;
+                    fetchSales();
+                    fetchInventory(); // Refresh quantity
+                    showToast('Sale recorded successfully', 'success');
+                } else showToast((await res.json()).detail, 'error');
+            } catch (err) { showToast('Failed to save sale', 'error'); }
+            btn.classList.remove('is-loading');
+        }
+
+        async function submitInventorySale(btn) {
+            const productId = document.getElementById('inventory-sale-id').value;
+            const date = document.getElementById('inventory-sale-date').value;
+            const quantity = parseInt(document.getElementById('inventory-sale-qty').value);
+            if (!productId || !date || isNaN(quantity)) return showToast('All fields required', 'warning');
+            btn.classList.add('is-loading');
+            try {
+                const res = await authFetch(`${API_BASE}/sales/set`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ product_id: parseInt(productId), date, quantity })
+                });
+                if (res.ok) {
+                    document.getElementById('inventory-sale-qty').value = 1;
+                    // Reset searchable dropdown
+                    document.getElementById('inventory-sale-id').value = '';
+                    document.getElementById('dropdown-label').textContent = 'Choose product...';
+                    document.getElementById('dropdown-label').classList.add('placeholder');
+                    document.querySelectorAll('#dropdown-product-list .dropdown-item').forEach(el => el.classList.remove('selected'));
+                    fetchSales();
+                    fetchInventory(); // Refresh quantity
+                    showToast('Inventory sale recorded!', 'success');
+                } else showToast((await res.json()).detail, 'error');
+            } catch (err) { showToast('Failed to save sale', 'error'); }
+            btn.classList.remove('is-loading');
+        }
+
+        let dropdownProducts = [];
+
+        async function populateInventoryDropdown() {
+            try {
+                const res = await authFetch(`${API_BASE}/inventory`);
+                const data = await res.json();
+                dropdownProducts = data.inventory;
+                renderDropdownProducts(dropdownProducts);
+            } catch (err) { console.error('Failed to populate dropdown', err); }
+        }
+
+        function renderDropdownProducts(items) {
+            const list = document.getElementById('dropdown-product-list');
+            const selectedId = document.getElementById('inventory-sale-id').value;
+            if (items.length === 0) {
+                list.innerHTML = '<div class="dropdown-empty">No products found</div>';
+                return;
+            }
+            list.innerHTML = items.map(item =>
+                `<div class="dropdown-item${item.id == selectedId ? ' selected' : ''}" data-id="${item.id}" onclick="selectDropdownProduct(${item.id}, '${item.name.replace(/'/g, "\\'")}')">` +
+                `${item.name}</div>`
+            ).join('');
+        }
+
+        function selectDropdownProduct(id, name) {
+            document.getElementById('inventory-sale-id').value = id;
+            const label = document.getElementById('dropdown-label');
+            label.textContent = name;
+            label.classList.remove('placeholder');
+            document.getElementById('product-dropdown').classList.remove('open');
+            // Update selected state
+            document.querySelectorAll('#dropdown-product-list .dropdown-item').forEach(el => {
+                el.classList.toggle('selected', el.dataset.id == id);
+            });
+        }
+
+        function toggleProductDropdown() {
+            const dd = document.getElementById('product-dropdown');
+            const isOpen = dd.classList.toggle('open');
+            if (isOpen) {
+                const searchInput = document.getElementById('dropdown-product-search');
+                searchInput.value = '';
+                renderDropdownProducts(dropdownProducts);
+                setTimeout(() => searchInput.focus(), 50);
+            }
+        }
+
+        function filterInventoryProducts() {
+            const query = document.getElementById('dropdown-product-search').value.toLowerCase().trim();
+            const filtered = dropdownProducts.filter(item => item.name.toLowerCase().includes(query));
+            renderDropdownProducts(filtered);
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function (e) {
+            const dd = document.getElementById('product-dropdown');
+            if (dd && !dd.contains(e.target) && dd.classList.contains('open')) {
+                dd.classList.remove('open');
+            }
+        });
+
+        async function exportSales() {
+            const start = document.getElementById('sales-start-date').value;
+            const end = document.getElementById('sales-end-date').value;
+            const query = (start && end) ? `?start_date=${start}&end_date=${end}` : '';
+            try {
+                const res = await authFetch(`${API_BASE}/sales/export${query}`);
+                if (!res.ok) throw new Error('Export failed');
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = `sales_export_${new Date().toISOString().split('T')[0]}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                showToast('Sale export started', 'success');
+            } catch (err) {
+                showToast('Export failed', 'error');
+            }
+        }
+
+        function renderAnalytics(stats, insights) {
+            document.getElementById('stat-total').innerText = stats.total_requests;
+            const fulfilled = stats.total_requests ? Math.round((stats.status_counts.available / stats.total_requests) * 100) : 0;
+            document.getElementById('stat-fulfilled').innerText = `${fulfilled}%`;
+            document.getElementById('stat-pending').innerText = stats.status_counts.pending;
+
+            const renderMetricList = (containerId, data, bg) => {
+                const list = document.getElementById(containerId);
+                list.innerHTML = data && data.length
+                    ? data.map((p, i) => `<div style="display:flex; justify-content:space-between; align-items:center; padding: 0.5rem; background:${bg}; border-radius:8px"><span style="font-weight:600">${containerId.includes('top') ? '#' + (i + 1) + ' ' : ''}${p.name}</span><span class="badge badge-score">${p.score}</span></div>`).join('')
+                    : '<div class="empty-state" style="padding:1rem; font-size:0.8rem">No data yet.</div>';
+            };
+
+            renderMetricList('top-requested-list', stats.top_requested_products, '#f0f9ff');
+            renderMetricList('top-sold-list', stats.top_sold_products, '#f0fdf4');
+            renderMetricList('low-requested-list', stats.low_requested_products, '#f8fafc');
+            renderMetricList('low-sold-list', stats.low_sold_products, '#fff7ed');
+
+            const stockList = document.getElementById('stock-insights-list');
+            const criticalStock = insights.filter(i => i.oos_rate > 0.2).sort((a, b) => b.oos_rate - a.oos_rate).slice(0, 5);
+            stockList.innerHTML = criticalStock.length
+                ? criticalStock.map(i => `<div style="display:flex; justify-content:space-between; align-items:center; padding: 0.5rem; background:#fff1f2; border-radius:8px"><span style="font-weight:600; color:var(--accent-no)">${i.name}</span><span class="badge badge-oos">${Math.round(i.oos_rate * 100)}% OOS</span></div>`).join('')
+                : '<div class="empty-state" style="padding:1rem;">All in stock!</div>';
+
+            const tbody = document.getElementById('demand-table-body');
+            tbody.innerHTML = insights.sort((a, b) => b.total_requests - a.total_requests).map(i => `
+                <tr>
+                    <td style="font-weight:600">${i.name}</td>
+                    <td>${i.total_requests}</td>
+                    <td>${i.out_of_stock_count}</td>
+                    <td><span class="${i.demand_rate > 1 ? 'trend-up' : ''}">${i.demand_rate}/day</span></td>
+                    <td style="font-size: 0.75rem; color:var(--text-secondary)">${i.last_requested_timestamp ? new Date(i.last_requested_timestamp).toLocaleString() : 'Never'}</td>
+                </tr>
+            `).join('');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/';
+                return;
+            }
+            authFetch(`${API_BASE}/me`).then(res => {
+                if (!res.ok) {
+                    throw new Error('Not authenticated');
+                }
+                return res.json();
+            }).then(data => {
+                // Refined fallback logic: only use 'My Shop' if shop_name is null, undefined, or empty string
+                const shopName = (data && data.shop_name && data.shop_name.trim()) ? data.shop_name.trim() : 'My Shop';
+                document.getElementById('display-shop-name').textContent = shopName;
+                document.getElementById('input-shop-name').value = shopName;
+                document.title = `Levix | ${shopName}`;
+            }).catch(e => {
+                console.error("Token validation failed", e);
+                localStorage.removeItem('token');
+                window.location.href = '/';
+            });
+
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                localStorage.removeItem('token');
+                window.location.href = '/';
+            });
+
+            // Global Escape key listener to cancel edits
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && editingProductId !== null) {
+                    cancelEdit(editingProductId);
+                }
+            });
+        });
+
+        fetchData();
+    </script>
+</body>
+
+</html>

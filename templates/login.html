@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en" style="-webkit-text-size-adjust: 100%;">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Levix | Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --accent-blue: #3b82f6;
+            --accent-blue-hover: #2563eb;
+            --accent-no: #ef4444;
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .login-card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
+        }
+
+        .brand-container {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-weight: 700;
+            font-size: 2rem;
+            color: var(--text-primary);
+            line-height: 1.2;
+            letter-spacing: -0.025em;
+        }
+
+        .subtitle {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 0.75rem 1.5rem;
+            background-color: var(--accent-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background-color: var(--accent-blue-hover);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .error-message {
+            color: var(--accent-no);
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: none;
+            text-align: center;
+        }
+
+        .links {
+            margin-top: 1.5rem;
+            text-align: center;
+            font-size: 0.875rem;
+        }
+
+        .links a {
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+
+        .loading-spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #ffffff;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .is-loading .loading-spinner {
+            display: block;
+        }
+
+        .is-loading .btn-text {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-card">
+        <div class="brand-container">
+            <h1>LEVIX</h1>
+            <span class="subtitle">Welcome Back</span>
+        </div>
+
+        <form id="login-form">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" required placeholder="Enter your email">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required placeholder="Enter your password">
+            </div>
+
+            <div id="error-msg" class="error-message"></div>
+
+            <button type="submit" id="submit-btn" class="btn-primary" style="margin-top: 2rem;">
+                <span class="loading-spinner"></span>
+                <span class="btn-text">Sign In</span>
+            </button>
+        </form>
+
+        <div class="links">
+            <a href="/forgot-password">Forgot your password?</a>
+        </div>
+    </div>
+
+    <script>
+        // Check if already logged in — redirect to dashboard
+        if (localStorage.getItem('token')) {
+            window.location.href = '/dashboard';
+        }
+
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('submit-btn');
+            const errorMsg = document.getElementById('error-msg');
+
+            btn.classList.add('is-loading');
+            btn.disabled = true;
+            errorMsg.style.display = 'none';
+
+            const formData = new URLSearchParams();
+            formData.append('username', email);
+            formData.append('password', password);
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.access_token) {
+                    localStorage.setItem('token', data.access_token);
+                    window.location.href = '/dashboard';
+                } else {
+                    errorMsg.textContent = data.detail || 'Login failed. Please check your credentials.';
+                    errorMsg.style.display = 'block';
+                }
+            } catch (error) {
+                errorMsg.textContent = 'An error occurred. Please try again.';
+                errorMsg.style.display = 'block';
+            } finally {
+                btn.classList.remove('is-loading');
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+
+</html>
