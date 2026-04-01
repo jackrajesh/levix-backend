@@ -4,12 +4,11 @@ from typing import Optional
 from passlib.context import CryptContext
 from jose import JWTError, jwt
 
-# Secret key to encode the JWT token
-SECRET_KEY = os.getenv("JWT_SECRET", "super-secret-key-for-local-dev-only") # fallback for local dev
+SECRET_KEY = os.getenv("JWT_SECRET", "super-secret-key-for-local-dev-only")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_HOURS = 24
 
-ppwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
