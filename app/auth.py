@@ -9,7 +9,7 @@ SECRET_KEY = os.getenv("JWT_SECRET", "super-secret-key-for-local-dev-only") # fa
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_HOURS = 24
 
-pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
+ppwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
