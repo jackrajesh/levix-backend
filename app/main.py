@@ -1,11 +1,12 @@
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from .database import engine
 from . import models
 
 # Import routers
-from .routes import pages, auth, inventory, sales, analytics, pending, webhooks, admin
+from .routes import pages, auth, inventory, sales, analytics, pending, webhooks, admin, messages, meta_auth
 
 app = FastAPI(title="Levix API")
 
@@ -27,9 +28,13 @@ def _run_migrations():
             try:
                 conn.execute(text("ALTER TABLE sales_records ALTER COLUMN product_id DROP NOT NULL"))
                 conn.commit()
-                print("[Migration] Made product_id nullable in sales_records")
             except Exception:
                 conn.rollback()
+
+            if "price" not in columns:
+                conn.execute(text("ALTER TABLE sales_records ADD COLUMN price NUMERIC(10,2) NOT NULL DEFAULT 0"))
+                conn.commit()
+                print("[Migration] Added price column to sales_records")
 
             if "pending_requests" in inspector.get_table_names():
                 columns = [c["name"] for c in inspector.get_columns("pending_requests")]
@@ -52,6 +57,16 @@ def _run_migrations():
                     print("[Migration] Added price column to inventory_items")
                 conn.commit()
 
+            if "log_entries" in inspector.get_table_names():
+                columns = [c["name"] for c in inspector.get_columns("log_entries")]
+                if "is_matched" not in columns:
+                    conn.execute(text("ALTER TABLE log_entries ADD COLUMN is_matched BOOLEAN DEFAULT TRUE"))
+                    print("[Migration] Added is_matched column to log_entries")
+                if "match_source" not in columns:
+                    conn.execute(text("ALTER TABLE log_entries ADD COLUMN match_source VARCHAR"))
+                    print("[Migration] Added match_source column to log_entries")
+                conn.commit()
+
 try:
     _run_migrations()
 except Exception as e:
@@ -66,6 +81,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 # --- Register Routers ---
 app.include_router(pages.router)
 app.include_router(auth.router)
@@ -75,6 +92,10 @@ app.include_router(analytics.router)
 app.include_router(pending.router)
 app.include_router(webhooks.router)
 app.include_router(admin.router)
+app.include_router(messages.router)
+
+# 🔥 ADD THIS (IMPORTANT)
+app.include_router(meta_auth.router)
 
 if __name__ == "__main__":
     import uvicorn

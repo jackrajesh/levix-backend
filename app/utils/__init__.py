@@ -1,9 +1,10 @@
 from typing import Optional
+import re
 
 CUSTOMER_FILLER_WORDS = {
     # English
-    "do", "you", "have", "any", "is", "are", "there", "available", "availability",
-    "can", "i", "get", "give", "sell", "selling", "need", "want", "looking", "for",
+    "hi", "hello", "do", "you", "have", "any", "is", "are", "there", "available", "availability",
+    "can", "i", "get", "give", "take", "sell", "selling", "need", "want", "buy", "looking", "for",
     "please", "some", "a", "the", "today", "now", "still", "left", "stock",
     
     # Tamil Romanized Common
@@ -13,18 +14,37 @@ CUSTOMER_FILLER_WORDS = {
     "kedaikutha", "kidaikutha", 
     "iruntha", "irunthaa", "irunthaal", 
     "sollunga", "solunga", 
-    "iruka?", "venuma?",
+    "iruka?", "venuma?", "venumaa?",
+    
+    # Hindi Romanized
+    "chahiye", "hai", "kya", "mil", "jayega", "milega", "hai kya", "chaiye",
     
     # Tamil Romanized Conversation
     "anna", "akka", "bro", "boss", "sir", "pls", "please",
-    "inga", "irukinga", "irukeengala",
-    "konjam", "oru", "oru packet", "oru piece",
+    "inga", "irukinga", "irukeengala", "vanganum",
     
-    # Tamil Script
-    "இருக்கா", "இருக்கு", "இருக்குமா", 
-    "வேணுமா", "வேணும்", 
-    "கிடைக்குமா", "கிடைக்குது", "கிடைக்குதா"
+    # Quantity words (to be removed)
+    "rendu", "oru", "ek", "onnu", "two", "one", "piece", "packet", "kg", "gram",
 }
+
+def normalize_conversational_input(message: str) -> str:
+    """
+    Standardizes multilingual input for better intent and product detection.
+    """
+    msg = message.lower().strip()
+    
+    # Intent Triggers (transliterated)
+    triggers = ["venum", "iruka", "chahiye", "hai kya", "chaiye", "irukka", "venuma"]
+    
+    # Simple normalization mappings
+    msg = msg.replace("chahiye", "want")
+    msg = msg.replace("hai kya", "is there")
+    msg = msg.replace("venum", "need")
+    
+    # Clean punctuations
+    msg = re.sub(r'[^\w\s]', ' ', msg)
+    
+    return msg.strip()
 
 def filter_filler_words(message: str) -> str:
     """

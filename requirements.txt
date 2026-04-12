@@ -6,8 +6,9 @@ requests
 python-dotenv
 cryptography
 python-jose[cryptography]
-passlib[bcrypt]
+passlib
 argon2-cffi
 python-multipart
 pydantic[email]
 pydantic-settings
+google-generativeai

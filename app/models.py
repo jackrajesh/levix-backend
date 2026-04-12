@@ -10,6 +10,7 @@ class Shop(Base):
     shop_name = Column(String, nullable=False)
     owner_name = Column(String, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
+    phone_number = Column(String(15), unique=True, index=True, nullable=True)
     password_hash = Column(String, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
@@ -70,6 +71,8 @@ class LogEntry(Base):
     product_name = Column(String, nullable=False)
     product_id = Column(Integer, nullable=True)
     status = Column(String, nullable=False)
+    is_matched = Column(Boolean, default=True) # New: tracked for analytics
+    match_source = Column(String, nullable=True) # New: 'direct', 'fuzzy', 'ai', 'pending'
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
     
     shop = relationship("Shop", back_populates="logs")
@@ -96,6 +99,7 @@ class SalesRecord(Base):
     product_name = Column(String, nullable=True)
     date = Column(Date, nullable=False)
     quantity = Column(Integer, nullable=False)
+    price = Column(Numeric(10, 2), default=0, nullable=False)
     
     shop = relationship("Shop", back_populates="sales")
     inventory_item = relationship("InventoryItem", back_populates="sales")

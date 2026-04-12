@@ -15,11 +15,10 @@ from ..services.product_service import (
     normalize_message,
     get_greeting_response,
     add_log_db,
-    filter_filler_words,
     get_product_state,
     match_multiple_products,
 )
-from ..utils import generate_reply
+from ..utils import generate_reply, filter_filler_words
 
 VERIFY_TOKEN = "levix123"
 

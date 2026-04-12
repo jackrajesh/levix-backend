@@ -33,7 +33,7 @@ def get_inventory(current_shop: models.Shop = Depends(get_current_shop), db: Ses
             "aliases": [a.alias for a in item.aliases],
             "created_at": item.created_at.isoformat() if item.created_at else None
         })
-    return {"inventory": result}
+    return result
 
 @router.post("/add")
 def add_to_inventory(item: schemas.InventoryItemCreate, current_shop: models.Shop = Depends(get_current_shop), db: Session = Depends(get_db)):
@@ -194,3 +194,45 @@ def delete_product(product_id: int, current_shop: models.Shop = Depends(get_curr
     db.delete(item)
     db.commit()
     return {"status": "success", "message": "Product removed"}
+
+@router.post("/bulk-delete")
+def bulk_delete_inventory(req: schemas.BulkDeleteRequest, current_shop: models.Shop = Depends(get_current_shop), db: Session = Depends(get_db)):
+    if not req.ids:
+        raise HTTPException(status_code=400, detail="No IDs provided")
+    
+    items = db.query(models.InventoryItem).filter(
+        models.InventoryItem.id.in_(req.ids),
+        models.InventoryItem.shop_id == current_shop.id
+    ).all()
+    
+    if not items:
+        raise HTTPException(status_code=404, detail="No matching products found")
+    
+    item_ids = [i.id for i in items]
+    
+    # Safely nullify sales record references so sales/analytics data is preserved
+    db.query(models.SalesRecord).filter(
+        models.SalesRecord.product_id.in_(item_ids)
+    ).update({models.SalesRecord.product_id: None}, synchronize_session='fetch')
+    
+    # Nullify log entry product_id references
+    db.query(models.LogEntry).filter(
+        models.LogEntry.product_id.in_(item_ids)
+    ).update({models.LogEntry.product_id: None}, synchronize_session='fetch')
+    
+    # Delete aliases
+    db.query(models.InventoryAlias).filter(
+        models.InventoryAlias.inventory_id.in_(item_ids)
+    ).delete(synchronize_session='fetch')
+    
+    # Delete pending requests linked to these items
+    db.query(models.PendingRequest).filter(
+        models.PendingRequest.product_id.in_(item_ids)
+    ).delete(synchronize_session='fetch')
+    
+    # Finally delete the inventory items
+    for item in items:
+        db.delete(item)
+    
+    db.commit()
+    return {"status": "success", "deleted_count": len(items)}

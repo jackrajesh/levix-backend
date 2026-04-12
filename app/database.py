@@ -35,7 +35,12 @@ if DATABASE_URL.startswith("sqlite"):
 elif DATABASE_URL and ("render.com" in DATABASE_URL or "neon.tech" in DATABASE_URL or "supabase" in DATABASE_URL):
     connect_args["sslmode"] = "require"
 
-engine = create_engine(DATABASE_URL, connect_args=connect_args)
+engine = create_engine(
+    DATABASE_URL,
+    connect_args=connect_args,
+    pool_pre_ping=True,
+    pool_recycle=300
+)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

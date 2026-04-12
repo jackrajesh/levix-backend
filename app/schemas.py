@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, ConfigDict
+from pydantic import BaseModel, EmailStr, ConfigDict, Field
 from datetime import datetime, date
 from typing import Optional
 
@@ -6,9 +6,11 @@ class ShopBase(BaseModel):
     shop_name: str
     owner_name: str
     email: EmailStr
+    phone_number: Optional[str] = None
 
 class ShopCreate(ShopBase):
     password: str
+    phone_number: str = Field(..., min_length=10, max_length=10, pattern=r"^\d{10}$", description="10-digit phone number")
 
 # password_hash is deliberately omitted to prevent leaking credentials
 class ShopResponse(ShopBase):
@@ -116,9 +118,13 @@ class SalesSetRequest(BaseModel):
     product_name: Optional[str] = None
     date: str
     quantity: int
+    price: Optional[float] = None
 
 class ShopNameUpdate(BaseModel):
     shop_name: str
+
+class BulkDeleteRequest(BaseModel):
+    ids: list[int]
 
 
 # --- WhatsApp Admin ---

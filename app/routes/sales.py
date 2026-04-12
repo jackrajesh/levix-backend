@@ -44,17 +44,28 @@ def set_sales(req: schemas.SalesSetRequest, current_shop: models.Shop = Depends(
         ).first()
         
         added_qty = req.quantity
+        # Determine the price to record
+        price_to_record = req.price if req.price is not None else item.price
+
         if existing:
             added_qty = req.quantity - existing.quantity
+        
+        # Quantity validation: ensure enough stock
+        if added_qty > 0 and added_qty > item.quantity:
+            raise HTTPException(status_code=400, detail=f"Insufficient stock. Only {item.quantity} available for {product_name}")
+
+        if existing:
             existing.quantity = req.quantity
             existing.product_name = product_name
+            existing.price = price_to_record
         else:
             new_sale = models.SalesRecord(
                 shop_id=current_shop.id,
                 product_id=product_id,
                 product_name=product_name,
                 date=sale_date,
-                quantity=req.quantity
+                quantity=req.quantity,
+                price=price_to_record
             )
             db.add(new_sale)
             
@@ -107,17 +118,28 @@ def set_sales(req: schemas.SalesSetRequest, current_shop: models.Shop = Depends(
                     existing = manual_existing
             
             added_qty = req.quantity
+            # Determine logic for price
+            price_to_record = req.price if req.price is not None else item.price
+
             if existing:
                 added_qty = req.quantity - existing.quantity
+            
+            # Quantity validation: ensure enough stock
+            if added_qty > 0 and added_qty > item.quantity:
+                raise HTTPException(status_code=400, detail=f"Insufficient stock. Only {item.quantity} available for {canonical_name}")
+
+            if existing:
                 existing.quantity = req.quantity
                 existing.product_name = canonical_name
+                existing.price = price_to_record
             else:
                 new_sale = models.SalesRecord(
                     shop_id=current_shop.id,
                     product_id=item.id,
                     product_name=canonical_name,
                     date=sale_date,
-                    quantity=req.quantity
+                    quantity=req.quantity,
+                    price=price_to_record
                 )
                 db.add(new_sale)
             
@@ -135,13 +157,15 @@ def set_sales(req: schemas.SalesSetRequest, current_shop: models.Shop = Depends(
             
             if existing:
                 existing.quantity = req.quantity
+                if req.price is not None: existing.price = req.price
             else:
                 new_sale = models.SalesRecord(
                     shop_id=current_shop.id,
                     product_id=None,
                     product_name=product_name.lower(),
                     date=sale_date,
-                    quantity=req.quantity
+                    quantity=req.quantity,
+                    price=req.price if req.price is not None else 0
                 )
                 db.add(new_sale)
     else:
@@ -171,12 +195,15 @@ def get_sales(start_date: Optional[str] = None, end_date: Optional[str] = None, 
     result = []
     for r in records:
         product_name = r.product_name or (r.inventory_item.name if r.inventory_item else "Unknown")
+        price = r.price if r.price is not None else (r.inventory_item.price if r.inventory_item else 0.0)
         result.append({
             "id": r.id,
             "product_id": r.product_id,
             "product_name": product_name,
             "date": r.date.isoformat(),
-            "quantity": r.quantity
+            "quantity": r.quantity,
+            "price": float(price),
+            "revenue": float(r.quantity * price)
         })
     
     result.sort(key=lambda x: x["product_name"])

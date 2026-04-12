@@ -2,9 +2,19 @@
 <html lang="en" style="-webkit-text-size-adjust: 100%;">
 
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-MC7H8XFN47"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-MC7H8XFN47');
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Levix | Login</title>
+    <title>Levix | Authenticate</title>
+    <link rel="icon" type="image/png" href="/static/favicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -15,6 +25,7 @@
             --accent-blue: #3b82f6;
             --accent-blue-hover: #2563eb;
             --accent-no: #ef4444;
+            --accent-yes: #22c55e;
             --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
             --border-color: #e2e8f0;
         }
@@ -45,6 +56,7 @@
             max-width: 400px;
             box-shadow: var(--shadow-md);
             border: 1px solid var(--border-color);
+            transition: height 0.3s ease;
         }
 
         .brand-container {
@@ -69,7 +81,7 @@
         }
 
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.2rem;
         }
 
         label {
@@ -111,6 +123,7 @@
             justify-content: center;
             align-items: center;
             gap: 0.5rem;
+            margin-top: 1.5rem;
         }
 
         .btn-primary:hover:not(:disabled) {
@@ -122,12 +135,23 @@
             cursor: not-allowed;
         }
 
-        .error-message {
-            color: var(--accent-no);
+        .status-message {
             font-size: 0.875rem;
             margin-top: 0.5rem;
             display: none;
             text-align: center;
+            padding: 0.5rem;
+            border-radius: 6px;
+        }
+
+        .error-message {
+            color: var(--accent-no);
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+
+        .success-message {
+            color: var(--accent-yes);
+            background-color: rgba(34, 197, 94, 0.1);
         }
 
         .links {
@@ -169,6 +193,11 @@
         .is-loading .btn-text {
             display: none;
         }
+
+        /* Form Toggle Animation */
+        #login-section, #register-section {
+            transition: opacity 0.3s ease;
+        }
     </style>
 </head>
 
@@ -176,30 +205,77 @@
     <div class="login-card">
         <div class="brand-container">
             <h1>LEVIX</h1>
-            <span class="subtitle">Welcome Back</span>
+            <span class="subtitle" id="form-subtitle">Welcome Back</span>
         </div>
 
-        <form id="login-form">
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" required placeholder="Enter your email">
+        <!-- ================= LOGIN SECTION ================= -->
+        <div id="login-section">
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" required placeholder="Enter your email">
+                </div>
+
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" required placeholder="Enter your password">
+                </div>
+
+                <div id="login-error-msg" class="status-message error-message"></div>
+
+                <button type="submit" id="login-submit-btn" class="btn-primary">
+                    <span class="loading-spinner"></span>
+                    <span class="btn-text">Sign In</span>
+                </button>
+            </form>
+            
+            <div class="links">
+                <a href="/forgot-password">Forgot your password?</a>
             </div>
+        </div>
 
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" required placeholder="Enter your password">
-            </div>
+        <!-- ================= REGISTER SECTION ================= -->
+        <div id="register-section" style="display: none;">
+            <form id="register-form">
+                <div class="form-group">
+                    <label for="reg-shop-name">Shop Name</label>
+                    <input type="text" id="reg-shop-name" required placeholder="Your shop's name">
+                </div>
 
-            <div id="error-msg" class="error-message"></div>
+                <div class="form-group">
+                    <label for="reg-owner-name">Owner Name</label>
+                    <input type="text" id="reg-owner-name" required placeholder="Your full name">
+                </div>
 
-            <button type="submit" id="submit-btn" class="btn-primary" style="margin-top: 2rem;">
-                <span class="loading-spinner"></span>
-                <span class="btn-text">Sign In</span>
-            </button>
-        </form>
+                <div class="form-group">
+                    <label for="reg-email">Email</label>
+                    <input type="email" id="reg-email" required placeholder="Enter your email">
+                </div>
 
-        <div class="links">
-            <a href="/forgot-password">Forgot your password?</a>
+                <div class="form-group">
+                    <label for="reg-phone">Phone Number</label>
+                    <input type="tel" id="reg-phone" pattern="[0-9]{10}" maxlength="10" required placeholder="10-digit mobile number">
+                </div>
+
+                <div class="form-group">
+                    <label for="reg-password">Password</label>
+                    <input type="password" id="reg-password" required placeholder="Create a password">
+                </div>
+
+                <div id="reg-status-msg" class="status-message"></div>
+
+                <button type="submit" id="register-submit-btn" class="btn-primary">
+                    <span class="loading-spinner"></span>
+                    <span class="btn-text">Create Account</span>
+                </button>
+            </form>
+        </div>
+
+        <!-- ================= TOGGLE ================= -->
+        <div class="links" style="margin-top: 2rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+            <span id="toggle-text">
+                <span id="toggle-prefix">Don't have an account?</span> <a href="#" id="toggle-mode-btn">Register</a>
+            </span>
         </div>
     </div>
 
@@ -209,13 +285,50 @@
             window.location.href = '/dashboard';
         }
 
+        // --- Toggle Logic ---
+        const loginSection = document.getElementById('login-section');
+        const registerSection = document.getElementById('register-section');
+        const toggleBtn = document.getElementById('toggle-mode-btn');
+        const toggleText = document.getElementById('toggle-text');
+        const formSubtitle = document.getElementById('form-subtitle');
+
+        let isLoginMode = true;
+
+        toggleBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            isLoginMode = !isLoginMode;
+
+            const togglePrefix = document.getElementById('toggle-prefix');
+
+            if (isLoginMode) {
+                // Show Login
+                registerSection.style.display = 'none';
+                loginSection.style.display = 'block';
+                formSubtitle.textContent = 'Welcome Back';
+                togglePrefix.textContent = "Don't have an account?";
+                toggleBtn.textContent = "Register";
+            } else {
+                // Show Register
+                loginSection.style.display = 'none';
+                registerSection.style.display = 'block';
+                formSubtitle.textContent = 'Create an Account';
+                togglePrefix.textContent = "Already have an account?";
+                toggleBtn.textContent = "Sign In";
+            }
+            
+            // clear messages
+            document.getElementById('login-error-msg').style.display = 'none';
+            document.getElementById('reg-status-msg').style.display = 'none';
+        });
+
+        // --- Login Submission ---
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const btn = document.getElementById('submit-btn');
-            const errorMsg = document.getElementById('error-msg');
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const btn = document.getElementById('login-submit-btn');
+            const errorMsg = document.getElementById('login-error-msg');
 
             btn.classList.add('is-loading');
             btn.disabled = true;
@@ -228,9 +341,7 @@
             try {
                 const response = await fetch('/login', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: formData
                 });
 
@@ -241,11 +352,89 @@
                     window.location.href = '/dashboard';
                 } else {
                     errorMsg.textContent = data.detail || 'Login failed. Please check your credentials.';
+                    errorMsg.className = 'status-message error-message';
                     errorMsg.style.display = 'block';
                 }
             } catch (error) {
                 errorMsg.textContent = 'An error occurred. Please try again.';
+                errorMsg.className = 'status-message error-message';
                 errorMsg.style.display = 'block';
+            } finally {
+                btn.classList.remove('is-loading');
+                btn.disabled = false;
+            }
+        });
+
+        // --- Register Submission ---
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const shop_name = document.getElementById('reg-shop-name').value.trim();
+            const owner_name = document.getElementById('reg-owner-name').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const phone_number = document.getElementById('reg-phone').value.trim();
+            const password = document.getElementById('reg-password').value;
+
+            const btn = document.getElementById('register-submit-btn');
+            const statusMsg = document.getElementById('reg-status-msg');
+
+            if (!shop_name || !owner_name || !email || !phone_number || !password) {
+                statusMsg.textContent = 'All fields are required.';
+                statusMsg.className = 'status-message error-message';
+                statusMsg.style.display = 'block';
+                return;
+            }
+
+            if (!/^\d{10}$/.test(phone_number)) {
+                statusMsg.textContent = 'Phone number must be exactly 10 digits.';
+                statusMsg.className = 'status-message error-message';
+                statusMsg.style.display = 'block';
+                return;
+            }
+
+            btn.classList.add('is-loading');
+            btn.disabled = true;
+            statusMsg.style.display = 'none';
+
+            const payload = {
+                shop_name: shop_name,
+                owner_name: owner_name,
+                email: email,
+                phone_number: phone_number,
+                password: password
+            };
+
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json().catch(() => null);
+
+                if (response.ok) {
+                    statusMsg.textContent = data?.message || 'Account created successfully! You can now sign in.';
+                    statusMsg.className = 'status-message success-message';
+                    statusMsg.style.display = 'block';
+                    document.getElementById('register-form').reset();
+                    
+                    // After short delay, switch back to login mode automatically
+                    setTimeout(() => {
+                        document.getElementById('toggle-mode-btn').click();
+                        // prefill email
+                        document.getElementById('login-email').value = email;
+                        document.getElementById('login-password').focus();
+                    }, 2000);
+                } else {
+                    statusMsg.textContent = data?.detail || data?.message || 'Registration failed. Please try again.';
+                    statusMsg.className = 'status-message error-message';
+                    statusMsg.style.display = 'block';
+                }
+            } catch (error) {
+                statusMsg.textContent = 'Network error. Please try again.';
+                statusMsg.className = 'status-message error-message';
+                statusMsg.style.display = 'block';
             } finally {
                 btn.classList.remove('is-loading');
                 btn.disabled = false;

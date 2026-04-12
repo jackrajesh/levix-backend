@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-MC7H8XFN47"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-MC7H8XFN47');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Levix</title>
+    <style>
+        :root {
+            --bg-color: #f4f4f9;
+            --container-bg: #ffffff;
+            --text-main: #333333;
+            --text-muted: #666666;
+            --primary: #000000;
+            --primary-hover: #333333;
+            --border: #e0e0e0;
+            --border-focus: #000000;
+            --error: #d32f2f;
+            --success: #388e3c;
+            --transition: all 0.3s ease;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #121212;
+                --container-bg: #1e1e1e;
+                --text-main: #ffffff;
+                --text-muted: #a0a0a0;
+                --primary: #ffffff;
+                --primary-hover: #e0e0e0;
+                --border: #333333;
+                --border-focus: #ffffff;
+                --error: #f44336;
+                --success: #4caf50;
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .container {
+            background-color: var(--container-bg);
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .container {
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            }
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background-color: transparent;
+            color: var(--text-main);
+            font-size: 1rem;
+            transition: var(--transition);
+            outline: none;
+        }
+
+        input:focus {
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 1px var(--border-focus);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.85rem;
+            background-color: var(--primary);
+            color: var(--container-bg);
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover:not(:disabled) {
+            background-color: var(--primary-hover);
+        }
+
+        .btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .message {
+            margin-top: 1.5rem;
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .message.show {
+            display: block;
+            opacity: 1;
+        }
+
+        .message.error {
+            background-color: rgba(244, 67, 54, 0.1);
+            color: var(--error);
+            border: 1px solid rgba(244, 67, 54, 0.2);
+        }
+
+        .message.success {
+            background-color: rgba(76, 175, 80, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(76, 175, 80, 0.2);
+        }
+        
+        .loader {
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--container-bg);
+            border-bottom-color: transparent;
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+        }
+
+        @keyframes rotation {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .login-link {
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+        
+        .login-link a {
+            color: #007bff; /* Standard blue link color */
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Create Account</h1>
+        <p class="subtitle">Join Levix to manage your shop</p>
+
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="shop_name">Shop Name</label>
+                <input type="text" id="shop_name" name="shop_name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="owner_name">Owner Name</label>
+                <input type="text" id="owner_name" name="owner_name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+
+            <button type="submit" id="submitBtn" class="btn">
+                <span id="btnText">Register</span>
+            </button>
+        </form>
+
+        <div id="statusMessage" class="message"></div>
+        
+        <div class="login-link">
+            Already have an account? <a href="/login">Sign In</a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const shop_name = document.getElementById('shop_name').value.trim();
+            const owner_name = document.getElementById('owner_name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const statusMessage = document.getElementById('statusMessage');
+
+            // Basic validation
+            if (!shop_name || !owner_name || !email || !password) {
+                showMessage('All fields are required.', 'error');
+                return;
+            }
+
+            // Set loading state
+            submitBtn.disabled = true;
+            btnText.innerHTML = '<span class="loader"></span> Registering...';
+            statusMessage.classList.remove('show');
+
+            const payload = {
+                shop_name: shop_name,
+                owner_name: owner_name,
+                email: email,
+                password: password
+            };
+
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json().catch(() => null);
+
+                if (response.ok) {
+                    showMessage(data?.message || 'Registration successful! You can now log in.', 'success');
+                    document.getElementById('registerForm').reset();
+                } else {
+                    showMessage(data?.detail || data?.message || 'Registration failed. Please try again.', 'error');
+                }
+            } catch (error) {
+                showMessage('Network error. Please check your connection and try again.', 'error');
+            } finally {
+                // Reset button state
+                submitBtn.disabled = false;
+                btnText.textContent = 'Register';
+            }
+        });
+
+        function showMessage(text, type) {
+            const statusMessage = document.getElementById('statusMessage');
+            statusMessage.textContent = text;
+            statusMessage.className = 'message ' + type + ' show';
+        }
+    </script>
+</body>
+</html>

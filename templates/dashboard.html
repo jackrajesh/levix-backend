@@ -2,9 +2,19 @@
 <html lang="en" style="-webkit-text-size-adjust: 100%;">
 
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-MC7H8XFN47"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-MC7H8XFN47');
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Levix | Dashboard</title>
+    <link rel="icon" type="image/png" href="/static/favicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -93,7 +103,7 @@
 
         #display-shop-name {
             font-weight: 700;
-            font-size: 1rem;
+            font-size: 1.125rem;
             color: var(--text-primary);
             white-space: nowrap;
         }
@@ -129,7 +139,21 @@
             gap: 1rem;
             margin-bottom: 2rem;
             border-bottom: 2px solid var(--border-color);
-            padding-bottom: 0.5rem;
+            padding-bottom: 1rem;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .mobile-only {
+            display: none;
+        }
+
+        .desktop-only {
+            display: block;
+        }
+
+        .tabs::-webkit-scrollbar {
+            display: none;
         }
 
         .tab-btn {
@@ -564,12 +588,6 @@
             padding: 0 0.25rem;
         }
 
-        @media (max-width: 600px) {
-            .pagination-container {
-                justify-content: center;
-                flex-direction: column;
-            }
-        }
 
         /* Stats Grid */
         .stats-grid {
@@ -842,221 +860,123 @@
             }
         }
 
-        /* Mobile (max-width: 768px) */
+
+        /* Mobile (max-width: 768px) Refined */
         @media (max-width: 768px) {
             body {
-                padding: 1rem 0.5rem;
+                padding: 0;
+                background-color: #f1f5f9;
             }
 
             .dashboard-container {
+                max-width: 360px !important;
+                margin: 0 auto !important;
                 padding: 10px;
+                background-color: var(--bg-color);
+                min-height: 100vh;
+                box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            }
+
+            #hamburger-btn {
+                display: block !important;
+                position: absolute;
+                left: 1rem;
+                top: 1.25rem;
+                z-index: 1005;
+            }
+
+            .tabs {
+                display: none !important;
             }
 
             header {
+                display: flex;
                 flex-direction: column;
-                align-items: center;
-                gap: 1.25rem;
+                align-items: center; /* Balanced column layout */
+                gap: 8px;
                 text-align: center;
-                margin-bottom: 2rem;
-            }
-
-            .brand-container {
-                margin-bottom: 0;
+                margin-bottom: 20px;
+                position: relative;
+                padding-top: 1.25rem;
             }
 
             .header-controls {
                 flex-direction: column;
                 width: 100%;
-                gap: 0.75rem;
+                gap: 4px;
                 align-items: center;
             }
 
             #shop-name-container {
-                width: 100%;
                 justify-content: center;
-                padding: 0;
+                font-size: 0.9rem;
             }
 
-            #edit-shop-name-form {
+            /* Search & Add Button Spacing */
+            .search-container {
+                margin-bottom: 8px !important;
+            }
+
+            .btn-primary.add-btn {
                 width: 100%;
-                justify-content: center;
-                flex-wrap: wrap;
-                gap: 0.5rem;
+                margin-bottom: 10px !important;
             }
 
-            #input-shop-name {
-                width: 100% !important;
-                max-width: 180px;
-                min-height: 36px;
-                text-align: center;
+            /* Action Bar Spacing */
+            .inventory-bulk-bar {
+                margin-bottom: 10px !important;
+                gap: 8px;
             }
 
-            #logoutBtn {
-                width: auto;
-                min-width: 100px;
-                max-width: 150px;
-                margin-left: 0;
-                justify-content: center;
-            }
-
-            /* Removed old card styles replaced by new layout */
-            .edit-mode.actions button {
-                flex: 1;
-                max-width: 120px;
-            }
-
-            .view-mode.actions {
-                width: 100%;
-                justify-content: center;
-                display: flex;
-                flex-wrap: wrap;
-                gap: 0.5rem;
-            }
-
-            .tabs {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 0.75rem;
-                border-bottom: none;
-                padding-bottom: 1rem;
-            }
-
-            .tab-btn {
-                padding: 0.875rem 0.5rem;
-                /* Slightly larger targets */
-                border: 1px solid var(--border-color);
-                border-radius: 10px;
-                text-align: center;
-                min-height: 48px;
-                width: 100%;
-                font-size: 0.9375rem;
-            }
-
-            .tab-btn.active {
-                background-color: var(--card-bg);
-                box-shadow: var(--shadow-sm);
-                border-color: var(--accent-blue);
-            }
-
-            .tab-btn.active {
-                border-bottom: 2px solid var(--accent-blue);
-                background-color: #f1f5f9;
-                margin-bottom: 0;
-            }
-
-            .filter-row {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .analytics-header {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 1.5rem;
-                text-align: left;
-            }
-
-            .date-filters {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 1rem;
-            }
-
-            .date-filters div {
-                width: 100%;
-            }
-
-            .sales-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .analytics-overview-grid {
-                grid-template-columns: 1fr !important;
-            }
-
+            /* High-Density Cards */
             .card {
+                padding: 12px !important;
+                margin-bottom: 10px !important;
+                border-radius: 10px;
                 flex-direction: column;
                 align-items: stretch;
-                gap: 1rem;
+                gap: 8px;
+            }
+
+            .card h3 {
+                margin-bottom: 4px;
+                font-size: 1rem;
+            }
+
+            /* Button Resizing */
+            button, .btn-primary, .btn-secondary, .btn-icon, .actions button {
+                padding: 8px 12px !important;
+                font-size: 13px !important;
+                border-radius: 8px !important;
+                min-height: auto !important;
             }
 
             .actions {
                 width: 100%;
                 justify-content: flex-start;
                 flex-wrap: wrap;
-                gap: 0.5rem;
-            }
-
-            .actions button {
-                flex: 1 1 auto;
-                justify-content: center;
-                padding: 0.75rem;
-                min-height: 44px;
-            }
-
-            input,
-            select,
-            .btn-primary,
-            .btn-secondary,
-            .btn-yes,
-            .btn-no {
-                width: 100% !important;
-                min-height: 44px;
-                font-size: 16px;
+                gap: 8px;
+                margin-top: 6px;
             }
 
             #pending-list .card {
-                flex-direction: column;
-                align-items: stretch;
                 text-align: left;
             }
 
             #pending-list .actions {
-                flex-direction: column;
+                flex-direction: row;
                 width: 100%;
-                gap: 0.75rem;
+                gap: 8px;
             }
-
             #pending-list .actions button {
                 width: 100% !important;
                 margin: 0;
-            }
-
-            #pending-list .info div {
-                flex-direction: column;
-                align-items: flex-start !important;
-                gap: 0.25rem;
             }
 
             .btn-icon {
                 width: auto !important;
                 min-height: 44px;
                 padding: 0 1rem;
-            }
-
-            #sale-modal>div {
-                width: 95% !important;
-                max-width: 400px;
-                margin: 0 auto;
-                padding: 1.5rem;
-            }
-
-            .stat-card {
-                padding: 1.25rem;
-                width: 100%;
-            }
-
-            h1 {
-                font-size: 1.5rem;
-            }
-
-            .table-responsive {
-                margin: 0 -0.5rem;
-                width: calc(100% + 1rem);
             }
         }
         .badge-qty {
@@ -1243,61 +1163,281 @@
             }
         }
 
-        /* Mobile Layout (< 600px) */
-        @media (max-width: 599px) {
-            .card {
-                align-items: stretch !important;
-                padding: 1.25rem !important;
-                text-align: left !important;
-            }
 
-            .inventory-card-controls.view-mode {
-                display: flex !important; /* Re-enable flex for simple stacking */
-                flex-direction: column !important;
-                align-items: stretch !important;
-                gap: 1rem !important;
-            }
-
-            .inventory-card-controls.view-mode > * {
-                width: 100% !important;
-                margin: 0 !important;
-            }
-
-            .qty-control-group {
-                justify-content: center !important;
-                width: auto !important;
-                align-self: center !important;
-            }
-
-            .status-select {
-                width: 100% !important;
-                max-width: none !important;
-            }
-
-            .inventory-card-actions {
-                justify-content: center !important;
-                border-top: 1px solid var(--border-color) !important;
-                padding-top: 1rem !important;
-                margin-top: 0.5rem !important;
-            }
-
-            .inventory-card-controls.view-mode .badge {
-                justify-content: center !important;
-                text-align: center !important;
-            }
-
-            /* Fix badge container on mobile */
-            .inventory-card-controls.view-mode div[style*="margin-left: auto"] {
-                margin-left: 0 !important;
-                justify-content: center !important;
-                flex-direction: row !important;
-                gap: 0.5rem !important;
-            }
-            
-            .inventory-card-controls.view-mode div[style*="margin-left: auto"] .badge {
-                width: auto !important;
-            }
+        /* --- SKELETON LOADERS --- */
+        .shimmer {
+            background: #f6f7f8;
+            background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+            background-repeat: no-repeat;
+            background-size: 200% 100%;
+            display: inline-block;
+            animation: shimmer 1.5s infinite linear;
+            border-radius: 6px;
         }
+
+        @keyframes shimmer {
+            0% { background-position: -150% 0; }
+            100% { background-position: 150% 0; }
+        }
+
+        .skeleton-card {
+            background: white !important;
+            border: 1px solid var(--border-color) !important;
+            box-shadow: none !important;
+            pointer-events: none;
+        }
+
+        .skeleton-title { height: 20px; width: 40%; margin-bottom: 8px; }
+        .skeleton-text { height: 14px; width: 70%; margin-bottom: 4px; }
+        .skeleton-box { height: 60px; width: 100%; border-radius: 8px; }
+        .skeleton-pill { height: 32px; width: 80px; border-radius: 8px; }
+        .skeleton-circle { height: 32px; width: 32px; border-radius: 50%; }
+
+        /* Settings Section */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .settings-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            transition: all 0.2s;
+        }
+
+        .settings-card:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .settings-card h3 {
+            font-size: 1.125rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .settings-card p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .btn-meta {
+            background-color: #0668E1;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .btn-meta:hover {
+            background-color: #0559c5;
+        }
+
+        .placeholder-card {
+            background: #f8fafc;
+            border-style: dashed;
+            opacity: 0.7;
+        }
+
+        #settings-header-btn {
+            background: none;
+            color: var(--text-secondary);
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        #settings-header-btn:hover {
+            color: var(--accent-blue);
+            background: #f1f5f9;
+        }
+
+        /* Sidebar & Hamburger Menu */
+        #hamburger-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            padding: 0.5rem;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        #mobile-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 260px;
+            max-width: 80%;
+            background: white;
+            z-index: 2005;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem 1.5rem;
+        }
+
+        #mobile-sidebar.open {
+            transform: translateX(0);
+        }
+
+        #sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        #sidebar-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+        }
+
+        #close-sidebar {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 0.875rem;
+            padding: 0.875rem 1rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            border-radius: 12px;
+            margin-bottom: 0.25rem;
+            border-bottom: none;
+        }
+
+        .sidebar-item:hover {
+            background: #f8fafc;
+            color: var(--accent-blue);
+        }
+
+        .sidebar-item.active {
+            background: #f1f5f9;
+            color: var(--accent-blue);
+        }
+
+        .sidebar-item svg {
+            opacity: 0.7;
+        }
+
+        .sidebar-item.active svg {
+            opacity: 1;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        #sidebar-shop-name {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .sidebar-logout {
+            color: #ef4444;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Inventory Card Refinement */
+        .inventory-card-top {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .inventory-thumb {
+            width: 48px;
+            height: 48px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .inventory-card-mid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 12px;
+        }
+
+        .inventory-card-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px dotted var(--border-color);
+        }
+
+        .inventory-stat-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .compact-badge {
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 6px;
+            background: white;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
     </style>
 </head>
 
@@ -1305,6 +1445,13 @@
     <div id="toast-container"></div>
     <div class="dashboard-container">
         <header>
+            <button id="hamburger-btn" onclick="toggleSidebar(true)">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
             <div class="brand-container">
                 <h1>LEVIX</h1>
                 <span class="subtitle">Intelligent Store Management</span>
@@ -1338,10 +1485,23 @@
             <button class="tab-btn" id="tab-inventory" onclick="switchTab('inventory')">Inventory</button>
             <button class="tab-btn" id="tab-sales" onclick="switchTab('sales')">Sales Tracking</button>
             <button class="tab-btn" id="tab-analytics" onclick="switchTab('analytics')">Analytics & Insights</button>
+            <button class="tab-btn" id="tab-settings" onclick="switchTab('settings')">Settings</button>
         </nav>
 
         <!-- Pending Tab -->
         <div id="pending-tab" class="tab-content active">
+            <div id="pending-bulk-bar" style="display:none; padding: 0.75rem 1rem; background: #f1f5f9; border-radius: 10px; margin-bottom: 1rem; align-items: center; gap: 1rem; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <input type="checkbox" id="pending-select-all" onchange="toggleSelectAllPending(this.checked)" style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent-primary);">
+                    <label for="pending-select-all" style="font-weight: 600; font-size: 0.85rem; cursor: pointer;">SELECT ALL</label>
+                    <span id="pending-selected-count" style="font-size: 0.8rem; color: var(--text-secondary);">0 selected</span>
+                </div>
+                <button class="btn-primary" onclick="bulkDeletePending(this)" style="background: var(--accent-no); border-color: var(--accent-no); padding: 0.5rem 1.25rem; font-size: 0.8rem;">
+                    <span class="loading-spinner"></span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    <span>DELETE SELECTED</span>
+                </button>
+            </div>
             <div id="pending-list" class="list">
                 <div class="empty-state">Loading pending requests...</div>
             </div>
@@ -1359,7 +1519,21 @@
                     <input type="text" class="search-input" id="inventory-search" placeholder="Search products..."
                         oninput="handleSearch()">
                 </div>
-                <button class="btn-primary" onclick="showAddForm()">+ADD PRODUCT</button>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <button class="btn-primary" onclick="showAddForm()">+ADD PRODUCT</button>
+                </div>
+            </div>
+            <div id="inventory-bulk-bar" style="display:none; padding: 0.75rem 1rem; background: #f1f5f9; border-radius: 10px; margin-bottom: 1rem; align-items: center; gap: 1rem; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <input type="checkbox" id="inventory-select-all" onchange="toggleSelectAllInventory(this.checked)" style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent-primary);">
+                    <label for="inventory-select-all" style="font-weight: 600; font-size: 0.85rem; cursor: pointer;">SELECT ALL</label>
+                    <span id="inventory-selected-count" style="font-size: 0.8rem; color: var(--text-secondary);">0 selected</span>
+                </div>
+                <button class="btn-primary" onclick="bulkDeleteInventory(this)" style="background: var(--accent-no); border-color: var(--accent-no); padding: 0.5rem 1.25rem; font-size: 0.8rem;">
+                    <span class="loading-spinner"></span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    <span>DELETE SELECTED</span>
+                </button>
             </div>
             <div id="add-form-container" style="display: none; margin-bottom: 2rem;">
                 <div class="stat-card" style="text-align: left;">
@@ -1610,6 +1784,49 @@
                 </div>
             </div>
         </div>
+
+        <!-- Settings Tab -->
+        <div id="settings-tab" class="tab-content">
+            <h2 style="font-size: 1.5rem; margin-bottom: 2rem;">Settings</h2>
+            
+            <div class="settings-grid">
+                <!-- WhatsApp Connection Section -->
+                <div class="settings-card">
+                    <h3>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="#25D366">
+                            <path d="M12.031 6.172c-2.32 0-4.591.899-6.4 2.535C2.199 11.968 2.199 17.032 5.631 20.268c.271.25.438.583.473.944.032.33-.217.658-.517.708-.225.038-.453-.016-.63-.146-.403-.298-1.503-1.127-1.928-1.446C1.401 18.914 0 16.592 0 14.156c0-4.148 2.87-7.796 7.152-8.665.311-.063.633.093.766.381.134.288.082.631-.132.863-.538.583-1.004 1.233-1.385 1.936-2.583 4.793-1.291 10.709 3.013 13.78 3.52 2.511 8.167 2.158 11.231-.837 3.064-2.994 3.417-7.641.83-11.231-3.033-4.215-8.528-5.35-12.28-2.618-.266.195-.626.202-.897.018-.271-.184-.424-.5-.382-.828.026-.206.126-.395.279-.533.421-.383.879-.721 1.365-.992.308-.172.695-.113.931.144.236.257.25.636.035.91-.321.408-.598.847-.824 1.309-1.983 4.053-.98 9.043 2.503 11.94 2.85 2.373 6.941 2.457 9.873.203 2.932-2.254 3.882-6.191 1.983-9.444l-.242-.32c-.084-.111-.13-.251-.13-.394z"/>
+                            <path d="M12.031 0C5.396 0 0 5.396 0 12.031c0 2.112.551 4.167 1.6 5.974L.065 24l6.11-1.604c1.807 1.05 3.862 1.6 5.974 1.6 6.635 0 12.031-5.396 12.031-12.031S18.666 0 12.031 0zm0 21.984c-1.893 0-3.75-.5-5.368-1.445l-.385-.226-3.993 1.047 1.065-3.893-.248-.395c-1.04-1.657-1.59-3.57-1.59-5.541 0-5.49 4.471-9.961 9.961-9.961s9.961 4.471 9.961 9.961-4.471 9.961-9.961 9.961z"/>
+                        </svg>
+                        Connect WhatsApp
+                    </h3>
+                    <p>Connect your WhatsApp Business account to automate customer replies and track stock demand directly from messaging.</p>
+                    <button class="btn-meta" onclick="connectWhatsApp()">
+                        <span>CONNECT WHATSAPP</span>
+                    </button>
+                </div>
+
+                <!-- Placeholder: Subscriptions -->
+                <div class="settings-card placeholder-card">
+                    <h3>Subscription Plan</h3>
+                    <p>You are currently on the <b>Free Tier</b>. Upgrade to unlock bulk analytics and faster AI processing.</p>
+                    <button class="btn-secondary" disabled>UPGRADE (COMING SOON)</button>
+                </div>
+
+                <!-- Placeholder: Spam Protection -->
+                <div class="settings-card placeholder-card">
+                    <h3>Spam Protection</h3>
+                    <p>Automated rate-limiting and customer blocking to prevent spam queries in your shop.</p>
+                    <button class="btn-secondary" disabled>CONFIGURE</button>
+                </div>
+
+                <!-- Placeholder: Automation -->
+                <div class="settings-card placeholder-card">
+                    <h3>Automation Settings</h3>
+                    <p>Configure custom business hours and automated "Shop Closed" responses.</p>
+                    <button class="btn-secondary" disabled>MANAGE</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Confirmation Modal -->
@@ -1701,9 +1918,105 @@
         </div>
     </div>
 
+    <div id="sidebar-overlay" onclick="toggleSidebar(false)"></div>
+    <div id="mobile-sidebar">
+        <div class="sidebar-header">
+            <div class="brand-container">
+                <h1 style="font-size: 1.5rem;">LEVIX</h1>
+                <span class="subtitle">Management</span>
+            </div>
+            <button id="close-sidebar" onclick="toggleSidebar(false)">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <div class="sidebar-item" onclick="switchTab('pending')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span>Pending</span>
+        </div>
+        <div class="sidebar-item" onclick="switchTab('inventory')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 8V21H3V8"></path><path d="M1 3H23V8H1V3Z"></path><path d="M10 12H14"></path>
+            </svg>
+            <span>Inventory</span>
+        </div>
+        <div class="sidebar-item" onclick="switchTab('sales')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
+            <span>Sales Tracking</span>
+        </div>
+        <div class="sidebar-item" onclick="switchTab('analytics')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+            <span>Analytics</span>
+        </div>
+        <div class="sidebar-item" onclick="switchTab('settings')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            <span>Settings</span>
+        </div>
+
+        <div class="sidebar-footer">
+            <span id="sidebar-shop-name">Loading...</span>
+            <div class="sidebar-logout" onclick="document.getElementById('logoutBtn').click()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+                <span>Logout</span>
+            </div>
+        </div>
+    </div>
 
     <script>
         const API_BASE = '';
+
+        // --- Skeleton Template Generator ---
+        function getSkeletonHTML(type, count = 3) {
+            let html = '';
+            for (let i = 0; i < count; i++) {
+                if (type === 'pending' || type === 'inventory') {
+                    html += `
+                    <div class="card skeleton-card">
+                        <div class="inventory-card-header">
+                            <div class="shimmer skeleton-title"></div>
+                            <div class="shimmer skeleton-text"></div>
+                        </div>
+                        <div class="inventory-card-controls view-mode">
+                            <div class="shimmer skeleton-pill" style="width: 100px;"></div>
+                            <div class="shimmer skeleton-pill" style="width: 120px;"></div>
+                            <div class="shimmer skeleton-pill" style="width: 80px;"></div>
+                            <div style="margin-left: auto; display: flex; gap: 0.5rem;">
+                                <div class="shimmer skeleton-badge" style="width: 50px; height: 24px;"></div>
+                                <div class="shimmer skeleton-badge" style="width: 50px; height: 24px;"></div>
+                            </div>
+                        </div>
+                    </div>`;
+                } else if (type === 'table') {
+                    html += `
+                    <tr>
+                        <td><div class="shimmer skeleton-text" style="width: 80%;"></div></td>
+                        <td><div class="shimmer skeleton-text" style="width: 60%;"></div></td>
+                        <td><div class="shimmer skeleton-text" style="width: 40%;"></div></td>
+                        <td><div class="shimmer skeleton-text" style="width: 40%; float: right;"></div></td>
+                    </tr>`;
+                } else if (type === 'stat') {
+                    html += `
+                    <div class="stat-card">
+                        <div class="shimmer skeleton-title" style="width: 60%; height: 32px; margin: 0 auto 10px auto;"></div>
+                        <div class="shimmer skeleton-text" style="width: 40%; margin: 0 auto;"></div>
+                    </div>`;
+                }
+            }
+            return html;
+        }
 
         // --- Server-Sent Events for Real-Time Pending Updates ---
         const eventSource = new EventSource('/events');
@@ -1787,8 +2100,27 @@
             if (editingProductId !== null) cancelEdit(editingProductId);
             currentTab = tabId;
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn.id === `tab-${tabId}`));
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                const isMatch = item.textContent.toLowerCase().includes(tabId.replace('-', ' '));
+                item.classList.toggle('active', isMatch);
+            });
             document.querySelectorAll('.tab-content').forEach(content => content.classList.toggle('active', content.id === `${tabId}-tab`));
             fetchData();
+            toggleSidebar(false);
+        }
+
+        function toggleSidebar(open) {
+            const sidebar = document.getElementById('mobile-sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            if (open) {
+                sidebar.classList.add('open');
+                overlay.style.display = 'block';
+                setTimeout(() => overlay.style.opacity = '1', 10);
+            } else {
+                sidebar.classList.remove('open');
+                overlay.style.opacity = '0';
+                setTimeout(() => overlay.style.display = 'none', 300);
+            }
         }
 
         async function fetchData() {
@@ -1802,9 +2134,14 @@
                 populateInventoryDropdown();
             }
             else if (currentTab === 'analytics') fetchAnalytics();
+            else if (currentTab === 'settings') {
+                console.log("[SETTINGS] Switched to settings tab");
+            }
         }
 
         async function fetchPending() {
+            const container = document.getElementById('pending-list');
+            container.innerHTML = getSkeletonHTML('pending', 3);
             try {
                 // Ensure inventory is loaded to check existence
                 if (fullInventory.length === 0) await fetchInventory();
@@ -1819,14 +2156,17 @@
             } catch (err) {
                 document.getElementById('pending-list').innerHTML = '<div class="empty-state">Failed to connect to backend</div>';
             }
-        }
-
-        function renderPending(items) {
+        }        function renderPending(items) {
             const container = document.getElementById('pending-list');
+            const bulkBar = document.getElementById('pending-bulk-bar');
             if (items.length === 0) {
                 container.innerHTML = '<div class="empty-state">No pending requests. Great job!</div>';
+                bulkBar.style.display = 'none';
                 return;
             }
+            bulkBar.style.display = 'flex';
+            document.getElementById('pending-select-all').checked = false;
+            updatePendingSelectedCount();
             container.innerHTML = items.map(item => {
                 const searchName = item.product.toLowerCase();
                 const inInventory = fullInventory.some(i =>
@@ -1840,7 +2180,10 @@
                 <div class="card ${isSystemWarning ? 'is-system-warning' : ''}" id="req-${item.id}">
                     <div class="info">
                         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 0.5rem;">
-                            <h3 style="margin:0;">${isSystemWarning ? 'System Warning' : item.product}</h3>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" class="pending-checkbox" data-id="${item.id}" onchange="updatePendingSelectedCount()" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-primary);">
+                                <h3 style="margin:0;">${isSystemWarning ? 'System Warning' : item.product}</h3>
+                            </div>
                             <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 500;">${timeStr}</span>
                         </div>
                         <p style="color: var(--text-primary); ${isSystemWarning ? 'background: #fff1f2; color: #991b1b; border: 1px solid #fecaca;' : 'background: #f1f5f9;'} padding: 0.75rem; border-radius: 8px; margin-bottom: 0.75rem; font-style: italic; font-size: 0.9375rem;">
@@ -1855,7 +2198,7 @@
                             <span class="loading-spinner"></span><span>${isSystemWarning ? 'Ignore Warning' : 'OUT OF STOCK'}</span>
                         </button>
                         ${(!inInventory && !isSystemWarning) ? `
-                        <button class="btn-primary" onclick="openAddPendingModal(${item.id}, '${item.product.replace(/'/g, "\\'")}')">
+                        <button class="btn-primary" onclick="openAddPendingModal(${item.id}, '${item.product.replace(/'/g, "\\\\'")}')">
                             <span>ADD TO INVENTORY</span>
                         </button>` : ''}
                     </div>
@@ -1946,6 +2289,8 @@
 
 
         async function fetchInventory() {
+            const container = document.getElementById('inventory-list');
+            container.innerHTML = getSkeletonHTML('inventory', 5);
             try {
                 const [invRes, insRes] = await Promise.all([
                     authFetch(`${API_BASE}/inventory`),
@@ -1955,8 +2300,16 @@
                 if (!invRes.ok || !insRes.ok) throw new Error('Fetch failed');
 
                 const invData = await invRes.json();
-                fullInventory = invData.inventory.sort((a, b) => a.name.localeCompare(b.name));
-                inventoryInsights = await insRes.json();
+                
+                if (!Array.isArray(invData)) {
+                    console.error("Invalid response", invData)
+                    return
+                }
+                
+                fullInventory = invData.sort((a, b) => a.name.localeCompare(b.name));
+                
+                const insData = await insRes.json();
+                inventoryInsights = insData.items || [];
 
                 handleSearch(true); // Triggers pagination and rendering
                 populateInventoryDropdown();
@@ -2039,9 +2392,16 @@
 
         function renderInventory(items) {
             const container = document.getElementById('inventory-list');
+            const bulkBar = document.getElementById('inventory-bulk-bar');
             if (items.length === 0) {
                 container.innerHTML = '<div class="empty-state">No products found.</div>';
+                if (bulkBar) bulkBar.style.display = 'none';
                 return;
+            }
+            if (bulkBar) {
+                bulkBar.style.display = 'flex';
+                document.getElementById('inventory-select-all').checked = false;
+                updateInventorySelectedCount();
             }
             container.innerHTML = items.map(item => {
                 const insight = inventoryInsights.find(i => i.id === item.id) || {};
@@ -2050,12 +2410,14 @@
                 const statusClass = item.status === 'out_of_stock' ? 'is-out-of-stock' : (isLow ? 'is-low-stock' : 'is-available');
                 
                 const isEditing = editingProductId === item.id;
-                
-                return `
+                              return `
                     <div class="card ${statusClass} ${isEditing ? 'is-editing' : ''}" id="prod-${item.id}">
                         <!-- header -->
                         <div class="inventory-card-header">
-                            <h3 style="margin: 0;">${item.name}</h3>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" class="inventory-checkbox" data-id="${item.id}" onchange="updateInventorySelectedCount()" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent-primary);">
+                                <h3 style="margin: 0;">${item.name}</h3>
+                            </div>
                             <p style="margin: 0; color: var(--text-secondary); font-size: 0.875rem;">Aliases: ${item.aliases.join(', ')}</p>
                         </div>
 
@@ -2140,6 +2502,82 @@
                         </div>
                     </div>`;
             }).join('');
+        }
+
+        // --- BULK DELETE FUNCTIONS ---
+
+        function updatePendingSelectedCount() {
+            const checked = document.querySelectorAll('.pending-checkbox:checked');
+            const countEl = document.getElementById('pending-selected-count');
+            if (countEl) countEl.textContent = `${checked.length} selected`;
+        }
+
+        function toggleSelectAllPending(checked) {
+            document.querySelectorAll('.pending-checkbox').forEach(cb => cb.checked = checked);
+            updatePendingSelectedCount();
+        }
+
+        function updateInventorySelectedCount() {
+            const checked = document.querySelectorAll('.inventory-checkbox:checked');
+            const countEl = document.getElementById('inventory-selected-count');
+            if (countEl) countEl.textContent = `${checked.length} selected`;
+        }
+
+        function toggleSelectAllInventory(checked) {
+            document.querySelectorAll('.inventory-checkbox').forEach(cb => cb.checked = checked);
+            updateInventorySelectedCount();
+        }
+
+        async function bulkDeletePending(btn) {
+            const ids = [...document.querySelectorAll('.pending-checkbox:checked')].map(cb => parseInt(cb.dataset.id));
+            if (ids.length === 0) return showToast('No items selected', 'warning');
+            showConfirm('Bulk Delete', `Are you sure you want to delete ${ids.length} pending request(s)?`, async () => {
+                btn.classList.add('is-loading');
+                try {
+                    const res = await authFetch(`${API_BASE}/pending/bulk-delete`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ ids })
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        showToast(`${data.deleted_count} request(s) deleted`, 'success');
+                        fetchPending();
+                    } else {
+                        showToast('Bulk delete failed', 'error');
+                    }
+                } catch (err) {
+                    showToast('Network error', 'error');
+                } finally {
+                    btn.classList.remove('is-loading');
+                }
+            });
+        }
+
+        async function bulkDeleteInventory(btn) {
+            const ids = [...document.querySelectorAll('.inventory-checkbox:checked')].map(cb => parseInt(cb.dataset.id));
+            if (ids.length === 0) return showToast('No items selected', 'warning');
+            showConfirm('Bulk Delete', `Are you sure you want to delete ${ids.length} product(s)? Sales history will be preserved.`, async () => {
+                btn.classList.add('is-loading');
+                try {
+                    const res = await authFetch(`${API_BASE}/inventory/bulk-delete`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ ids })
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        showToast(`${data.deleted_count} product(s) removed`, 'success');
+                        fetchInventory();
+                    } else {
+                        showToast('Bulk delete failed', 'error');
+                    }
+                } catch (err) {
+                    showToast('Network error', 'error');
+                } finally {
+                    btn.classList.remove('is-loading');
+                }
+            });
         }
 
         async function updateStatus(productId, newStatus) {
@@ -2420,6 +2858,30 @@
         }
 
         async function fetchAnalytics() {
+            const statsGrid = document.querySelector('.stats-grid');
+            const demandBody = document.getElementById('demand-table-body');
+            // Instead of overwriting innerHTML which destroys IDs, we just show numbers as loading text
+            if (statsGrid) {
+                const totalEl = document.getElementById('stat-total');
+                const fulfilledEl = document.getElementById('stat-fulfilled');
+                const pendingEl = document.getElementById('stat-pending');
+                if (totalEl) totalEl.innerHTML = '<span class="shimmer skeleton-title" style="display:inline-block; width:60px; height:32px;"></span>';
+                if (fulfilledEl) fulfilledEl.innerHTML = '<span class="shimmer skeleton-title" style="display:inline-block; width:60px; height:32px;"></span>';
+                if (pendingEl) pendingEl.innerHTML = '<span class="shimmer skeleton-title" style="display:inline-block; width:60px; height:32px;"></span>';
+            }
+            if (demandBody) demandBody.innerHTML = getSkeletonHTML('table', 5);
+
+            // Shimmer for list summaries
+            const listIds = ['top-requested-list', 'top-sold-list', 'low-requested-list', 'low-sold-list', 'stock-insights-list'];
+            listIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.innerHTML = `
+                    <div class="shimmer skeleton-text" style="width: 100%; height: 20px;"></div>
+                    <div class="shimmer skeleton-text" style="width: 80%; height: 20px;"></div>
+                    <div class="shimmer skeleton-text" style="width: 90%; height: 20px;"></div>
+                `;
+            });
+
             const start = document.getElementById('start-date').value;
             const end = document.getElementById('end-date').value;
             const query = (start && end) ? `?start_date=${start}&end_date=${end}` : '';
@@ -2430,11 +2892,32 @@
                 ]);
                 const stats = await statsRes.json();
                 const insights = await insRes.json();
+                
+                console.log("Analytics data:", insights);
+                
+                // Safe check
+                if (!insights || typeof insights !== 'object') {
+                    console.error("Invalid insights data received");
+                    return;
+                }
+
                 renderAnalytics(stats, insights);
-            } catch (err) { showToast('Failed to fetch analytics', 'error'); }
+            } catch (err) { 
+                console.error("Fetch analytics failed", err);
+                // Graceful fallback: render with empty data instead of toast error
+                renderAnalytics({}, {
+                    top_requested: [],
+                    top_sold: [],
+                    low_demand_requests: [],
+                    low_demand_sales: []
+                });
+            }
         }
 
         async function fetchSales() {
+            const tbody = document.getElementById('sales-table-body');
+            tbody.innerHTML = getSkeletonHTML('table', 5);
+
             const start = document.getElementById('sales-start-date').value;
             const end = document.getElementById('sales-end-date').value;
             const query = (start && end) ? `?start_date=${start}&end_date=${end}` : '';
@@ -2591,7 +3074,7 @@
             try {
                 const res = await authFetch(`${API_BASE}/inventory`);
                 const data = await res.json();
-                dropdownProducts = data.inventory;
+                dropdownProducts = Array.isArray(data) ? data : (data.inventory || []);
                 renderDropdownProducts(dropdownProducts);
             } catch (err) { console.error('Failed to populate dropdown', err); }
         }
@@ -2669,39 +3152,75 @@
         }
 
         function renderAnalytics(stats, insights) {
-            document.getElementById('stat-total').innerText = stats.total_requests;
-            const fulfilled = stats.total_requests ? Math.round((stats.status_counts.available / stats.total_requests) * 100) : 0;
+            // Safety defaults
+            stats = stats || {};
+            insights = insights || {};
+
+            const totalReq = stats.total_requests || 0;
+            const statusCounts = stats.status_counts || {available: 0, pending: 0};
+
+            document.getElementById('stat-total').innerText = totalReq;
+            const fulfilled = totalReq ? Math.round((statusCounts.available / totalReq) * 100) : 0;
             document.getElementById('stat-fulfilled').innerText = `${fulfilled}%`;
-            document.getElementById('stat-pending').innerText = stats.status_counts.pending;
+            document.getElementById('stat-pending').innerText = statusCounts.pending || 0;
 
             const renderMetricList = (containerId, data, bg) => {
                 const list = document.getElementById(containerId);
-                list.innerHTML = data && data.length
-                    ? data.map((p, i) => `<div style="display:flex; justify-content:space-between; align-items:center; padding: 0.5rem; background:${bg}; border-radius:8px"><span style="font-weight:600">${containerId.includes('top') ? '#' + (i + 1) + ' ' : ''}${p.name}</span><span class="badge badge-score">${p.score}</span></div>`).join('')
-                    : '<div class="empty-state" style="padding:1rem; font-size:0.8rem">No data yet.</div>';
+                if (!list) return;
+
+                const items = data || [];
+                list.innerHTML = items.length
+                    ? items.map((p, i) => {
+                        let valueBadge = '';
+                        if (p.score !== undefined) {
+                            valueBadge = `<span class="badge badge-score">${p.score} ASKS</span>`;
+                        } else if (p.quantity_sold !== undefined) {
+                            const formattedRev = Number(p.revenue).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                            valueBadge = `<div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <span class="badge" style="background: #e2e8f0; color: #475569; font-size: 0.7rem; font-weight: 600;">${p.quantity_sold} SOLD</span>
+                                <span class="badge" style="background: #dcfce7; color: #166534; font-size: 0.7rem; font-weight: 700;">₹${formattedRev}</span>
+                            </div>`;
+                        }
+                        
+                        return `<div style="display:flex; justify-content:space-between; align-items:center; padding: 0.5rem; background:${bg}; border-radius:8px; margin-bottom: 0.5rem;">
+                            <span style="font-weight:600; font-size: 0.9rem;">${containerId.includes('top-') ? '#' + (i + 1) + ' ' : ''}${p.name}</span>
+                            ${valueBadge}
+                        </div>`;
+                    }).join('')
+                    : '<div class="empty-state" style="padding:1rem; font-size:0.8rem">No data available yet</div>';
             };
 
-            renderMetricList('top-requested-list', stats.top_requested_products, '#f0f9ff');
-            renderMetricList('top-sold-list', stats.top_sold_products, '#f0fdf4');
-            renderMetricList('low-requested-list', stats.low_requested_products, '#f8fafc');
-            renderMetricList('low-sold-list', stats.low_sold_products, '#fff7ed');
+            // Match Backend keys from /inventory/insights
+            renderMetricList('top-requested-list', insights.top_requested, '#f0f9ff');
+            renderMetricList('top-sold-list', insights.top_sold, '#f0fdf4');
+            renderMetricList('low-requested-list', insights.low_demand_requests, '#f8fafc');
+            renderMetricList('low-sold-list', insights.low_demand_sales, '#fff7ed');
 
             const stockList = document.getElementById('stock-insights-list');
-            const criticalStock = insights.filter(i => i.oos_rate > 0.2).sort((a, b) => b.oos_rate - a.oos_rate).slice(0, 5);
-            stockList.innerHTML = criticalStock.length
-                ? criticalStock.map(i => `<div style="display:flex; justify-content:space-between; align-items:center; padding: 0.5rem; background:#fff1f2; border-radius:8px"><span style="font-weight:600; color:var(--accent-no)">${i.name}</span><span class="badge badge-oos">${Math.round(i.oos_rate * 100)}% OOS</span></div>`).join('')
-                : '<div class="empty-state" style="padding:1rem;">All in stock!</div>';
+            if (stockList) {
+                // Ensure insights is an array or handle object structure
+                const insightItems = Array.isArray(insights) ? insights : (insights.items || []);
+                const criticalStock = insightItems.filter(i => (i.oos_rate || 0) > 0.2).sort((a, b) => b.oos_rate - a.oos_rate).slice(0, 5);
+                stockList.innerHTML = criticalStock.length
+                    ? criticalStock.map(i => `<div style="display:flex; justify-content:space-between; align-items:center; padding: 0.5rem; background:#fff1f2; border-radius:8px"><span style="font-weight:600; color:var(--accent-no)">${i.name}</span><span class="badge badge-oos">${Math.round(i.oos_rate * 100)}% OOS</span></div>`).join('')
+                    : '<div class="empty-state" style="padding:1rem; font-size:0.8rem">No data available yet</div>';
+            }
 
             const tbody = document.getElementById('demand-table-body');
-            tbody.innerHTML = insights.sort((a, b) => b.total_requests - a.total_requests).map(i => `
-                <tr>
-                    <td style="font-weight:600">${i.name}</td>
-                    <td>${i.total_requests}</td>
-                    <td>${i.out_of_stock_count}</td>
-                    <td><span class="${i.demand_rate > 1 ? 'trend-up' : ''}">${i.demand_rate}/day</span></td>
-                    <td style="font-size: 0.75rem; color:var(--text-secondary)">${i.last_requested_timestamp ? new Date(i.last_requested_timestamp).toLocaleString() : 'Never'}</td>
-                </tr>
-            `).join('');
+            if (tbody) {
+                const tableItems = Array.isArray(insights) ? insights : (insights.items || []);
+                tbody.innerHTML = tableItems.length 
+                    ? tableItems.sort((a, b) => (b.total_requests || 0) - (a.total_requests || 0)).map(i => `
+                        <tr>
+                            <td style="font-weight:600">${i.name}</td>
+                            <td>${i.total_requests || 0}</td>
+                            <td>${i.out_of_stock_count || 0}</td>
+                            <td><span class="${(i.demand_rate || 0) > 1 ? 'trend-up' : ''}">${i.demand_rate || 0}/day</span></td>
+                            <td style="font-size: 0.75rem; color:var(--text-secondary)">${i.last_requested_timestamp ? new Date(i.last_requested_timestamp).toLocaleString() : 'Never'}</td>
+                        </tr>
+                    `).join('')
+                    : '<tr><td colspan="5" class="empty-state">No data available yet</td></tr>';
+            }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -2719,6 +3238,7 @@
                 // Refined fallback logic: only use 'My Shop' if shop_name is null, undefined, or empty string
                 const shopName = (data && data.shop_name && data.shop_name.trim()) ? data.shop_name.trim() : 'My Shop';
                 document.getElementById('display-shop-name').textContent = shopName;
+                document.getElementById('sidebar-shop-name').textContent = shopName;
                 document.getElementById('input-shop-name').value = shopName;
                 document.title = `Levix | ${shopName}`;
             }).catch(e => {
@@ -2739,6 +3259,18 @@
                 }
             });
         });
+
+        function connectWhatsApp() {
+            const appId = "26549149854679745";
+            const redirectUri = "https://levixapp.in/auth/meta/callback";
+
+            // temporary static state (will be dynamic later)
+            const state = "shop_id=demo";
+
+            const url = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${appId}&redirect_uri=${redirectUri}&scope=whatsapp_business_management,whatsapp_business_messaging,business_management&response_type=code&state=${state}`;
+
+            window.open(url, "_blank", "width=600,height=700");
+        }
 
         fetchData();
     </script>

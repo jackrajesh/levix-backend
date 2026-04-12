@@ -2,13 +2,27 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func as sa_func
 
-from .. import models
+from .. import models, schemas
 from ..database import get_db
 from .auth import get_current_shop
 from ..services.sse import broadcast_event
 from ..services.product_service import add_log_db
 
 router = APIRouter(tags=["pending"])
+
+@router.post("/pending/bulk-delete")
+def bulk_delete_pending(req: schemas.BulkDeleteRequest, current_shop: models.Shop = Depends(get_current_shop), db: Session = Depends(get_db)):
+    if not req.ids:
+        raise HTTPException(status_code=400, detail="No IDs provided")
+    
+    deleted = db.query(models.PendingRequest).filter(
+        models.PendingRequest.id.in_(req.ids),
+        models.PendingRequest.shop_id == current_shop.id
+    ).delete(synchronize_session='fetch')
+    
+    db.commit()
+    broadcast_event("pending_updated")
+    return {"status": "success", "deleted_count": deleted}
 
 @router.get("/pending")
 def get_pending(current_shop: models.Shop = Depends(get_current_shop), db: Session = Depends(get_db)):

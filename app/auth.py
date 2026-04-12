@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 from passlib.context import CryptContext
 from jose import JWTError, jwt
+import hashlib
 
 # =========================
 # CONFIG
@@ -11,39 +12,26 @@ SECRET_KEY = os.getenv("JWT_SECRET", "super-secret-key-for-local-dev-only")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_HOURS = 24
 
-# Support both bcrypt (new) and argon2 (old users)
-pwd_context = CryptContext(
-    schemes=["bcrypt", "argon2"],
-    deprecated="auto"
-)
+# Use argon2 for all hashing
+pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 # =========================
 # PASSWORD HELPERS
 # =========================
-def _clean_password(password: str) -> str:
-    """
-    Clean and safely truncate password for bcrypt (max 72 bytes)
-    """
-    if not password:
-        raise ValueError("Password cannot be empty")
-
-    # remove spaces + hidden chars
-    password = password.strip()
-
-    # encode → truncate → decode safely
-    password_bytes = password.encode("utf-8")[:72]
-    return password_bytes.decode("utf-8", errors="ignore")
-
 
 def hash_password(password: str) -> str:
-    cleaned = _clean_password(password)
-    return pwd_context.hash(cleaned)
+    return pwd_context.hash(password)
+
+def hash_otp(otp: str) -> str:
+    return hashlib.sha256(otp.encode()).hexdigest()
+
+def verify_otp(plain_otp: str, hashed_otp: str) -> bool:
+    return hash_otp(plain_otp) == hashed_otp
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     try:
-        cleaned = _clean_password(plain_password)
-        return pwd_context.verify(cleaned, hashed_password)
+        return pwd_context.verify(plain_password, hashed_password)
     except Exception:
         return False  # prevents crashes
 

@@ -18,3 +18,7 @@ async def get_forgot_password():
 @router.get("/reset-password", response_class=FileResponse)
 async def get_reset_password():
     return FileResponse("templates/reset-password.html")
+
+@router.get("/favicon.ico", include_in_schema=False)
+async def get_favicon():
+    return FileResponse("static/favicon.png")
