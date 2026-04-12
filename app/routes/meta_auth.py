@@ -4,7 +4,7 @@ import requests
 router = APIRouter()
 
 APP_ID = "26549149854679745"
-APP_SECRET = "YOUR_APP_SECRET"
+APP_SECRET = "02b387474682544dff4b7144b3d5543a"
 REDIRECT_URI = "https://levixapp.in/auth/meta/callback"
 
 
