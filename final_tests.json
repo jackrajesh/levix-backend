@@ -1,0 +1,86 @@
+{
+  "TEST_A (Full Delivery Checkout)": [
+    {
+      "user": "hello",
+      "bot": "Hello! 😊 Ready to take your order at *Test Retail*. What would you like?"
+    },
+    {
+      "user": "menu",
+      "bot": "Here's what we have 😊\n• *Biryani* — ₹100\n• *Fried Rice* — ₹100\n• *Coke* — ₹100\n\nWhat would you like to order?"
+    },
+    {
+      "user": "2 fried rice, 1 coke",
+      "bot": "Added to cart:\n✅ 2x Fried Rice\n✅ 1x Coke\n\n*Cart total: ₹300*"
+    },
+    {
+      "user": "cart",
+      "bot": "Your cart:\n• 2x Fried Rice — ₹200\n• 1x Coke — ₹100\nTotal: *₹300*"
+    },
+    {
+      "user": "checkout",
+      "bot": "✅ *Order Summary*\n• 2x Fried Rice ₹200\n• 1x Coke ₹100\n\n*Total: ₹300*\n\nHow would you like to receive it?\nReply *pickup* or *delivery*"
+    },
+    {
+      "user": "delivery",
+      "bot": "Perfect! 🚗 Please share your delivery address.\n_(Street / flat no / area / city)_"
+    },
+    {
+      "user": "Flat 4B, Central Avenue, near the metro station",
+      "bot": "Got it! Delivering to:\n_flat 4b, central avenue, near the metro station_\n\nHere's your order:\n• 2x Fried Rice\n• 1x Coke\n\nTotal: *₹340*\n\nConfirm order? _(yes / no)_\n_(₹40 delivery charge included)_"
+    },
+    {
+      "user": "yes",
+      "bot": "🎉 Order *#45686* confirmed!\nStatus: *PENDING*\n📍 Delivering to: _flat 4b, central avenue, near the metro station_\nTotal: *₹340*\n\nWe'll notify you when it's on the way!"
+    }
+  ],
+  "TEST_B (Order Tracking Same Number)": [
+    {
+      "user": "track my order",
+      "bot": "Order *#45686* — ⏳ *PENDING*\nItems: 2x Fried Rice; 1x Coke\nTotal: *₹340.00*"
+    }
+  ],
+  "TEST_C (Unknown Request YES)": [
+    {
+      "user": "water packet",
+      "bot": "We don't have *Water Packet* right now. 😔\nShall I send your request to the shop owner? *(yes / no)*"
+    },
+    {
+      "user": "yes",
+      "bot": "✅ Got it! Your request for *Water Packet* has been sent to the owner.\nThey'll look into it. Anything else?"
+    }
+  ],
+  "TEST_D (Clear Cart Empty Yes)": [
+    {
+      "user": "clear cart",
+      "bot": "Nothing in your cart yet 😊 What would you like to order?"
+    },
+    {
+      "user": "yes",
+      "bot": "I'm here 😊 What would you like to order?"
+    }
+  ],
+  "TEST_E (Change Quantity & Reduce)": [
+    {
+      "user": "2 biryani",
+      "bot": "✅ Added *2x Biryani* (₹100 each)\nCart total: *₹200*\n\nAnything else?"
+    },
+    {
+      "user": "change to 3",
+      "bot": "Got it 👍 Changed *Biryani* to *3x*. Subtotal: *₹300*"
+    },
+    {
+      "user": "remove 1",
+      "bot": "Reduced *Biryani* to 2. Subtotal: ₹200"
+    },
+    {
+      "user": "total",
+      "bot": "Your cart:\n• 2x Biryani — ₹200\nTotal: *₹200*"
+    }
+  ],
+  "TEST_F (Stray No)": [
+    {
+      "user": "no",
+      "bot": "I'm here 😊 What would you like to order?"
+    }
+  ]
+}

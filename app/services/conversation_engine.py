@@ -41,11 +41,13 @@ logger = logging.getLogger("levix.conversation")
 VALID_TRANSITIONS: dict[str, set[str]] = {
     "idle":                      {"shopping", "cart_active", "idle"},
     "shopping":                  {"shopping", "cart_active", "completed", "idle"},
-    "cart_active":               {"cart_active", "shopping", "awaiting_delivery_mode", "awaiting_confirmation", "cancelled", "idle"},
+    "cart_active":               {"cart_active", "shopping", "awaiting_delivery_mode", "awaiting_confirmation", "awaiting_clear_confirm", "awaiting_yes_no", "cancelled", "idle"},
     "awaiting_delivery_mode":    {"cart_active", "awaiting_address", "awaiting_confirmation", "cancelled"},
     "awaiting_address":          {"awaiting_address", "awaiting_confirmation", "cart_active", "cancelled"},
     "awaiting_confirmation":     {"cart_active", "completed", "cancelled"},
-    "completed":                 {"idle", "shopping"},     # new order starts fresh
+    "awaiting_clear_confirm":    {"shopping", "cart_active", "cancelled"},
+    "awaiting_yes_no":           {"shopping", "cart_active", "awaiting_address", "awaiting_confirmation", "idle"},
+    "completed":                 {"idle", "shopping"},
     "cancelled":                 {"idle", "shopping"},
 }
 

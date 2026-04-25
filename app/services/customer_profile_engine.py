@@ -256,32 +256,40 @@ class CustomerProfileEngine:
     @classmethod
     def welcome_back_message(cls, profile: models.CustomerProfile) -> str:
         """
-        Return a personalised welcome-back string (empty string for first visit).
-        Designed to be prepended to the greeting reply.
+        Return a clean personalised welcome-back string.
+        Empty string = first visit (caller uses default greeting).
+        Rules:
+        - If they have a favourite item -> "Welcome back! Want your usual X again?"
+        - If they have avg spend only   -> "Welcome back! Great combos around ₹N for you!"
+        - Otherwise                     -> "Welcome back! Good to see you again."
         """
-        if (profile.visit_count or 0) <= 1 and (profile.total_orders or 0) == 0:
+        orders = profile.total_orders or 0
+        visits = profile.visit_count or 0
+
+        # Strict first-timer gate: no orders AND first visit
+        if orders == 0 and visits <= 1:
             return ""
 
         tier = profile.vip_tier or "NEW"
 
-        favs = profile.favorite_products or {}
-        top_fav: Optional[str] = None
-        if favs:
-            top_fav = max(favs, key=favs.get)  # type: ignore[arg-type]
-
         if tier == "VIP":
-            prefix = "Welcome back, VIP! ⭐ "
-        elif tier == "REGULAR":
-            prefix = "Welcome back 😊 "
+            prefix = "Welcome back, VIP! \u2b50 "
+        elif orders > 0:
+            prefix = "Welcome back \U0001f60a "
         else:
             prefix = "Hi again! "
 
-        if top_fav and (profile.total_orders or 0) > 0:
-            return f"{prefix}Ready for your usual *{top_fav}* today? Or something different?"
-        elif profile.avg_budget:
-            return f"{prefix}I have some great combos around ₹{int(profile.avg_budget)} for you!"
+        favs = profile.favorite_products or {}
+        top_fav: Optional[str] = None
+        if favs:
+            top_fav = max(favs, key=lambda k: favs.get(k, 0))
+
+        if top_fav and orders > 0:
+            return f"{prefix}Want your usual *{top_fav}* again?"
+        elif profile.avg_budget and orders > 0:
+            return f"{prefix}I have great combos around \u20b9{int(profile.avg_budget)} for you!"
         else:
-            return f"{prefix}Good to see you! What can I get for you today?"
+            return f"{prefix}Good to see you again. What can I get for you?"
 
     # ── Lead counter ──────────────────────────────────────────────────────────
 

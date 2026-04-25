@@ -22,6 +22,10 @@ class Shop(Base):
     # Phase 4: Pilot Settings
     settings = Column(JSON, nullable=True, default=dict)
 
+    # Phase 5: Universal Retail Settings
+    business_category = Column(String, nullable=True)
+    business_subnote = Column(Text, nullable=True)
+
     reset_tokens = relationship("PasswordResetToken", back_populates="shop", cascade="all, delete-orphan")
     inventory = relationship("InventoryItem", back_populates="shop", cascade="all, delete-orphan")
     logs = relationship("LogEntry", back_populates="shop", cascade="all, delete-orphan")
@@ -133,6 +137,7 @@ class PendingRequest(Base):
     product_id = Column(Integer, ForeignKey("inventory_items.id"), nullable=True)
     customer_message = Column(String, nullable=True)
     request_type = Column(String, default="customer") # 'customer' or 'oos_warning'
+    category_context = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     shop = relationship("Shop", back_populates="pending_requests")

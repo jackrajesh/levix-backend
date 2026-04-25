@@ -1,0 +1,142 @@
+{
+  "score": "9/9",
+  "all_passed": true,
+  "results": [
+    {
+      "test": "1. Welcome back greeting",
+      "passed": true,
+      "steps": [
+        {
+          "input": "hi",
+          "before": "Raw invoice dump / hi again",
+          "after": "Welcome back \ud83d\ude0a Want your usual *Chicken Biryani* again?",
+          "signal": "want your usual",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "test": "2. Order status intent",
+      "passed": true,
+      "steps": [
+        {
+          "input": "tell me order status",
+          "before": "Added product / confused reply",
+          "after": "Order *BK55501* \u2014 \ud83c\udf73 *PREPARING*\nItems: 2x Chicken Biryani\nTotal: *\u20b9240.00*",
+          "signal": "bk55501",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "test": "3. YES+text = cart modify",
+      "passed": true,
+      "steps": [
+        {
+          "input": "yes add coke too",
+          "before": "Confirms order / ignores extra text",
+          "after": "\u2705 *1x Coke* added! Total: *\u20b950*\n\n\ud83d\udca1 Customers also love *Rose Milk* \u2014 want to add it?\n_(350ml can)_",
+          "signal": "coke",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "test": "4. Group combo = meals not drinks",
+      "passed": true,
+      "steps": [
+        {
+          "input": "5 people under 700",
+          "before": "5x Coke as combo",
+          "after": "For a budget of *\u20b9700*, here's what I'd suggest:\n\u2022 Veg Fried Rice \u2014 \u20b980\n\u2022 Chicken Biryani \u2014 \u20b9120\n\u2022 Mutton Biryani \u2014 \u20b9180\n\nTotal: *\u20b9700*\n\nShall I add these to your cart? _(yes / no)_",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "test": "5. Multi-item parser",
+      "passed": true,
+      "steps": [
+        {
+          "input": "hi",
+          "before": "",
+          "after": "Hi again! Good to see you again. What can I get for you?",
+          "signal": "",
+          "pass": true
+        },
+        {
+          "input": "2 fried rice, 1 coke, 1 rose milk",
+          "before": "Only first item added",
+          "after": "Added to cart:\n\u2705 2x Veg Fried Rice\n\u2705 1x Coke\n\u2705 1x Rose Milk\n\n*Cart total: \u20b9270*",
+          "signal": "added to cart",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "test": "6. 5-digit order number",
+      "passed": true,
+      "steps": [
+        {
+          "input": "yes",
+          "before": "No order number in reply",
+          "after": "\ud83c\udf89 Order *#50238* confirmed!\n\ud83c\udfea Pickup from store\nTotal: *\u20b9240*\n\nSee you soon!",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "test": "7. Clear cart flow",
+      "passed": true,
+      "steps": [
+        {
+          "input": "hi",
+          "before": "",
+          "after": "Hi again! Good to see you again. What can I get for you?",
+          "signal": "",
+          "pass": true
+        },
+        {
+          "input": "1 chicken biryani",
+          "before": "",
+          "after": "\u2705 *1x Chicken Biryani* added! Total: *\u20b9120*\n\n\ud83d\udca1 Customers also love *Coke* \u2014 want to add it?\n_(basmati rice, medium spicy, serves 1)_",
+          "signal": "",
+          "pass": true
+        },
+        {
+          "input": "clear cart",
+          "before": "No confirmation asked",
+          "after": "Are you sure you want to clear your cart? *(yes / no)*",
+          "signal": "sure",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "test": "8. Non-food redirect",
+      "passed": true,
+      "steps": [
+        {
+          "input": "I want to buy an iphone",
+          "before": "Logs as missing product / adds to cart",
+          "after": "We're a food store \ud83d\ude0a Want to see our menu?",
+          "signal": "food store",
+          "pass": true
+        }
+      ]
+    },
+    {
+      "test": "9. Product details in reply",
+      "passed": true,
+      "steps": [
+        {
+          "input": "how much is chicken biryani",
+          "before": "Plain price only",
+          "after": "*Chicken Biryani* is \u20b9120 \ud83d\ude0a\n_(basmati rice, medium spicy, serves 1)_\n\nWant to add it to your cart?",
+          "signal": "basmati",
+          "pass": true
+        }
+      ]
+    }
+  ]
+}

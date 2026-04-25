@@ -383,13 +383,14 @@ class OrderEngine:
     def _product_to_dict(p: models.InventoryItem) -> dict[str, Any]:
         stock = int(p.quantity) if p.quantity else 0
         return {
-            "id":                 p.id,
-            "name":               p.name,
-            "category":           p.category or "",
-            "price":              float(p.price),
-            "max_qty_per_order":  min(stock, 50) if stock > 0 else 50,
-            "stock":              stock,
-            "product_details":    p.product_details or "",
+            "id":                p.id,
+            "name":              p.name,
+            "category":          p.category or "",
+            "price":             float(p.price),
+            "max_qty_per_order": min(stock, 50) if stock > 0 else 50,
+            "stock":             stock,
+            "product_details":   p.product_details or "",
+            "details":           p.product_details or "",
         }
 
     @staticmethod

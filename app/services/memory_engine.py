@@ -60,6 +60,11 @@ class SessionMemory:
     # Abandoned-cart tracking
     abandoned_reminder_sent: bool = False
 
+    # Pending YES/NO action (for upsell confirm, unknown-product request, clear-cart confirm)
+    pending_action_type:  Optional[str] = None   # e.g. "log_missing_product"
+    pending_payload:      Optional[dict] = None  # arbitrary payload for the action
+    pending_created_at:   Optional[str] = None   # ISO timestamp
+
     # ── Serialisation ─────────────────────────────────────────────────────────
 
     def to_dict(self) -> dict[str, Any]:

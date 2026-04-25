@@ -1,15 +1,12 @@
+# -*- coding: utf-8 -*-
 """
-recommendation_engine.py — LEVIX Smart Recommendation Brain
-============================================================
-Purely deterministic — no AI API call needed.
-
-Provides:
-- Budget-optimised combos (knapsack-style greedy)
-- Group-meal bundles (person-count aware)
-- Preference filtering (veg, spice, category)
-- Upsell suggestions
-- Fast-mover & popularity picks
-- Out-of-stock replacement suggestions
+recommendation_engine.py — LEVIX Smart Recommendation Brain (v2)
+=================================================================
+Key fix: meal-first combo builder.
+- MEAL_CATEGORIES take priority over all others
+- Drinks/sides are ADDON-only, never primary combo items
+- Group meals: qty scales correctly per person count
+- product_details used for item descriptions
 """
 
 from __future__ import annotations
@@ -26,13 +23,55 @@ from .. import models
 logger = logging.getLogger("levix.recommendation")
 
 
+# ─── Meal category priority list ─────────────────────────────────────────────
+
+MEAL_CATEGORIES = [
+    "biryani", "fried rice", "meals", "meal", "rice",
+    "wings", "leg piece", "leg", "chicken", "mutton",
+    "curry", "parotta", "roti", "naan", "dosa", "idli",
+    "kebab", "tikka", "tandoori", "fry", "roast", "grilled",
+    "kothu", "parcel", "combo",
+]
+
+DRINK_CATEGORIES = [
+    "drink", "cool drink", "juice", "coke", "pepsi", "water",
+    "tea", "coffee", "chai", "milk", "lassi", "shake", "soda",
+    "rose milk", "badam milk", "faluda",
+]
+
+SIDE_CATEGORIES = [
+    "side", "starter", "snack", "raita", "pickle", "papad",
+    "dessert", "sweet", "ice cream", "halwa",
+]
+
+
+def _is_drink(item: dict) -> bool:
+    cat  = item.get("category", "").lower()
+    name = item.get("name", "").lower()
+    tags = item.get("tags", "").lower()
+    for d in DRINK_CATEGORIES:
+        if d in cat or d in name or d in tags:
+            return True
+    return False
+
+
+def _is_meal(item: dict) -> bool:
+    cat  = item.get("category", "").lower()
+    name = item.get("name", "").lower()
+    tags = item.get("tags", "").lower()
+    for m in MEAL_CATEGORIES:
+        if m in cat or m in name:
+            return True
+    return False
+
+
 # ─── Result type ──────────────────────────────────────────────────────────────
 
 @dataclass
 class RecommendationResult:
-    items: list[dict] = field(default_factory=list)    # product dicts
+    items: list[dict] = field(default_factory=list)
     total: float = 0.0
-    rationale: str = ""                                # human-readable explanation
+    rationale: str = ""
     is_empty: bool = True
 
     def __post_init__(self):
@@ -47,7 +86,21 @@ def _to_dict(p: models.InventoryItem) -> dict[str, Any]:
         "price":    float(p.price),
         "quantity": p.quantity,
         "tags":     (p.product_details or "").lower(),
+        "details":  p.product_details or "",
     }
+
+
+def _meal_score(item: dict) -> int:
+    """High = strong meal signal. Negative = drink/side."""
+    if _is_drink(item):
+        return -100   # drinks never lead a combo
+    cat  = item.get("category", "").lower()
+    name = item.get("name", "").lower()
+    score = 0
+    for i, keyword in enumerate(MEAL_CATEGORIES):
+        if keyword in cat or keyword in name:
+            score += (len(MEAL_CATEGORIES) - i) * 3   # higher weight for higher priority
+    return score
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -55,12 +108,8 @@ def _to_dict(p: models.InventoryItem) -> dict[str, Any]:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 class RecommendationEngine:
-    """
-    Pure-Python recommendation logic backed by the shop's inventory.
-    Never hallucinates — all items come from the DB.
-    """
 
-    # ── 1. Budget combo ───────────────────────────────────────────────────────
+    # ── 1. Budget combo (meal-first) ──────────────────────────────────────────
 
     @staticmethod
     def combo_under_budget(
@@ -74,15 +123,14 @@ class RecommendationEngine:
         category:  Optional[str] = None,
     ) -> RecommendationResult:
         """
-        Greedy combo builder: fills `budget` with the best-value in-stock
-        food items, prioritising meals and biryanis.
-
-        Scales quantities for `people` count.
+        Meal-first greedy combo:
+        1. Fill meals for `people` count (one portion each person for main item)
+        2. Only add drinks/sides if budget permits AND meals are already chosen
+        3. Never output 5x Coke as a dinner suggestion
         """
         if budget <= 0:
             return RecommendationResult(rationale="Budget must be positive")
 
-        # Fetch candidates: in-stock, affordable individually
         q = (
             db.query(models.InventoryItem)
             .filter(
@@ -103,23 +151,22 @@ class RecommendationEngine:
                 func.lower(models.InventoryItem.category).contains(category.lower())
             )
 
-        candidates = sorted(
-            [_to_dict(p) for p in q.all()],
-            key=lambda x: RecommendationEngine._meal_priority(x),
-            reverse=True,
-        )
+        all_items = [_to_dict(p) for p in q.all()]
 
-        if not candidates:
-            return RecommendationResult(rationale="No items found under budget")
+        # Separate meals from drinks/sides
+        meals  = sorted([i for i in all_items if not _is_drink(i)], key=_meal_score, reverse=True)
+        drinks = sorted([i for i in all_items if _is_drink(i)], key=lambda x: x["price"])
 
-        # Greedy fill: pick items that fit, prioritise high-priority meals
+        if not meals:
+            return RecommendationResult(rationale="No meal items found under budget")
+
         combo: list[dict] = []
-        remaining = budget
+        remaining = float(budget)
         seen_ids: set = set()
-
-        # One portion per person for the top item, then add variety
         portions = max(1, people)
-        for item in candidates:
+
+        # Phase 1: Fill meals
+        for item in meals:
             if item["id"] in seen_ids:
                 continue
             cost = item["price"] * portions
@@ -127,30 +174,36 @@ class RecommendationEngine:
                 combo.append({**item, "qty": portions})
                 remaining -= cost
                 seen_ids.add(item["id"])
-                portions = 1  # subsequent items are single serves
+                portions = 1  # subsequent items 1 serve only
             elif item["price"] <= remaining:
-                # At least 1 portion fits
                 combo.append({**item, "qty": 1})
                 remaining -= item["price"]
                 seen_ids.add(item["id"])
-
-            if remaining < min(c["price"] for c in candidates if c["id"] not in seen_ids or True) :
-                break  # nothing else fits
-            if len(combo) >= 5:
+            if len(combo) >= 3:
                 break
 
-        total = sum(i["price"] * i["qty"] for i in combo)
+        # Phase 2: Optional drinks only if budget remains
+        if remaining >= 30 and drinks:
+            for d in drinks:
+                if d["id"] in seen_ids:
+                    continue
+                if d["price"] <= remaining:
+                    combo.append({**d, "qty": 1})
+                    remaining -= d["price"]
+                    seen_ids.add(d["id"])
+                    break   # max 1 drink item in a food combo
 
+        if not combo:
+            return RecommendationResult(rationale="No items fit within budget")
+
+        total = round(sum(i["price"] * i["qty"] for i in combo), 2)
         rationale = (
-            f"Budget combo for {people} {'person' if people == 1 else 'people'} "
-            f"under ₹{budget:.0f}"
+            f"Meal combo for {people} {'person' if people == 1 else 'people'} "
+            f"under \u20b9{budget:.0f}"
         )
         if veg_only:
             rationale += " (veg)"
-        if spice:
-            rationale += f", {spice}"
-
-        return RecommendationResult(items=combo, total=round(total, 2), rationale=rationale)
+        return RecommendationResult(items=combo, total=total, rationale=rationale)
 
     # ── 2. Group meal ─────────────────────────────────────────────────────────
 
@@ -161,11 +214,7 @@ class RecommendationEngine:
         people:  int,
         budget:  Optional[float] = None,
     ) -> RecommendationResult:
-        """
-        Build a group meal: one main each, plus shared starters / drinks if
-        budget allows.
-        """
-        budget = budget or (people * 250)   # default ₹250/person heuristic
+        budget = budget or (people * 200)   # ₹200/person default
         return RecommendationEngine.combo_under_budget(
             db, shop_id, budget, people=people
         )
@@ -173,11 +222,7 @@ class RecommendationEngine:
     # ── 3. Veg-only combo ─────────────────────────────────────────────────────
 
     @staticmethod
-    def veg_combo(
-        db:     Session,
-        shop_id: int,
-        budget: float,
-    ) -> RecommendationResult:
+    def veg_combo(db: Session, shop_id: int, budget: float) -> RecommendationResult:
         return RecommendationEngine.combo_under_budget(
             db, shop_id, budget, veg_only=True
         )
@@ -185,14 +230,7 @@ class RecommendationEngine:
     # ── 4. Spicy picks ────────────────────────────────────────────────────────
 
     @staticmethod
-    def spicy_picks(
-        db:      Session,
-        shop_id: int,
-        limit:   int = 4,
-    ) -> RecommendationResult:
-        """
-        Return items tagged as spicy in product_details or category.
-        """
+    def spicy_picks(db: Session, shop_id: int, limit: int = 4) -> RecommendationResult:
         items = (
             db.query(models.InventoryItem)
             .filter(
@@ -209,49 +247,31 @@ class RecommendationEngine:
         )
         dicts = [_to_dict(p) for p in items]
         total = sum(d["price"] for d in dicts)
-        return RecommendationResult(
-            items=dicts, total=round(total, 2), rationale="Spicy picks from our menu"
-        )
+        return RecommendationResult(items=dicts, total=round(total, 2), rationale="Spicy picks")
 
-    # ── 5. Popular / fast-moving ──────────────────────────────────────────────
+    # ── 5. Popular items ──────────────────────────────────────────────────────
 
     @staticmethod
-    def popular_items(
-        db:      Session,
-        shop_id: int,
-        limit:   int = 4,
-    ) -> RecommendationResult:
-        """
-        Derive popularity from CustomerProfile favorite_products counts.
-        Falls back to inventory order if no order history exists.
-        """
-        # Aggregate from customer profiles
+    def popular_items(db: Session, shop_id: int, limit: int = 4) -> RecommendationResult:
         profiles = (
             db.query(models.CustomerProfile)
             .filter(models.CustomerProfile.shop_id == shop_id)
             .all()
         )
-
         popularity: dict[str, int] = {}
         for p in profiles:
-            favs = p.favorite_products or {}
-            for name, count in favs.items():
+            for name, count in (p.favorite_products or {}).items():
                 popularity[name] = popularity.get(name, 0) + count
 
         if not popularity:
-            # Fallback: top items by DB order
             items = (
                 db.query(models.InventoryItem)
-                .filter(
-                    models.InventoryItem.shop_id == shop_id,
-                    models.InventoryItem.quantity > 0,
-                )
-                .limit(limit)
-                .all()
+                .filter(models.InventoryItem.shop_id == shop_id, models.InventoryItem.quantity > 0)
+                .limit(limit).all()
             )
             dicts = [_to_dict(p) for p in items]
         else:
-            top_names = sorted(popularity, key=popularity.get, reverse=True)[:limit]  # type: ignore[arg-type]
+            top_names = sorted(popularity, key=popularity.get, reverse=True)[:limit]  # type: ignore
             dicts = []
             for name in top_names:
                 item = (
@@ -260,36 +280,28 @@ class RecommendationEngine:
                         models.InventoryItem.shop_id == shop_id,
                         func.lower(models.InventoryItem.name) == name.lower(),
                         models.InventoryItem.quantity > 0,
-                    )
-                    .first()
+                    ).first()
                 )
                 if item:
                     dicts.append(_to_dict(item))
 
         total = sum(d["price"] for d in dicts)
-        return RecommendationResult(
-            items=dicts, total=round(total, 2), rationale="Popular items from our menu"
-        )
+        return RecommendationResult(items=dicts, total=round(total, 2), rationale="Popular items")
 
     # ── 6. Upsell suggestion ──────────────────────────────────────────────────
 
     @staticmethod
     def upsell_for(
-        db:         Session,
-        shop_id:    int,
-        cart:       list[dict],
+        db: Session,
+        shop_id: int,
+        cart: list[dict],
         budget_left: float = 500,
     ) -> Optional[dict]:
-        """
-        Return ONE upsell item that complements the cart but is not already in it.
-        Prioritises drinks / desserts / sides that are cheap enough.
-        """
+        """Return ONE drink/side upsell not already in cart."""
         cart_ids = {i.get("product_id") for i in cart}
         cart_names_lower = {i.get("name", "").lower() for i in cart}
 
-        # Prefer drinks or sides
-        upsell_categories = ["drink", "dessert", "side", "cool drink", "juice", "chai", "tea"]
-        for cat in upsell_categories:
+        for cat in DRINK_CATEGORIES + ["dessert", "side", "starter"]:
             item = (
                 db.query(models.InventoryItem)
                 .filter(
@@ -298,39 +310,21 @@ class RecommendationEngine:
                     models.InventoryItem.price <= budget_left,
                     func.lower(models.InventoryItem.category).contains(cat),
                     ~models.InventoryItem.id.in_(cart_ids),
-                )
-                .first()
+                ).first()
             )
             if item and item.name.lower() not in cart_names_lower:
                 return _to_dict(item)
+        return None
 
-        # Generic fallback: any affordable item not in cart
-        item = (
-            db.query(models.InventoryItem)
-            .filter(
-                models.InventoryItem.shop_id == shop_id,
-                models.InventoryItem.quantity > 0,
-                models.InventoryItem.price <= budget_left,
-                ~models.InventoryItem.id.in_(cart_ids),
-            )
-            .first()
-        )
-        return _to_dict(item) if item else None
-
-    # ── 7. Out-of-stock replacement ───────────────────────────────────────────
+    # ── 7. OOS replacement ────────────────────────────────────────────────────
 
     @staticmethod
     def replacement_for(
-        db:       Session,
-        shop_id:  int,
+        db: Session,
+        shop_id: int,
         item_name: str,
         category: Optional[str] = None,
     ) -> Optional[dict]:
-        """
-        Find a suitable in-stock replacement for an OOS item.
-        Searches same category first, then falls back to price tier.
-        """
-        # Try same category
         if category:
             item = (
                 db.query(models.InventoryItem)
@@ -339,15 +333,12 @@ class RecommendationEngine:
                     models.InventoryItem.quantity > 0,
                     func.lower(models.InventoryItem.category).contains(category.lower()),
                     func.lower(models.InventoryItem.name) != item_name.lower(),
-                )
-                .first()
+                ).first()
             )
             if item:
                 return _to_dict(item)
 
-        # Keyword match in name
-        keywords = item_name.lower().split()
-        for kw in keywords:
+        for kw in item_name.lower().split():
             if len(kw) < 3:
                 continue
             item = (
@@ -357,46 +348,25 @@ class RecommendationEngine:
                     models.InventoryItem.quantity > 0,
                     func.lower(models.InventoryItem.name).contains(kw),
                     func.lower(models.InventoryItem.name) != item_name.lower(),
-                )
-                .first()
+                ).first()
             )
             if item:
                 return _to_dict(item)
-
         return None
 
-    # ── 8. Menu listing (for view_menu intent) ────────────────────────────────
+    # ── 8. Menu listing ───────────────────────────────────────────────────────
 
     @staticmethod
     def menu_items(
-        db:       Session,
-        shop_id:  int,
+        db: Session,
+        shop_id: int,
         category: Optional[str] = None,
-        limit:    int = 8,
+        limit: int = 8,
     ) -> list[dict]:
-        """Return in-stock menu items, optionally filtered by category."""
         q = db.query(models.InventoryItem).filter(
             models.InventoryItem.shop_id == shop_id,
             models.InventoryItem.quantity > 0,
         )
         if category:
-            q = q.filter(
-                func.lower(models.InventoryItem.category).contains(category.lower())
-            )
+            q = q.filter(func.lower(models.InventoryItem.category).contains(category.lower()))
         return [_to_dict(p) for p in q.limit(limit).all()]
-
-    # ── Internal helpers ──────────────────────────────────────────────────────
-
-    @staticmethod
-    def _meal_priority(item: dict) -> int:
-        """Score that pushes meals to the front of combo picks."""
-        cat = item.get("category", "").lower()
-        name = item.get("name", "").lower()
-        score = 0
-        for keyword in ["biryani", "rice", "curry", "meal", "parotta", "naan", "roti"]:
-            if keyword in cat or keyword in name:
-                score += 2
-        for keyword in ["chicken", "mutton", "paneer", "veg", "egg"]:
-            if keyword in name:
-                score += 1
-        return score
