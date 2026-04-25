@@ -77,28 +77,27 @@ def generate_reply(item, state: str, product_name: Optional[str] = None) -> str:
     """
     product_name_to_use = product_name if product_name else item.name
     
-    reply = "LEVIX ⚡\n\n"
-    
     price_val = ""
     if item.price is not None:
         price_val = int(item.price) if item.price % 1 == 0 else item.price
-    price_str = f"💰 Price: ₹{price_val}" if price_val != "" else ""
     
     if state == "available":
-        reply += f"{product_name_to_use} is available ✅\n"
-        if price_str:
-            reply += f"{price_str}\n"
-        reply += "\nAnything else you need?"
+        res = f"Yes, we have {product_name_to_use}! "
+        if price_val:
+            res += f"It is ₹{price_val}. "
+        res += "Do you want to order?"
+        return res
     elif state == "low_stock":
-        reply += f"{product_name_to_use} is available ⚠️\nOnly a few left\n"
-        if price_str:
-            reply += f"{price_str}\n"
-        reply += "\nAnything else you need?"
+        res = f"Only few left for {product_name_to_use}. "
+        if price_val:
+            res += f"It is ₹{price_val}. "
+        res += "Do you want it before it finishes?"
+        return res
     elif state == "out_of_stock":
-        reply += f"{product_name_to_use} is currently out of stock ❌\nWe can notify you when it's back"
+        return f"Sorry, {product_name_to_use} is out of stock now. I will message you when it is back!"
     elif state == "coming_soon":
-        reply += f"{product_name_to_use} will be available soon ⏳\nStay tuned"
+        return f"{product_name_to_use} is coming soon! I will tell you."
     elif state == "owner_check":
-        reply += f"{product_name_to_use} requires confirmation from store 🧑‍💼\nChecking with owner, please wait...\n\nWe’ll update you shortly"
+        return f"Checking with the shop owner for {product_name_to_use}. Please wait 1 minute."
         
-    return reply
+    return f"Yes, {product_name_to_use} is available. Do you want anything else?"

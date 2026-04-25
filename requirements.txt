@@ -12,3 +12,7 @@ python-multipart
 pydantic[email]
 pydantic-settings
 google-generativeai
+google-genai
+jinja2
+pandas
+openpyxl

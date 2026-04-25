@@ -1,0 +1,150 @@
+[
+  {
+    "scenario": "S1: Multi-line and Alias",
+    "steps": [
+      {
+        "message": "Add 2 coca cola\\nno ice",
+        "replies": [
+          "\u2705 Added *2x Coke* to your cart! (\u20b950.0 each)\nCart total: *\u20b9100.0*\n\nAnything else?"
+        ],
+        "state": {
+          "cart": [
+            {
+              "product_id": 83,
+              "name": "Coke",
+              "unit_price": 50.0,
+              "quantity": 2,
+              "spice_level": null,
+              "special_note": null
+            }
+          ]
+        }
+      },
+      {
+        "message": "what's in cart",
+        "replies": [
+          "Your cart:\\n\u2022 2x Coke\\nTotal: *\u20b9100.0*"
+        ],
+        "state": {
+          "cart": [
+            {
+              "product_id": 83,
+              "name": "Coke",
+              "unit_price": 50.0,
+              "quantity": 2,
+              "spice_level": null,
+              "special_note": null
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "scenario": "S2: Confirmation Guard",
+    "steps": [
+      {
+        "message": "add 2 chicken biryani",
+        "replies": [
+          "\u2705 Added *2x Chicken Biryani* to your cart! (\u20b9200.0 each)\nCart total: *\u20b9400.0*\n\nAnything else?"
+        ],
+        "state": {
+          "cart": [
+            {
+              "product_id": 82,
+              "name": "Chicken Biryani",
+              "unit_price": 200.0,
+              "quantity": 2,
+              "spice_level": null,
+              "special_note": null
+            }
+          ]
+        }
+      },
+      {
+        "message": "pickup",
+        "replies": [
+          "Great, you'll pick it up! \ud83c\udfea\nHere's your order:\n\u2022 2x Chicken Biryani\n\nTotal: *\u20b9400.0*\n\nShall I confirm this order? _(yes / no)_"
+        ],
+        "state": {
+          "cart": [
+            {
+              "product_id": 82,
+              "name": "Chicken Biryani",
+              "unit_price": 200.0,
+              "quantity": 2,
+              "spice_level": null,
+              "special_note": null
+            }
+          ],
+          "delivery_mode": "pickup"
+        }
+      },
+      {
+        "message": "change",
+        "replies": [
+          "Sure, what would you like to change?"
+        ],
+        "state": {
+          "cart": [
+            {
+              "product_id": 82,
+              "name": "Chicken Biryani",
+              "unit_price": 200.0,
+              "quantity": 2,
+              "spice_level": null,
+              "special_note": null
+            }
+          ],
+          "delivery_mode": "pickup"
+        }
+      }
+    ]
+  },
+  {
+    "scenario": "S3: Combo Priority",
+    "steps": [
+      {
+        "message": "Need dinner for 5 under 700",
+        "replies": [
+          "I've built a combo for you: Chicken Biryani! Added to cart.\nCart total: *\u20b9200.0*\n\nShall I confirm this? _(yes / no)_"
+        ],
+        "state": {
+          "cart": [
+            {
+              "product_id": 82,
+              "name": "Chicken Biryani",
+              "unit_price": 200.0,
+              "quantity": 1,
+              "spice_level": null,
+              "special_note": null
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "scenario": "S4: Multi-line modifiers",
+    "steps": [
+      {
+        "message": "Add biryani\\nless spicy\\nno onion\\nextra gravy",
+        "replies": [
+          "Got it! Added note to Chicken Biryani: extra gravy \ud83c\udf36\ufe0f"
+        ],
+        "state": {
+          "cart": [
+            {
+              "product_id": 82,
+              "name": "Chicken Biryani",
+              "unit_price": 200.0,
+              "quantity": 1,
+              "spice_level": "extra gravy",
+              "special_note": null
+            }
+          ]
+        }
+      }
+    ]
+  }
+]

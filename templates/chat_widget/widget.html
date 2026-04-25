@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LEVIX AI Assistant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --primary: #6C63FF;
+    --primary-dark: #5A52D5;
+    --surface: #ffffff;
+    --surface2: #f6f6fc;
+    --text: #1a1a2e;
+    --text-muted: #6b7280;
+    --border: #e5e7eb;
+    --bubble-out: #6C63FF;
+    --bubble-in: #f0f0f8;
+    --radius: 18px;
+    --shadow: 0 8px 32px rgba(108,99,255,0.18);
+  }
+
+  body { font-family: 'Inter', sans-serif; background: transparent; }
+
+  /* ── LAUNCHER BUTTON ────────────────────────────────── */
+  #levix-launcher {
+    position: fixed; bottom: 24px; right: 24px;
+    width: 60px; height: 60px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), #a78bfa);
+    border: none; cursor: pointer;
+    box-shadow: var(--shadow);
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s;
+    z-index: 9998;
+  }
+  #levix-launcher:hover { transform: scale(1.12); box-shadow: 0 12px 40px rgba(108,99,255,0.32); }
+  #levix-launcher svg { width: 28px; height: 28px; fill: #fff; }
+  #levix-launcher .badge {
+    position: absolute; top: -2px; right: -2px;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: #ef4444; color: #fff;
+    font-size: 10px; font-weight: 700;
+    display: none; align-items: center; justify-content: center;
+    border: 2px solid #fff;
+  }
+  #levix-launcher.has-unread .badge { display: flex; }
+
+  /* ── CHAT PANEL ─────────────────────────────────────── */
+  #levix-panel {
+    position: fixed; bottom: 96px; right: 24px;
+    width: 380px; max-width: calc(100vw - 32px);
+    height: 580px; max-height: calc(100vh - 120px);
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    transform: scale(0.85) translateY(20px);
+    opacity: 0; pointer-events: none;
+    transition: transform 0.28s cubic-bezier(.34,1.56,.64,1), opacity 0.22s ease;
+    z-index: 9999;
+  }
+  #levix-panel.open {
+    transform: scale(1) translateY(0);
+    opacity: 1; pointer-events: all;
+  }
+
+  /* ── HEADER ─────────────────────────────────────────── */
+  .lx-header {
+    background: linear-gradient(135deg, var(--primary) 0%, #a78bfa 100%);
+    padding: 16px 20px;
+    display: flex; align-items: center; gap: 12px;
+    flex-shrink: 0;
+  }
+  .lx-avatar {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+  }
+  .lx-header-info { flex: 1; }
+  .lx-header-name { color: #fff; font-weight: 700; font-size: 15px; line-height: 1.2; }
+  .lx-header-status { color: rgba(255,255,255,0.8); font-size: 12px; display: flex; align-items: center; gap: 5px; margin-top: 2px; }
+  .lx-status-dot { width: 7px; height: 7px; border-radius: 50%; background: #4ade80; }
+  .lx-close-btn {
+    background: rgba(255,255,255,0.18); border: none; cursor: pointer;
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 18px; transition: background 0.18s;
+  }
+  .lx-close-btn:hover { background: rgba(255,255,255,0.3); }
+
+  /* ── MESSAGES AREA ──────────────────────────────────── */
+  .lx-messages {
+    flex: 1; overflow-y: auto; padding: 16px;
+    display: flex; flex-direction: column; gap: 10px;
+    scroll-behavior: smooth;
+  }
+  .lx-messages::-webkit-scrollbar { width: 4px; }
+  .lx-messages::-webkit-scrollbar-track { background: transparent; }
+  .lx-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .lx-msg { display: flex; align-items: flex-end; gap: 8px; max-width: 88%; }
+  .lx-msg.out { align-self: flex-end; flex-direction: row-reverse; }
+  .lx-msg.in  { align-self: flex-start; }
+
+  .lx-msg-avatar {
+    width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--primary), #a78bfa);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; color: #fff; font-weight: 600;
+  }
+
+  .lx-bubble {
+    padding: 10px 14px; border-radius: 16px;
+    font-size: 14px; line-height: 1.5; max-width: 100%;
+    word-break: break-word;
+  }
+  .lx-msg.out .lx-bubble {
+    background: var(--bubble-out);
+    color: #fff; border-bottom-right-radius: 4px;
+  }
+  .lx-msg.in .lx-bubble {
+    background: var(--bubble-in);
+    color: var(--text); border-bottom-left-radius: 4px;
+  }
+  .lx-time { font-size: 10px; color: var(--text-muted); margin-top: 4px; text-align: right; }
+  .lx-msg.in .lx-time { text-align: left; }
+
+  /* ── TYPING INDICATOR ──────────────────────────────── */
+  .lx-typing { display: flex; align-items: center; gap: 5px; padding: 8px 14px; }
+  .lx-typing span {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--primary);
+    animation: lx-bounce 1.2s infinite ease-in-out;
+  }
+  .lx-typing span:nth-child(2) { animation-delay: 0.2s; }
+  .lx-typing span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes lx-bounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-6px); opacity: 1; }
+  }
+  .lx-typing-wrap { align-self: flex-start; display: none; }
+  .lx-typing-wrap.show { display: flex; }
+  .lx-typing-wrap .lx-bubble { background: var(--bubble-in); padding: 10px 14px; }
+
+  /* ── QUICK REPLIES ──────────────────────────────────── */
+  .lx-quick-replies {
+    display: flex; gap: 8px; padding: 0 16px 10px;
+    flex-wrap: wrap; flex-shrink: 0;
+  }
+  .lx-qr-btn {
+    background: var(--surface2); border: 1.5px solid var(--primary);
+    color: var(--primary); border-radius: 20px;
+    padding: 6px 14px; font-size: 12.5px; font-weight: 500;
+    cursor: pointer; transition: all 0.18s; font-family: inherit;
+  }
+  .lx-qr-btn:hover { background: var(--primary); color: #fff; }
+
+  /* ── INPUT AREA ─────────────────────────────────────── */
+  .lx-input-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 16px; border-top: 1px solid var(--border);
+    background: var(--surface); flex-shrink: 0;
+  }
+  .lx-input {
+    flex: 1; border: 1.5px solid var(--border); border-radius: 24px;
+    padding: 10px 16px; font-size: 14px; font-family: inherit;
+    color: var(--text); background: var(--surface2);
+    outline: none; resize: none; max-height: 100px;
+    transition: border-color 0.18s;
+    line-height: 1.4;
+  }
+  .lx-input:focus { border-color: var(--primary); background: #fff; }
+  .lx-input::placeholder { color: var(--text-muted); }
+  .lx-send-btn {
+    width: 42px; height: 42px; border-radius: 50%; border: none;
+    background: linear-gradient(135deg, var(--primary), #a78bfa);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: transform 0.18s, box-shadow 0.18s;
+    box-shadow: 0 4px 12px rgba(108,99,255,0.3);
+  }
+  .lx-send-btn:hover { transform: scale(1.08); box-shadow: 0 6px 16px rgba(108,99,255,0.4); }
+  .lx-send-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .lx-send-btn svg { width: 18px; height: 18px; fill: #fff; }
+
+  /* ── POWERED BY ─────────────────────────────────────── */
+  .lx-footer {
+    text-align: center; padding: 6px; font-size: 10.5px;
+    color: var(--text-muted); border-top: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .lx-footer a { color: var(--primary); text-decoration: none; font-weight: 600; }
+
+  /* ── WELCOME SCREEN ─────────────────────────────────── */
+  .lx-welcome {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 28px 20px; text-align: center; gap: 10px;
+  }
+  .lx-welcome-emoji { font-size: 44px; }
+  .lx-welcome h3 { font-size: 17px; color: var(--text); font-weight: 700; }
+  .lx-welcome p { font-size: 13.5px; color: var(--text-muted); line-height: 1.5; }
+  .lx-welcome-start {
+    background: linear-gradient(135deg, var(--primary), #a78bfa);
+    color: #fff; border: none; border-radius: 24px;
+    padding: 11px 28px; font-size: 14px; font-weight: 600;
+    cursor: pointer; margin-top: 8px; transition: opacity 0.18s;
+    font-family: inherit;
+  }
+  .lx-welcome-start:hover { opacity: 0.9; }
+
+  @media (max-width: 420px) {
+    #levix-panel { width: calc(100vw - 16px); right: 8px; bottom: 80px; border-radius: 20px; }
+    #levix-launcher { right: 16px; bottom: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Launcher Fab -->
+<button id="levix-launcher" aria-label="Open LEVIX Chat">
+  <span class="badge" id="lx-badge">1</span>
+  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
+  </svg>
+</button>
+
+<!-- Chat Panel -->
+<div id="levix-panel" role="dialog" aria-label="LEVIX AI Assistant">
+  <!-- Header -->
+  <div class="lx-header">
+    <div class="lx-avatar">🤖</div>
+    <div class="lx-header-info">
+      <div class="lx-header-name">LEVIX Assistant</div>
+      <div class="lx-header-status">
+        <span class="lx-status-dot"></span> Online · Replies instantly
+      </div>
+    </div>
+    <button class="lx-close-btn" id="lx-close" aria-label="Close chat">✕</button>
+  </div>
+
+  <!-- Messages -->
+  <div class="lx-messages" id="lx-messages">
+    <!-- Welcome -->
+    <div class="lx-welcome" id="lx-welcome">
+      <span class="lx-welcome-emoji">👋</span>
+      <h3>Hi! How can we help?</h3>
+      <p>Ask us about products, prices, or place an order. We'll guide you step by step.</p>
+      <button class="lx-welcome-start" id="lx-start-btn">Start Chat</button>
+    </div>
+    <!-- Typing bubble (hidden by default) -->
+    <div class="lx-msg in lx-typing-wrap" id="lx-typing">
+      <div class="lx-msg-avatar">AI</div>
+      <div class="lx-bubble">
+        <div class="lx-typing">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Replies -->
+  <div class="lx-quick-replies" id="lx-quick-replies"></div>
+
+  <!-- Input -->
+  <div class="lx-input-row">
+    <textarea
+      id="lx-input"
+      class="lx-input"
+      placeholder="Type a message…"
+      rows="1"
+      aria-label="Chat message"
+    ></textarea>
+    <button class="lx-send-btn" id="lx-send" aria-label="Send message" disabled>
+      <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
+  </div>
+
+  <div class="lx-footer">Powered by <a href="#" target="_blank">LEVIX AI</a></div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ── CONFIG ───────────────────────────────────────────────────────────────
+  const SHOP_ID   = window.LEVIX_SHOP_ID   || 1;
+  const API_BASE  = window.LEVIX_API_BASE  || '';
+  const BOT_NAME  = window.LEVIX_BOT_NAME  || 'LEVIX';
+  const QUICK_REPLIES_INITIAL = ['See products', 'Place an order', 'Check price', 'Track order'];
+
+  // ── STATE ────────────────────────────────────────────────────────────────
+  let sessionId   = localStorage.getItem('lx_session_' + SHOP_ID) || null;
+  let isOpen      = false;
+  let chatStarted = false;
+  let sending     = false;
+
+  // ── ELEMENTS ─────────────────────────────────────────────────────────────
+  const $launcher = document.getElementById('levix-launcher');
+  const $panel    = document.getElementById('levix-panel');
+  const $messages = document.getElementById('lx-messages');
+  const $input    = document.getElementById('lx-input');
+  const $send     = document.getElementById('lx-send');
+  const $typing   = document.getElementById('lx-typing');
+  const $welcome  = document.getElementById('lx-welcome');
+  const $qr       = document.getElementById('lx-quick-replies');
+  const $close    = document.getElementById('lx-close');
+  const $start    = document.getElementById('lx-start-btn');
+  const $badge    = document.getElementById('lx-badge');
+
+  // ── HELPERS ──────────────────────────────────────────────────────────────
+  function now() {
+    const d = new Date();
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function genSessionId() {
+    return 'lx-' + Math.random().toString(36).substr(2, 9) + '-' + Date.now();
+  }
+
+  function scrollBottom() {
+    requestAnimationFrame(() => { $messages.scrollTop = $messages.scrollHeight; });
+  }
+
+  function setTyping(show) {
+    $typing.classList.toggle('show', show);
+    if (show) scrollBottom();
+  }
+
+  function setSending(state) {
+    sending = state;
+    $send.disabled = state || $input.value.trim() === '';
+    $input.disabled = state;
+  }
+
+  // ── RENDER BUBBLE ────────────────────────────────────────────────────────
+  function addMessage(role, text) {
+    const isOut = role === 'user';
+    const wrap  = document.createElement('div');
+    wrap.className = `lx-msg ${isOut ? 'out' : 'in'}`;
+
+    let inner = '';
+    if (!isOut) {
+      inner += `<div class="lx-msg-avatar">AI</div>`;
+    }
+    inner += `
+      <div>
+        <div class="lx-bubble">${text.replace(/\n/g, '<br>')}</div>
+        <div class="lx-time">${now()}</div>
+      </div>
+    `;
+    wrap.innerHTML = inner;
+
+    // Insert before typing indicator
+    $messages.insertBefore(wrap, $typing);
+    scrollBottom();
+  }
+
+  // ── QUICK REPLIES ────────────────────────────────────────────────────────
+  function setQuickReplies(items) {
+    $qr.innerHTML = '';
+    if (!items || items.length === 0) return;
+    items.forEach(text => {
+      const btn = document.createElement('button');
+      btn.className = 'lx-qr-btn';
+      btn.textContent = text;
+      btn.onclick = () => { $input.value = text; sendMessage(); };
+      $qr.appendChild(btn);
+    });
+  }
+
+  function clearQuickReplies() { $qr.innerHTML = ''; }
+
+  // ── SEND MESSAGE ─────────────────────────────────────────────────────────
+  async function sendMessage() {
+    const text = $input.value.trim();
+    if (!text || sending) return;
+
+    // Hide welcome + quick replies on first real send
+    if ($welcome && $welcome.parentNode) $welcome.remove();
+    clearQuickReplies();
+
+    $input.value = '';
+    $input.style.height = 'auto';
+    $send.disabled = true;
+
+    addMessage('user', text);
+    setSending(true);
+    setTyping(true);
+
+    try {
+      const response = await fetch(`${API_BASE}/ai/chat/public?shop_id=${SHOP_ID}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: text,
+          session_id: sessionId,
+          source: 'widget',
+        }),
+      });
+
+      const data = await response.json();
+
+      setTyping(false);
+
+      if (data.session_id) {
+        sessionId = data.session_id;
+        localStorage.setItem('lx_session_' + SHOP_ID, sessionId);
+      }
+
+      if (data.reply) {
+        addMessage('bot', data.reply);
+      }
+
+      // Suggest next action as quick reply
+      if (data.next_question && data.next_question !== data.reply) {
+        // Already embedded in reply — skip
+      }
+
+      // If lead created, show confirmation chip
+      if (data.lead_created) {
+        const chip = document.createElement('div');
+        chip.style.cssText = 'text-align:center;margin:4px 0;';
+        chip.innerHTML = `<span style="background:#ecfdf5;color:#059669;border-radius:12px;padding:4px 12px;font-size:11.5px;font-weight:600;">✅ Request received — owner notified</span>`;
+        $messages.insertBefore(chip, $typing);
+      }
+
+    } catch (err) {
+      setTyping(false);
+      addMessage('bot', "Sorry, something went wrong. Please try again in a moment.");
+      console.error('[LEVIX]', err);
+    } finally {
+      setSending(false);
+    }
+  }
+
+  // ── INPUT AUTO-RESIZE ────────────────────────────────────────────────────
+  $input.addEventListener('input', () => {
+    $input.style.height = 'auto';
+    $input.style.height = Math.min($input.scrollHeight, 100) + 'px';
+    $send.disabled = $input.value.trim() === '' || sending;
+  });
+
+  $input.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  });
+
+  $send.addEventListener('click', sendMessage);
+
+  // ── OPEN / CLOSE ─────────────────────────────────────────────────────────
+  function openPanel() {
+    isOpen = true;
+    $panel.classList.add('open');
+    $launcher.classList.remove('has-unread');
+    setTimeout(() => $input.focus(), 300);
+
+    if (!chatStarted) {
+      setQuickReplies(QUICK_REPLIES_INITIAL);
+    }
+  }
+
+  function closePanel() {
+    isOpen = false;
+    $panel.classList.remove('open');
+  }
+
+  $launcher.addEventListener('click', () => isOpen ? closePanel() : openPanel());
+  $close.addEventListener('click', closePanel);
+  $start.addEventListener('click', () => {
+    if ($welcome) $welcome.remove();
+    chatStarted = true;
+    clearQuickReplies();
+    // Send greeting
+    $input.value = 'Hi';
+    sendMessage();
+  });
+
+  // ── PANEL CLICK OUTSIDE ──────────────────────────────────────────────────
+  document.addEventListener('click', e => {
+    if (isOpen && !$panel.contains(e.target) && !$launcher.contains(e.target)) {
+      closePanel();
+    }
+  });
+
+  // ── INITIAL UNREAD BADGE (tease after 3s) ───────────────────────────────
+  if (!sessionId) {
+    setTimeout(() => {
+      $launcher.classList.add('has-unread');
+    }, 3000);
+  }
+
+})();
+</script>
+</body>
+</html>

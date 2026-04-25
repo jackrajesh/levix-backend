@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>AI Leads Inbox — LEVIX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f0f1a;--surface:#1a1a2e;--surface2:#222240;--surface3:#2a2a4a;
+  --primary:#6C63FF;--primary-light:#a78bfa;--accent:#4ade80;
+  --danger:#f87171;--warn:#fbbf24;--info:#60a5fa;
+  --text:#e8e8f8;--text-muted:#9999bb;--border:#2e2e50;
+  --radius:14px;--shadow:0 8px 32px rgba(0,0,0,0.4);
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+a{color:var(--primary);text-decoration:none}
+
+/* ── LAYOUT ── */
+.inbox-wrap{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:260px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+
+/* ── SIDEBAR ── */
+.sidebar-logo{padding:24px 20px 16px;border-bottom:1px solid var(--border)}
+.sidebar-logo h2{font-size:20px;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--primary-light));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sidebar-logo span{font-size:11px;color:var(--text-muted)}
+.sidebar-nav{padding:16px 12px;flex:1}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;font-size:14px;font-weight:500;cursor:pointer;color:var(--text-muted);transition:all 0.18s;margin-bottom:4px}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{background:linear-gradient(135deg,rgba(108,99,255,0.2),rgba(167,139,250,0.1));color:var(--primary);border:1px solid rgba(108,99,255,0.3)}
+.nav-icon{width:18px;height:18px;opacity:0.8}
+.nav-badge{margin-left:auto;background:var(--primary);color:#fff;border-radius:10px;font-size:10px;font-weight:700;padding:2px 7px}
+
+/* ── TOPBAR ── */
+.topbar{display:flex;align-items:center;gap:12px;padding:18px 24px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0}
+.topbar h1{font-size:20px;font-weight:700;flex:1}
+.filter-group{display:flex;gap:8px}
+.filter-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text-muted);border-radius:20px;padding:6px 14px;font-size:12.5px;font-weight:500;cursor:pointer;transition:all 0.18s;font-family:inherit}
+.filter-btn:hover,.filter-btn.active{background:var(--primary);border-color:var(--primary);color:#fff}
+.refresh-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text-muted);border-radius:10px;padding:8px 14px;font-size:13px;cursor:pointer;transition:all 0.18s;font-family:inherit;display:flex;align-items:center;gap:6px}
+.refresh-btn:hover{border-color:var(--primary);color:var(--primary)}
+
+/* ── ANALYTICS BAR ── */
+.analytics-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;padding:16px 24px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
+.stat-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;text-align:center}
+.stat-num{font-size:24px;font-weight:800;color:var(--primary);line-height:1}
+.stat-label{font-size:11px;color:var(--text-muted);margin-top:4px}
+.stat-card.green .stat-num{color:var(--accent)}
+.stat-card.warn .stat-num{color:var(--warn)}
+
+/* ── LEADS LIST ── */
+.leads-area{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:12px}
+.leads-area::-webkit-scrollbar{width:4px}
+.leads-area::-webkit-scrollbar-track{background:transparent}
+.leads-area::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+/* ── LEAD CARD ── */
+.lead-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden}
+.lead-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--primary)}
+.lead-card.status-accepted::before{background:var(--accent)}
+.lead-card.status-rejected::before{background:var(--danger)}
+.lead-card.status-info_requested::before{background:var(--warn)}
+.lead-card:hover{border-color:rgba(108,99,255,0.4);transform:translateY(-1px);box-shadow:var(--shadow)}
+
+.lead-top{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px}
+.lead-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-light));display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;flex-shrink:0}
+.lead-info{flex:1}
+.lead-name{font-size:15px;font-weight:600;color:var(--text);line-height:1.2}
+.lead-phone{font-size:12px;color:var(--text-muted);margin-top:2px}
+.lead-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-intent{background:rgba(108,99,255,0.15);color:var(--primary-light)}
+.badge-status-new{background:rgba(96,165,250,0.15);color:var(--info)}
+.badge-status-accepted{background:rgba(74,222,128,0.15);color:var(--accent)}
+.badge-status-rejected{background:rgba(248,113,113,0.15);color:var(--danger)}
+.badge-status-info_requested{background:rgba(251,191,36,0.15);color:var(--warn)}
+.badge-confidence{background:rgba(0,0,0,0.3);color:var(--text-muted);border:1px solid var(--border)}
+
+/* ── CONFIDENCE BAR ── */
+.conf-bar-wrap{display:flex;align-items:center;gap:8px;margin-top:8px}
+.conf-bar-track{flex:1;height:4px;background:var(--surface3);border-radius:4px;overflow:hidden}
+.conf-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--primary),var(--primary-light));transition:width 0.4s ease}
+.conf-pct{font-size:11px;color:var(--text-muted);width:32px;text-align:right}
+
+/* ── SUMMARY ── */
+.lead-summary{font-size:13px;color:var(--text-muted);line-height:1.5;margin:8px 0;padding:10px 12px;background:var(--surface2);border-radius:8px;border-left:2px solid var(--border)}
+
+/* ── FIELDS CHIPS ── */
+.lead-fields{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.field-chip{background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:3px 10px;font-size:11.5px;color:var(--text-muted)}
+.field-chip span{color:var(--text);font-weight:500}
+
+/* ── ACTION BUTTONS ── */
+.lead-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.action-btn{border:none;border-radius:10px;padding:8px 16px;font-size:12.5px;font-weight:600;cursor:pointer;transition:all 0.18s;font-family:inherit;display:flex;align-items:center;gap:5px}
+.btn-accept{background:rgba(74,222,128,0.15);color:var(--accent);border:1px solid rgba(74,222,128,0.3)}
+.btn-accept:hover{background:var(--accent);color:#000}
+.btn-reject{background:rgba(248,113,113,0.15);color:var(--danger);border:1px solid rgba(248,113,113,0.3)}
+.btn-reject:hover{background:var(--danger);color:#fff}
+.btn-info{background:rgba(251,191,36,0.15);color:var(--warn);border:1px solid rgba(251,191,36,0.3)}
+.btn-info:hover{background:var(--warn);color:#000}
+.btn-transcript{background:rgba(108,99,255,0.15);color:var(--primary-light);border:1px solid rgba(108,99,255,0.3)}
+.btn-transcript:hover{background:var(--primary);color:#fff}
+.action-btn:disabled{opacity:0.4;cursor:not-allowed}
+
+/* ── EMPTY STATE ── */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:60px;text-align:center;flex:1;color:var(--text-muted)}
+.empty-state .emoji{font-size:56px}
+.empty-state h3{font-size:18px;font-weight:600;color:var(--text)}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:none;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.show{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);width:100%;max-width:540px;max-height:80vh;overflow-y:auto;box-shadow:var(--shadow)}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border)}
+.modal-header h3{font-size:17px;font-weight:700}
+.modal-close{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:20px;line-height:1}
+.modal-body{padding:20px 24px}
+.transcript-turn{margin-bottom:12px}
+.transcript-turn .role{font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+.transcript-turn .content{background:var(--surface2);border-radius:10px;padding:10px 14px;font-size:13.5px;line-height:1.5;color:var(--text)}
+.transcript-turn.user .content{background:rgba(108,99,255,0.12);border:1px solid rgba(108,99,255,0.2)}
+
+/* ── TOAST ── */
+.toast-wrap{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:2000;pointer-events:none}
+.toast{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:12px 20px;font-size:13.5px;font-weight:500;color:var(--text);box-shadow:var(--shadow);animation:slideUp 0.3s ease;white-space:nowrap}
+.toast.success{border-color:rgba(74,222,128,0.4);color:var(--accent)}
+.toast.error{border-color:rgba(248,113,113,0.4);color:var(--danger)}
+@keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+@media(max-width:768px){
+  .sidebar{display:none}
+  .analytics-bar{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<div class="inbox-wrap">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <h2>LEVIX</h2>
+      <span>AI Sales Engine</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-item active">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+        AI Leads Inbox
+        <span class="nav-badge" id="nav-count">0</span>
+      </div>
+      <div class="nav-item" onclick="window.location='/'">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+        Dashboard
+      </div>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <!-- Topbar -->
+    <div class="topbar">
+      <h1>🤖 AI Leads Inbox</h1>
+      <div class="filter-group">
+        <button class="filter-btn active" data-status="">All</button>
+        <button class="filter-btn" data-status="new">New</button>
+        <button class="filter-btn" data-status="accepted">Accepted</button>
+        <button class="filter-btn" data-status="rejected">Rejected</button>
+      </div>
+      <button class="refresh-btn" id="refresh-btn">↻ Refresh</button>
+    </div>
+
+    <!-- Analytics Bar -->
+    <div class="analytics-bar" id="analytics-bar">
+      <div class="stat-card"><div class="stat-num" id="stat-chats">—</div><div class="stat-label">Chats Started</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-leads">—</div><div class="stat-label">Total Leads</div></div>
+      <div class="stat-card green"><div class="stat-num" id="stat-conv">—</div><div class="stat-label">Conversion %</div></div>
+      <div class="stat-card warn"><div class="stat-num" id="stat-turns">—</div><div class="stat-label">Avg Msgs/Lead</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-handoff">—</div><div class="stat-label">AI Handoff %</div></div>
+    </div>
+
+    <!-- Leads -->
+    <div class="leads-area" id="leads-area">
+      <div class="empty-state">
+        <span class="emoji">📬</span>
+        <h3>Loading leads…</h3>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Transcript Modal -->
+<div class="modal-overlay" id="transcript-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>💬 Conversation Transcript</h3>
+      <button class="modal-close" id="modal-close">✕</button>
+    </div>
+    <div class="modal-body" id="transcript-body"></div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+(function(){
+'use strict';
+
+const TOKEN = localStorage.getItem('access_token') || '';
+const BASE  = '';
+let currentFilter = '';
+
+function auth(opts={}){
+  return {...opts, headers:{...(opts.headers||{}), Authorization:`Bearer ${TOKEN}`, 'Content-Type':'application/json'}};
+}
+
+function toast(msg, type=''){
+  const w = document.getElementById('toast-wrap');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  w.appendChild(t);
+  setTimeout(()=>t.remove(), 3200);
+}
+
+function intentEmoji(intent){
+  const map={buy:'🛒',inquire_price:'💰',compare:'⚖️',support:'🔧',service_booking:'📅',custom_request:'✨',browsing:'👀',unknown:'❓'};
+  return map[intent]||'💬';
+}
+
+function confColor(c){
+  if(c>=0.8) return '#4ade80';
+  if(c>=0.6) return '#fbbf24';
+  return '#f87171';
+}
+
+function renderConfBar(pct){
+  const fill = Math.round(pct*100);
+  return `<div class="conf-bar-wrap">
+    <div class="conf-bar-track"><div class="conf-bar-fill" style="width:${fill}%;background:linear-gradient(90deg,${confColor(pct)},${confColor(pct)}99)"></div></div>
+    <span class="conf-pct">${fill}%</span>
+  </div>`;
+}
+
+function renderCard(lead){
+  const initial = (lead.customer_name||'?').charAt(0).toUpperCase();
+  const statusClass = `status-${lead.status}`;
+  const statusLabel = {new:'New',accepted:'Accepted',rejected:'Rejected',info_requested:'Info Requested'}[lead.status]||lead.status;
+  const conf = lead.confidence||0;
+
+  // Collected fields chips
+  let fieldChips = '';
+  if(lead.collected_data){
+    Object.entries(lead.collected_data).forEach(([k,v])=>{
+      if(v) fieldChips+=`<span class="field-chip">${k.replace(/_/g,' ')}: <span>${v}</span></span>`;
+    });
+  }
+
+  const isActionable = lead.status==='new'||lead.status==='info_requested';
+
+  return `<div class="lead-card ${statusClass}" id="lead-${lead.id}">
+    <div class="lead-top">
+      <div class="lead-avatar">${initial}</div>
+      <div class="lead-info">
+        <div class="lead-name">${lead.customer_name||'Unknown Customer'}</div>
+        <div class="lead-phone">${lead.phone||'No phone yet'}</div>
+        <div class="lead-meta">
+          <span class="badge badge-intent">${intentEmoji(lead.intent)} ${lead.intent||'unknown'}</span>
+          <span class="badge badge-status-${lead.status}">${statusLabel}</span>
+          ${lead.product_name?`<span class="badge badge-confidence">📦 ${lead.product_name}</span>`:''}
+          <span class="badge badge-confidence">⚡ ${lead.source}</span>
+        </div>
+      </div>
+    </div>
+
+    ${renderConfBar(conf)}
+
+    ${lead.summary?`<div class="lead-summary">${lead.summary}</div>`:''}
+    ${fieldChips?`<div class="lead-fields">${fieldChips}</div>`:''}
+
+    <div class="lead-actions">
+      <button class="action-btn btn-accept" onclick="acceptLead(${lead.id})" ${!isActionable?'disabled':''}>✅ Accept</button>
+      <button class="action-btn btn-reject" onclick="rejectLead(${lead.id})" ${!isActionable?'disabled':''}>❌ Reject</button>
+      <button class="action-btn btn-info"   onclick="requestInfo(${lead.id})" ${!isActionable?'disabled':''}>💬 Request Info</button>
+      ${lead.session_id?`<button class="action-btn btn-transcript" onclick="viewTranscript('${lead.session_id}')">📋 Transcript</button>`:''}
+    </div>
+  </div>`;
+}
+
+async function loadLeads(){
+  const area = document.getElementById('leads-area');
+  area.innerHTML = '<div class="empty-state"><span class="emoji">⏳</span><h3>Loading…</h3></div>';
+  try{
+    const url = `/ai/leads${currentFilter?`?status=${currentFilter}`:''}`;
+    const res = await fetch(url, auth());
+    const data = await res.json();
+    const leads = data.leads||[];
+    document.getElementById('nav-count').textContent = data.total||0;
+
+    if(!leads.length){
+      area.innerHTML=`<div class="empty-state"><span class="emoji">📭</span><h3>No leads yet</h3><p>AI leads will appear here when customers chat with your widget.</p></div>`;
+      return;
+    }
+    area.innerHTML = leads.map(renderCard).join('');
+  }catch(e){
+    area.innerHTML=`<div class="empty-state"><span class="emoji">⚠️</span><h3>Could not load leads</h3><p>${e.message}</p></div>`;
+  }
+}
+
+async function loadAnalytics(){
+  try{
+    const res = await fetch('/ai/analytics', auth());
+    const d = await res.json();
+    document.getElementById('stat-chats').textContent  = d.chats_started||0;
+    document.getElementById('stat-leads').textContent  = d.leads_created||0;
+    document.getElementById('stat-conv').textContent   = (d.conversion_rate_pct||0)+'%';
+    document.getElementById('stat-turns').textContent  = d.avg_messages_to_lead||0;
+    document.getElementById('stat-handoff').textContent= (d.ai_handoff_rate_pct||0)+'%';
+  }catch(e){ console.warn('Analytics load failed', e); }
+}
+
+window.acceptLead = async function(id){
+  try{
+    await fetch(`/ai/leads/${id}/accept`, auth({method:'PATCH'}));
+    toast('✅ Lead accepted — customer notified!', 'success');
+    loadLeads();
+  }catch(e){ toast('Failed: '+e.message,'error'); }
+};
+
+window.rejectLead = async function(id){
+  try{
+    await fetch(`/ai/leads/${id}/reject`, auth({method:'PATCH'}));
+    toast('Lead rejected.', '');
+    loadLeads();
+  }catch(e){ toast('Failed: '+e.message,'error'); }
+};
+
+window.requestInfo = async function(id){
+  try{
+    await fetch(`/ai/leads/${id}/request-info`, auth({method:'PATCH'}));
+    toast('💬 More info requested from customer.', '');
+    loadLeads();
+  }catch(e){ toast('Failed: '+e.message,'error'); }
+};
+
+window.viewTranscript = async function(sessionId){
+  const body = document.getElementById('transcript-body');
+  body.innerHTML = '<p style="color:var(--text-muted)">Loading…</p>';
+  document.getElementById('transcript-modal').classList.add('show');
+  try{
+    const res = await fetch(`/ai/sessions/${sessionId}`, auth());
+    const d = await res.json();
+    const hist = d.conversation_history||[];
+    if(!hist.length){ body.innerHTML='<p style="color:var(--text-muted)">No conversation history.</p>'; return; }
+    body.innerHTML = hist.map(t=>`
+      <div class="transcript-turn ${t.role}">
+        <div class="role">${t.role==='user'?'👤 Customer':'🤖 AI Assistant'}</div>
+        <div class="content">${(t.content||'').replace(/\n/g,'<br>')}</div>
+      </div>`).join('');
+  }catch(e){ body.innerHTML=`<p style="color:var(--danger)">${e.message}</p>`; }
+};
+
+// Filter buttons
+document.querySelectorAll('.filter-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.status||'';
+    loadLeads();
+  });
+});
+
+document.getElementById('refresh-btn').addEventListener('click',()=>{ loadLeads(); loadAnalytics(); });
+document.getElementById('modal-close').addEventListener('click',()=>document.getElementById('transcript-modal').classList.remove('show'));
+document.getElementById('transcript-modal').addEventListener('click',function(e){ if(e.target===this) this.classList.remove('show'); });
+
+// Init
+loadLeads();
+loadAnalytics();
+
+// SSE auto-refresh
+if(typeof EventSource!=='undefined'){
+  try{
+    const shopId = parseInt(localStorage.getItem('shop_id')||'0');
+    if(shopId){
+      const es = new EventSource(`/sse/${shopId}`);
+      es.addEventListener('new_ai_lead',()=>{ toast('🔔 New AI lead received!','success'); loadLeads(); loadAnalytics(); });
+    }
+  }catch(e){}
+}
+
+})();
+</script>
+</body>
+</html>

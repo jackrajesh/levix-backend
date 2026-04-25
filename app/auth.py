@@ -1,9 +1,10 @@
 import os
 from datetime import datetime, timedelta, timezone
-from typing import Optional
+from typing import Optional, List, Any
 from passlib.context import CryptContext
 from jose import JWTError, jwt
 import hashlib
+from .permissions import has_effective_permission, normalize_permissions
 
 # =========================
 # CONFIG
@@ -14,6 +15,28 @@ ACCESS_TOKEN_EXPIRE_HOURS = 24
 
 # Use argon2 for all hashing
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
+
+class UserIdentity:
+    def __init__(self, shop: Any, user_type: str, user_id: int, name: str, role: str, permissions: List[str]):
+        self.shop = shop  # Shop model instance
+        self.user_type = user_type # 'owner' or 'team_member'
+        self.user_id = user_id
+        self.name = name
+        self.role = role
+        self.permissions = normalize_permissions(permissions or [])
+    
+    @property
+    def id(self):
+        return self.shop.id
+    
+    @property
+    def shop_name(self):
+        return self.shop.shop_name
+
+    def has_permission(self, permission: str) -> bool:
+        if self.user_type == 'owner':
+            return True
+        return has_effective_permission(self.permissions, permission)
 
 # =========================
 # PASSWORD HELPERS

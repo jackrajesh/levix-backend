@@ -1,0 +1,129 @@
+{
+  "run_at": "2026-04-25T18:06:47.230447+00:00",
+  "shop_id": 12,
+  "product": {
+    "name": "Chicken Biryani",
+    "price": 120.0
+  },
+  "summary": {
+    "1. Order inserted into DB": true,
+    "2. Pending dashboard updated": true,
+    "3. Repeat customer memory loaded": true,
+    "4. Duplicate YES blocked": true,
+    "5. Address validation works": true
+  },
+  "score": "5/5",
+  "all_passed": true,
+  "proofs": [
+    {
+      "proof": "1_order_in_db",
+      "orders_before": 0,
+      "orders_after": 1,
+      "order_inserted": true,
+      "order_id": 7,
+      "booking_id": "BK202604252336280001",
+      "phone": "919900000001",
+      "product": "2x Chicken Biryani",
+      "total_amount": 240.0,
+      "status": "pending",
+      "created_at": "2026-04-25 18:08:51.990761+00:00",
+      "passed": true
+    },
+    {
+      "proof": "2_pending_dashboard",
+      "pending_orders_count": 1,
+      "orders": [
+        {
+          "id": 7,
+          "booking_id": "BK202604252336280001",
+          "phone": "919900000001",
+          "product": "2x Chicken Biryani",
+          "total": 240.0,
+          "status": "pending",
+          "created_at": "2026-04-25 18:08:51.990761+00:00"
+        }
+      ],
+      "passed": true
+    },
+    {
+      "proof": "3_repeat_customer",
+      "profile_created": true,
+      "session_a_total_orders": 1,
+      "session_a_vip_tier": "NEW",
+      "session_a_favourites": {
+        "Chicken Biryani": 1
+      },
+      "session_a_last_summary": "1x Chicken Biryani",
+      "session_b_greeting": "Hi again! Ready for your usual *Chicken Biryani* today? Or something different?",
+      "memory_loaded_in_reply": true,
+      "passed": true
+    },
+    {
+      "proof": "4_duplicate_yes_blocked",
+      "orders_before": 0,
+      "orders_after_yes1": 1,
+      "orders_after_yes2": 1,
+      "yes1_reply": "\ud83c\udf89 Order placed!\n\ud83c\udfea Pickup from store\nTotal: *\u20b9120*\n\nSee you soon!",
+      "yes2_reply": "Looks like that order is already placed \ud83d\udc4d Anything else?",
+      "duplicate_blocked": true,
+      "passed": true
+    },
+    {
+      "proof": "5_address_validation",
+      "validation_cases": [
+        {
+          "input": "12",
+          "label": "bare number",
+          "should_pass": false,
+          "actual_pass": false,
+          "reason": "address looks incomplete (only numbers)",
+          "correct": true
+        },
+        {
+          "input": "hi",
+          "label": "single word",
+          "should_pass": false,
+          "actual_pass": false,
+          "reason": "address seems too short (need at least 4 parts like street, area, city)",
+          "correct": true
+        },
+        {
+          "input": "123 456",
+          "label": "only numbers with space",
+          "should_pass": false,
+          "actual_pass": false,
+          "reason": "address looks incomplete (only numbers)",
+          "correct": true
+        },
+        {
+          "input": "12 Gandhi Street Karur",
+          "label": "valid 4-token address",
+          "should_pass": true,
+          "actual_pass": true,
+          "reason": "OK",
+          "correct": true
+        },
+        {
+          "input": "flat 4b rose nagar tirupur",
+          "label": "valid lowercase",
+          "should_pass": true,
+          "actual_pass": true,
+          "reason": "OK",
+          "correct": true
+        },
+        {
+          "input": "No 5, Anna Nagar, Chennai 600040",
+          "label": "valid with pin",
+          "should_pass": true,
+          "actual_pass": true,
+          "reason": "OK",
+          "correct": true
+        }
+      ],
+      "all_cases_correct": true,
+      "bad_addr_handled": true,
+      "good_addr_handled": true,
+      "passed": true
+    }
+  ]
+}

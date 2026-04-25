@@ -4,14 +4,15 @@ from sqlalchemy import func as sa_func
 
 from .. import models, schemas
 from ..database import get_db
-from .auth import get_current_shop
+from .auth import get_current_shop, UserIdentity, require_permission
 from ..services.sse import broadcast_event
 from ..services.product_service import add_log_db
 
 router = APIRouter(tags=["pending"])
 
 @router.post("/pending/bulk-delete")
-def bulk_delete_pending(req: schemas.BulkDeleteRequest, current_shop: models.Shop = Depends(get_current_shop), db: Session = Depends(get_db)):
+def bulk_delete_pending(req: schemas.BulkDeleteRequest, identity: UserIdentity = Depends(require_permission("inbox_reply")), db: Session = Depends(get_db)):
+    current_shop = identity.shop
     if not req.ids:
         raise HTTPException(status_code=400, detail="No IDs provided")
     
@@ -21,24 +22,27 @@ def bulk_delete_pending(req: schemas.BulkDeleteRequest, current_shop: models.Sho
     ).delete(synchronize_session='fetch')
     
     db.commit()
-    broadcast_event("pending_updated")
+    broadcast_event(current_shop.id, "pending_updated")
     return {"status": "success", "deleted_count": deleted}
 
 @router.get("/pending")
-def get_pending(current_shop: models.Shop = Depends(get_current_shop), db: Session = Depends(get_db)):
+def get_pending(identity: UserIdentity = Depends(require_permission("inbox_view")), db: Session = Depends(get_db)):
+    current_shop = identity.shop
     pending = db.query(models.PendingRequest).filter(
         models.PendingRequest.shop_id == current_shop.id
-    ).all()
+    ).order_by(models.PendingRequest.created_at.desc()).all()
     return [{
         "id": p.id, 
         "product": p.product_name, 
         "customer_message": p.customer_message, 
         "request_type": p.request_type, 
-        "created_at": p.created_at.isoformat() if p.created_at else None
+        "created_at": p.created_at.isoformat() if p.created_at else None,
+        "timestamp": p.created_at.isoformat() if p.created_at else None
     } for p in pending]
 
 @router.delete("/pending/{request_id}")
-def delete_pending(request_id: int, current_shop: models.Shop = Depends(get_current_shop), db: Session = Depends(get_db)):
+def delete_pending(request_id: int, identity: UserIdentity = Depends(require_permission("inbox_reply")), db: Session = Depends(get_db)):
+    current_shop = identity.shop
     found_req = db.query(models.PendingRequest).filter(
         models.PendingRequest.id == request_id,
         models.PendingRequest.shop_id == current_shop.id
@@ -49,11 +53,12 @@ def delete_pending(request_id: int, current_shop: models.Shop = Depends(get_curr
     
     db.delete(found_req)
     db.commit()
-    broadcast_event("pending_updated")
+    broadcast_event(current_shop.id, "pending_updated")
     return {"status": "success", "message": "Pending request removed"}
 
 @router.post("/yes/{request_id}")
-def resolve_yes(request_id: int, current_shop: models.Shop = Depends(get_current_shop), db: Session = Depends(get_db)):
+def resolve_yes(request_id: int, identity: UserIdentity = Depends(require_permission("inbox_reply")), db: Session = Depends(get_db)):
+    current_shop = identity.shop
     found_req = db.query(models.PendingRequest).filter(
         models.PendingRequest.id == request_id,
         models.PendingRequest.shop_id == current_shop.id
@@ -70,7 +75,7 @@ def resolve_yes(request_id: int, current_shop: models.Shop = Depends(get_current
                 item.stock_warning_active = False
         db.delete(found_req)
         db.commit()
-        broadcast_event("pending_updated")
+        broadcast_event(current_shop.id, "pending_updated")
         return {"status": "success", "message": "Product marked as Out Of Stock"}
     
     existing_item = db.query(models.InventoryItem).filter(
@@ -99,11 +104,12 @@ def resolve_yes(request_id: int, current_shop: models.Shop = Depends(get_current
     
     db.delete(found_req)
     db.commit()
-    broadcast_event("pending_updated")
+    broadcast_event(current_shop.id, "pending_updated")
     return {"status": "success", "message": f"{found_req.product_name} marked as available"}
 
 @router.post("/no/{request_id}")
-def resolve_no(request_id: int, current_shop: models.Shop = Depends(get_current_shop), db: Session = Depends(get_db)):
+def resolve_no(request_id: int, identity: UserIdentity = Depends(require_permission("inbox_reply")), db: Session = Depends(get_db)):
+    current_shop = identity.shop
     found_req = db.query(models.PendingRequest).filter(
         models.PendingRequest.id == request_id,
         models.PendingRequest.shop_id == current_shop.id
@@ -119,7 +125,7 @@ def resolve_no(request_id: int, current_shop: models.Shop = Depends(get_current_
                 item.stock_warning_active = False
         db.delete(found_req)
         db.commit()
-        broadcast_event("pending_updated")
+        broadcast_event(current_shop.id, "pending_updated")
         return {"status": "success", "message": "Warning dismissed"}
     
     existing_item = db.query(models.InventoryItem).filter(
@@ -131,7 +137,7 @@ def resolve_no(request_id: int, current_shop: models.Shop = Depends(get_current_
         existing_item.quantity = 0
         existing_item.status = "out_of_stock"
         existing_item.stock_warning_active = True
-        add_log_db(db, current_shop.id, existing_item.name, "low_stock", existing_item.id)
+        add_log_db(db, current_shop.id, existing_item.name, "low_stock", existing_item.id, performed_by=identity.name, user_type=identity.user_type)
     else:
         new_item = models.InventoryItem(
             shop_id=current_shop.id,
@@ -146,9 +152,9 @@ def resolve_no(request_id: int, current_shop: models.Shop = Depends(get_current_
             inventory_id=new_item.id,
             alias=found_req.product_name.lower()
         ))
-        add_log_db(db, current_shop.id, new_item.name, "low_stock", new_item.id)
+        add_log_db(db, current_shop.id, new_item.name, "low_stock", new_item.id, performed_by=identity.name, user_type=identity.user_type)
     
     db.delete(found_req)
     db.commit()
-    broadcast_event("pending_updated")
+    broadcast_event(current_shop.id, "pending_updated")
     return {"status": "success", "message": f"{found_req.product_name} marked as out of stock"}

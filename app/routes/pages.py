@@ -4,6 +4,10 @@ from fastapi.responses import FileResponse
 router = APIRouter()
 
 @router.get("/", response_class=FileResponse)
+async def get_root():
+    return FileResponse("templates/login.html")
+
+@router.get("/login", response_class=FileResponse)
 async def get_login():
     return FileResponse("templates/login.html")
 

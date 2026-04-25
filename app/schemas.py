@@ -30,6 +30,11 @@ class TokenData(BaseModel):
 class MeResponse(BaseModel):
     shop_id: int
     shop_name: Optional[str] = None
+    role: Optional[str] = "owner"
+    user_name: Optional[str] = None
+    user_type: Optional[str] = "owner"
+    is_team_member: Optional[bool] = False
+    permissions: Optional[list] = []
 
 class ForgotPasswordRequest(BaseModel):
     email: EmailStr
@@ -52,6 +57,8 @@ class InventoryItemBase(BaseModel):
     quantity: int = 0
     price: float = 0
     status: str = "out_of_stock"
+    product_details: Optional[str] = None  # AI-readable operational context
+    category: Optional[str] = None         # footwear | food | service | apparel | custom | general
 
 class InventoryItemCreate(InventoryItemBase):
     aliases: list[str] = []
@@ -109,6 +116,8 @@ class EditItem(BaseModel):
     aliases: list[str]
     quantity: int
     price: float = 0
+    product_details: Optional[str] = None
+    category: Optional[str] = None
 
 class QuantityUpdate(BaseModel):
     amount: int
@@ -134,3 +143,40 @@ class ConnectWhatsAppRequest(BaseModel):
     phone_number_id: str
     access_token: str
     business_account_id: Optional[str] = None
+
+class OrderResponse(BaseModel):
+    id: int
+    shop_id: int
+    booking_id: str
+    order_id: str
+    customer_name: str
+    phone: str
+    address: str
+    product: str
+    quantity: int
+    unit_price: float
+    total_amount: float
+    status: str
+    created_at: datetime
+    updated_at: datetime
+    
+    model_config = ConfigDict(from_attributes=True)
+
+
+# ─── AI Lead Schema ───
+
+class AILeadResponse(BaseModel):
+    id: int
+    session_id: Optional[str] = None
+    customer_name: Optional[str] = None
+    phone: Optional[str] = None
+    product_name: Optional[str] = None
+    category: Optional[str] = None
+    intent: Optional[str] = None
+    summary: Optional[str] = None
+    status: str
+    source: str
+    confidence: float = 0.0
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)

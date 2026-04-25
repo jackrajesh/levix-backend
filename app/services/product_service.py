@@ -2,11 +2,14 @@ import re
 import os
 import difflib
 from typing import Optional, List, Dict, Tuple
+import logging
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func as sa_func
 from datetime import datetime
 from .. import models
 from .sse import broadcast_event
+
+logger = logging.getLogger("levix.product_service")
 
 ALLOWED_STATUSES = ["available", "out_of_stock", "coming_soon"]
 LOW_STOCK_THRESHOLD = 5
@@ -21,10 +24,15 @@ ALIAS_MAP = {
     "parotta": "parotta",
     "parrotta": "parotta",
     "chiken": "chicken",
+    "ckn": "chicken",
     "leg pis": "leg piece",
+    "leg pc": "leg piece",
     "leg piece": "leg piece",
     "wins": "wings",
-    "wing": "wings"
+    "wing": "wings",
+    "coke": "coca cola",
+    "cola": "coca cola",
+    "pepsi": "pepsi cold drink"
 }
 
 STOP_WORDS = ["spicy", "hot", "fresh", "cool", "cold", "veg", "nonveg", "pure", "best", "special"]
@@ -33,50 +41,58 @@ def normalize_product(name: str) -> str:
     """
     Strict normalization for product names:
     - Lowercase
-    - Removes units (packet, pcs, kg, litre, ml, etc.)
-    - Removes common special characters
+    - Removes punctuation
+    - Removes units
+    - Applies alias map to each word
     """
     if not name:
         return ""
     
     n = name.lower().strip()
     
-    # 1. Strip Units & Noise
+    # 1. Clean special chars & punctuation
+    n = re.sub(r'[^a-z0-9 ]', ' ', n)
+    
+    # 2. Strip Units
     units = [
         "packet", "pck", "pcs", "piece", "item", "kg", "gram", "gm", 
-        "litre", "lit", "ml", "box", "set", "nos", "packet", "pks"
+        "litre", "lit", "ml", "box", "set", "nos", "pks"
     ]
     pattern = r'\b(' + '|'.join(units) + r')\b'
     n = re.sub(pattern, ' ', n)
     
-    # 2. Clean special chars
-    n = re.sub(r'[^a-z0-9 ]', ' ', n)
-    return " ".join(n.split())
+    # 3. Collapse spaces
+    n = " ".join(n.split())
+    
+    # 4. Token-level alias mapping (synonyms)
+    tokens = n.split()
+    aliased_tokens = [ALIAS_MAP.get(t, t) for t in tokens]
+    
+    return " ".join(aliased_tokens)
 
 def get_similarity(s1: str, s2: str) -> float:
     """Calculates Levenshtein-based similarity score."""
     return difflib.SequenceMatcher(None, s1.lower(), s2.lower()).ratio()
 
-GENERIC_CATEGORIES = ["chicken", "juice", "rice", "biryani", "milk", "tea", "coffee", "mutton", "egg", "fish"]
+GENERIC_CATEGORIES = ["chicken", "juice", "rice", "biryani", "milk", "tea", "coffee", "mutton", "egg", "fish", "ckn"]
 
 def fuzzy_match_with_score(query: str, db: Session, shop_id: int) -> Tuple[Optional[models.InventoryItem], float]:
     """
     STRICT MATCH MODE:
     1. Returns (Best Match Item, Similarity Score).
     2. Threshold required: 0.85 or perfect substring.
-    3. Generic words (chicken, egg) blocked from single-word auto-matching.
     """
     if not query:
         return None, 0.0
         
+    # Replace common short-hands before normalizing
+    query = re.sub(r'\bckn\b', 'chicken', query, flags=re.IGNORECASE)
+        
     q_norm = normalize_product(query)
     if not q_norm:
         return None, 0.0
-        
-    q_final = ALIAS_MAP.get(q_norm, q_norm)
     
-    # [STRICT MATCH MODE ACTIVE] logic
-    is_generic = q_final in GENERIC_CATEGORIES
+    is_generic = q_norm in GENERIC_CATEGORIES
     
     items = db.query(models.InventoryItem).options(
         joinedload(models.InventoryItem.aliases)
@@ -85,55 +101,59 @@ def fuzzy_match_with_score(query: str, db: Session, shop_id: int) -> Tuple[Optio
     best_match = None
     max_score = 0
     
-    q_tokens = set(q_final.split())
+    q_tokens = set(q_norm.split())
     for item in items:
-        names_to_check = [item.name.lower()] + [a.alias.lower() for a in item.aliases]
+        names_to_check = [item.name] + [a.alias for a in item.aliases]
         for name in names_to_check:
             n_norm = normalize_product(name)
             
             # 1. Exact Hit
-            if q_final == n_norm:
+            if q_norm == n_norm:
+                logger.info(f"MATCH_CONFIDENCE: {q_norm} == {n_norm} -> 1.0")
                 return item, 1.0
             
-            score = get_similarity(q_final, n_norm)
+            score = get_similarity(q_norm, n_norm)
             
-            # 2. Substring Boosting (Only if significantly long or unique)
-            if (q_final in n_norm or n_norm in q_final):
-                # Strong signal but still fuzzy
-                score = max(score, 0.82) 
+            # 2. Substring / Fuzzy Contains Boosting
+            if q_norm in n_norm:
+                score = max(score, 0.90) 
+            elif n_norm in q_norm:
+                score = max(score, 0.88)
             
             # 3. Token Match Boost
             n_tokens = set(n_norm.split())
             common = q_tokens.intersection(n_tokens)
             if common:
-                token_score = len(common) / len(q_tokens)
-                if token_score >= 0.7:
-                    score = max(score, 0.78)
+                token_score = len(common) / len(max(q_tokens, n_tokens, key=len))
+                if token_score >= 0.8:
+                    score = max(score, 0.85)
+                elif token_score >= 0.5:
+                    score = max(score, 0.75)
 
             # --- GENERIC GATE ---
-            if is_generic:
-                # If it's a generic word like 'chicken', we need a high-confidence match
-                # to avoid mapping 'chicken' to 'Chicken Wings' blindly.
-                if score < 0.95:
-                    score = score * 0.7 # Penalize heavily
+            if is_generic and score < 0.95:
+                score = score * 0.7 # Penalize heavily
             
             if score > max_score:
                 max_score = score
                 best_match = item
 
+    if best_match:
+        logger.info(f"MATCH_CONFIDENCE: '{query}' -> '{best_match.name}' = {max_score:.2f}")
+
     return best_match, max_score
 
 def fuzzy_match_product(query: str, db: Session, shop_id: int) -> Optional[models.InventoryItem]:
     """Simplified wrapper with 0.85 Threshold."""
-    print(f"[STRICT MATCH MODE ACTIVE] Processing: {query}")
+    logger.info(f"[STRICT MATCH MODE ACTIVE] Processing: {query}")
     item, score = fuzzy_match_with_score(query, db, shop_id)
     
     # Final gate
-    if item and score >= 0.85:
-        print(f"[MATCH SUCCESS] '{query}' -> '{item.name}' ({score:.2f})")
+    if item and score >= 0.80:
+        logger.info(f"[MATCH SUCCESS] '{query}' -> '{item.name}' ({score:.2f})")
         return item
     
-    print(f"[MATCH FAILED] '{query}' best score: {score:.2f}")
+    logger.info(f"[MATCH FAILED] '{query}' best score: {score:.2f}")
     return None
     """
     Overhauled matching logic:
@@ -312,12 +332,22 @@ def handle_low_stock_log(item: models.InventoryItem, db: Session):
     elif item.quantity > LOW_STOCK_THRESHOLD:
         item.stock_warning_active = False
 
-def add_log_db(db: Session, shop_id: int, product_name: str, status: str, product_id: Optional[int] = None):
+def add_log_db(db: Session, shop_id: int, product_name: str, status: str, product_id: Optional[int] = None, is_matched: bool = True, match_source: Optional[str] = None, performed_by: Optional[str] = None, user_type: Optional[str] = None):
+    # Scrub internal system strings from analytics
+    blocked = ["unknowns", "append", "join", "matchmultipleproducts"]
+    name_low = product_name.lower()
+    if any(k in name_low for k in blocked):
+        return
+
     new_entry = models.LogEntry(
         shop_id=shop_id,
         product_name=product_name,
         product_id=product_id,
         status=status,
+        is_matched=is_matched,
+        match_source=match_source,
+        performed_by=performed_by,
+        user_type=user_type
     )
     db.add(new_entry)
     db.commit()

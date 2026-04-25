@@ -6,6 +6,10 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import Optional
 
+import json
+import datetime
+import traceback
+from .auth import get_current_shop
 from .. import models
 from ..database import get_db
 from ..services.sse import sse_events_handler, broadcast_event
@@ -16,13 +20,24 @@ from ..services.product_service import (
     get_greeting_response,
     add_log_db,
     get_product_state,
-    match_multiple_products,
+)
+from ..services.ai_matcher import ai_match_products, generate_ai_reply
+from ..services.ai_router import AIRouter
+from ..services.router_engine import RouterEngine
+from ..services.order_controller import (
+    get_or_create_customer_session, 
+    handle_order_flow, 
+    update_customer_session,
+    generate_booking_id,
+    generate_order_id
 )
 from ..utils import generate_reply, filter_filler_words
 
+import logging
 VERIFY_TOKEN = "levix123"
 
 router = APIRouter(tags=["webhooks"])
+logger = logging.getLogger("levix.webhooks")
 
 
 class WebhookRequest(BaseModel):
@@ -30,9 +45,53 @@ class WebhookRequest(BaseModel):
     shop_id: Optional[int] = None
 
 
+from jose import jwt
+from ..auth import SECRET_KEY, ALGORITHM
+
+from fastapi import Query
+
 @router.get("/events")
-async def events_endpoint(request: Request):
-    return await sse_events_handler(request)
+async def events_endpoint(request: Request, token: str = Query(None)):
+    """
+    Server-Sent Events endpoint for real-time dashboard updates.
+    Optimized to avoid holding a DB session open during the long-running stream.
+    """
+    if not token:
+        raise HTTPException(status_code=401, detail="Token missing")
+    
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        shop_id = payload.get("shop_id")
+        
+        if not shop_id:
+            # Fallback for older tokens (use sub/email)
+            email = payload.get("sub")
+            if not email:
+                raise HTTPException(status_code=401, detail="Invalid token")
+            
+            from ..database import SessionLocal
+            from .. import models
+            db = SessionLocal()
+            try:
+                # Handle team member emails if they are prefixed
+                email_str = str(email)
+                if email_str.startswith("tm_"):
+                    member = db.query(models.TeamMember).filter(models.TeamMember.email == email_str).first()
+                    shop_id = member.shop_id if member else None
+                else:
+                    shop = db.query(models.Shop).filter(models.Shop.email == email_str).first()
+                    shop_id = shop.id if shop else None
+            finally:
+                db.close()
+
+        if not shop_id:
+            raise HTTPException(status_code=401, detail="Invalid token payload")
+            
+    except Exception as e:
+        print(f"[SSE] Auth Failure: {e}")
+        raise HTTPException(status_code=401, detail="Auth Failed")
+        
+    return await sse_events_handler(request, int(shop_id))
 
 
 @router.get("/webhook")
@@ -49,138 +108,83 @@ async def verify_webhook(request: Request):
 
 @router.post("/webhook")
 async def webhook_endpoint(request: Request, db: Session = Depends(get_db)):
-    # ── 0. Request ID for end-to-end log tracing ─────────────────────────────
-    req_id = str(uuid.uuid4())[:8]
-
-    # ── 1. Parse payload ──────────────────────────────────────────────────────
-    raw_message = None
-    sender = None
-    phone_number_id = None
-
+    """
+    Unified WhatsApp Webhook Handler.
+    Now fully powered by the 4-Layer AIRouter + WebhookGuard.
+    """
+    # 1. Parse Payload
     try:
         data = await request.json()
-        print(f"[{req_id}] Webhook received payload")
+    except Exception:
+        return {"status": "invalid_json"}
 
-        entry = data.get("entry", [{}])[0]
-        changes = entry.get("changes", [{}])[0]
-        value = changes.get("value", {})
+    # 2. Webhook Guard (Deduplication & Validation)
+    from ..core.webhook_guard import WebhookGuard
+    if not WebhookGuard.validate_payload(data):
+        return {"status": "ignored"}
 
-        # Extract phone_number_id for shop routing
-        metadata = value.get("metadata", {})
-        phone_number_id = metadata.get("phone_number_id")
-        print(f"[{req_id}] phone_number_id: {phone_number_id}")
-
-        if "messages" not in value:
+    try:
+        value = data["entry"][0]["changes"][0]["value"]
+        
+        # Handle Status Updates
+        if "statuses" in value:
             return {"status": "ok"}
 
-        message_obj = value["messages"][0]
-        raw_message = message_obj.get("text", {}).get("body", "").strip()
-        sender = message_obj.get("from")
+        # Extract Message Details
+        if "messages" not in value:
+            return {"status": "ok"}
+            
+        msg = value["messages"][0]
+        wa_id = msg["id"]
+        sender = msg["from"]
+        metadata = value.get("metadata", {})
+        phone_number_id = metadata.get("phone_number_id")
 
-        print(f"[{req_id}] Incoming message from {sender}: {raw_message}")
+        if not phone_number_id:
+            return {"status": "no_phone_id"}
+
+        # 2. Webhook Guard (Deduplication)
+        if WebhookGuard.is_duplicate(wa_id):
+            return {"status": "duplicate"}
+
+        # Extract Text
+        raw_message = ""
+        if msg["type"] == "text":
+            raw_message = msg["text"]["body"]
+        elif msg["type"] == "button":
+            raw_message = msg["button"]["text"]
+
+        if not raw_message:
+            return {"status": "no_text"}
+
+        # 3. Resolve Shop
+        shop = get_shop_by_phone_number_id(phone_number_id, db)
+        if not shop:
+            logger.error(f"[WEBHOOK] No shop found for phone_id: {phone_number_id}")
+            return {"status": "no_shop"}
+
+        # 4. Process via AIRouter (Phases 1-8)
+        # Timeout protection wrapped inside AIRouter or here
+        import asyncio
+        try:
+            reply = RouterEngine.process_message(db, shop.id, sender, raw_message)
+        except Exception as ai_err:
+            logger.error(f"[WEBHOOK] Router failed: {ai_err}")
+            reply = "Vanakkam! 🙏 We've received your message and our team will get back to you shortly."
+
+        # 5. Send Reply
+        if reply:
+            send_whatsapp_message(shop, sender, reply)
+            
+            # 6. Real-time Dashboard Update
+            # Phase 2: Mandatory Logs
+            broadcast_event(shop.id, "pending_updated")
+            broadcast_event(shop.id, "new_ai_lead")
+            
+            logger.info(f"[INBOX] Lead rendered for Shop {shop.id} - Broadcast sent")
 
     except Exception as e:
-        print(f"[{req_id}] Error parsing payload: {e}")
-        return {"status": "ok"}
-
-    if not raw_message or not sender:
-        return {"status": "ok"}
-
-    # ── 2. Resolve shop by phone_number_id ────────────────────────────────────
-    shop = get_shop_by_phone_number_id(phone_number_id, db)
-
-    if not shop:
-        print(f"[{req_id}] No shop found for phone_number_id: {phone_number_id}. Ignoring message.")
-        return {"status": "ok"}
-
-    print(f"[{req_id}] Matched shop: {shop.shop_name} (id={shop.id})")
-    shop_id = shop.id
-
-    # ── 3. Greeting check ─────────────────────────────────────────────────────
-    greeting = get_greeting_response(raw_message)
-    if greeting:
-        print("Greeting detected:", greeting)
-        send_whatsapp_message(shop, sender, greeting)
-        return {"status": "ok"}
-
-    # ── 4. Normalize and match products ───────────────────────────────────────
-    normalized = normalize_message(raw_message)
-    if not normalized:
-        return {"status": "ok"}
-
-    cleaned_message = filter_filler_words(normalized)
-
-    matched_items, unknowns, limit_exceeded = match_multiple_products(cleaned_message, db, shop_id)
-
-    if limit_exceeded:
-        reply = "⚠️ Limit reached. Please ask under 12 products."
-        print("Limit exceeded, sending warning.")
-        send_whatsapp_message(shop, sender, reply)
-        return {"status": "ok"}
-
-    # ── 5. Build reply ────────────────────────────────────────────────────────
-    reply = ""
-    if matched_items:
-        if len(matched_items) == 1:
-            item = matched_items[0]
-            add_log_db(db, shop_id, item.name, item.status, item.id)
-            print("DEBUG PRODUCT MATCH:", item.name)
-            state = getattr(item, "state", get_product_state(item))
-            reply = generate_reply(item, state)
-        else:
-            reply = "LEVIX ⚡\n"
-            for item in matched_items:
-                add_log_db(db, shop_id, item.name, item.status, item.id)
-                reply += f"{item.name} - ₹{item.price}\n"
-            reply += "\nAnything else you need?"
-
-    # ── 6. Handle unknown products ────────────────────────────────────────────
-    if unknowns:
-        for unknown in unknowns:
-            p_name = unknown.capitalize()
-            exists = db.query(models.PendingRequest).filter(
-                models.PendingRequest.shop_id == shop_id,
-                models.PendingRequest.product_name == p_name,
-            ).first()
-
-            if not exists:
-                db.add(models.PendingRequest(
-                    shop_id=shop_id,
-                    product_name=p_name,
-                    customer_message=raw_message,
-                    request_type="customer",
-                ))
-                add_log_db(db, shop_id, p_name, "pending")
-
-        db.commit()
-        broadcast_event("pending_created")
-
-        unknown_msg = f"\n\nWe will check availability for: {', '.join([u.capitalize() for u in unknowns])}"
-        if not reply:
-            reply = "Thanks for asking. Let me check and get back to you soon."
-        reply += unknown_msg
-
-    if reply:
-        print("Generated reply:", reply)
-        send_whatsapp_message(shop, sender, reply)
-        return {"status": "ok"}
-
-    # ── 7. Fallback: generic short/unrecognised messages ─────────────────────
-    pending_product = cleaned_message.capitalize()
-    common_short_words = ["this", "that", "there", "where", "what", "which", "some", "any", "vanakam", "vanakkam"]
-    if pending_product.lower() in common_short_words:
-        send_whatsapp_message(shop, sender, "Please wait, checking with the owner.")
-        return {"status": "ok"}
-
-    db.add(models.PendingRequest(
-        shop_id=shop_id,
-        product_name=pending_product,
-        customer_message=raw_message,
-        request_type="customer",
-    ))
-    db.commit()
-    add_log_db(db, shop_id, pending_product, "pending")
-    broadcast_event("pending_created")
-    send_whatsapp_message(shop, sender, "Thanks for asking.\n\nLet me check with the shop owner and get back to you soon.")
-
-    return {"status": "ok"}
+        import traceback
+        logger.error(f"[WEBHOOK CRITICAL ERROR] {e}\n{traceback.format_exc()}")
+    
+    return {"status": "success"}

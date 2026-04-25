@@ -10,7 +10,7 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Explicitly load .env from project root
-load_dotenv(BASE_DIR / ".env")
+load_dotenv(BASE_DIR / "config" / ".env")
 
 DATA_DIR = BASE_DIR / "data"
 DATA_DIR.mkdir(exist_ok=True)
@@ -18,20 +18,29 @@ SQLITE_DB_PATH = DATA_DIR / "levix.db"
 
 # Prioritize environment variable, fallback to SQLite
 DATABASE_URL = os.getenv("DATABASE_URL")
+
+# Render compatibility: postgres:// must be postgresql:// for SQLAlchemy
+if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
 if not DATABASE_URL:
+    print("[LEVIX WARNING] DATABASE_URL not found, falling back to local SQLite.")
     DATABASE_URL = f"sqlite:///{SQLITE_DB_PATH}"
 
 # Security Logging: Mask password in DATABASE_URL
 def mask_db_url(url: str) -> str:
-    # Pattern to match postgresql://user:password@host...
-    return re.sub(r"(://[^:]+:)([^@]+)(@)", r"\1***\3", url)
+    try:
+        return re.sub(r"(://[^:]+:)([^@]+)(@)", r"\1***\3", url)
+    except:
+        return "DATABASE_URL_MASK_FAILED"
 
-print(f"Initialized Database with URL: {mask_db_url(DATABASE_URL)}")
+print(f"[LEVIX] Booting with Database: {mask_db_url(DATABASE_URL)}")
 
 # Configure engine arguments
 connect_args: dict[str, Any] = {}
 if DATABASE_URL.startswith("sqlite"):
     connect_args["check_same_thread"] = False
+    connect_args["timeout"] = 30
 elif DATABASE_URL and ("render.com" in DATABASE_URL or "neon.tech" in DATABASE_URL or "supabase" in DATABASE_URL):
     connect_args["sslmode"] = "require"
 
@@ -41,6 +50,16 @@ engine = create_engine(
     pool_pre_ping=True,
     pool_recycle=300
 )
+
+# SQLite performance and concurrency tuning
+if DATABASE_URL.startswith("sqlite"):
+    from sqlalchemy import event
+    @event.listens_for(engine, "connect")
+    def set_sqlite_pragma(dbapi_connection, connection_record):
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA journal_mode=WAL")
+        cursor.execute("PRAGMA synchronous=NORMAL")
+        cursor.close()
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

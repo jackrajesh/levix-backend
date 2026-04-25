@@ -5,10 +5,12 @@ from cryptography.fernet import Fernet, InvalidToken
 def _get_fernet() -> Fernet:
     key = os.getenv("ENCRYPTION_KEY")
     if not key:
-        raise RuntimeError(
-            "ENCRYPTION_KEY is not set in environment. "
-            "Generate one with: python -c \"from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())\""
-        )
+        print("[LEVIX WARNING] ENCRYPTION_KEY not set. Using a temporary fallback key (Encryption will NOT be persistent!)")
+        # Temporary fallback key for non-crashing startup
+        key = "temporary_insecure_fallback_key_for_startup_only"
+        # Return a valid key format for Fernet
+        import base64
+        key = base64.urlsafe_b64encode(key.ljust(32)[:32].encode()).decode()
     return Fernet(key.encode() if isinstance(key, str) else key)
 
 
