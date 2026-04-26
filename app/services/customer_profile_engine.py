@@ -77,7 +77,7 @@ class CustomerProfileEngine:
             profile.visit_count = (profile.visit_count or 0) + 1
             profile.last_seen_at = datetime.now(timezone.utc)
             db.commit()
-            logger.info(f"[PROFILE] Restored: {phone} (visits={profile.visit_count})")
+            logger.info(f"[PROFILE] Restored: {phone} name={profile.customer_name} (visits={profile.visit_count})")
 
         return profile
 
@@ -132,11 +132,14 @@ class CustomerProfileEngine:
             profile.veg_preference = str(veg)
             changed = True
 
-        # Customer name (if captured during checkout)
+        # Customer name (Task 3: Never overwrite with product search)
         name = session_fields.get("customer_name")
         if name and not profile.customer_name:
-            profile.customer_name = str(name)
-            changed = True
+            # Basic safety: ensure it doesn't look like a product or generic text
+            is_valid_name = len(name.split()) <= 3 and len(name) < 30
+            if is_valid_name:
+                profile.customer_name = str(name)
+                changed = True
 
         if changed:
             db.commit()
@@ -172,6 +175,12 @@ class CustomerProfileEngine:
                 cats = dict(profile.favorite_categories or {})
                 cats[cat] = cats.get(cat, 0) + 1
                 profile.favorite_categories = cats
+        
+        # Task 3: Cap favorite_products at 10 items (keep most frequent)
+        if len(favs) > 10:
+            sorted_favs = sorted(favs.items(), key=lambda x: -x[1])[:10]
+            favs = dict(sorted_favs)
+            
         profile.favorite_products = favs
 
         # Summarise for last_order_summary (human readable)

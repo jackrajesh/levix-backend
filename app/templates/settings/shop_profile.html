@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Shop Profile — LEVIX Settings</title>
+<meta name="description" content="Configure your shop profile, category, and AI vocabulary settings on LEVIX."/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f0f1a;--surface:#1a1a2e;--surface2:#222240;--surface3:#2a2a4a;
+  --primary:#6C63FF;--primary-light:#a78bfa;--accent:#4ade80;--warn:#fb923c;
+  --text:#e8e8f8;--text-muted:#9999bb;--border:#2e2e50;
+  --radius:14px;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;justify-content:center;padding:40px 20px;}
+.page{width:100%;max-width:680px;}
+.page-header{margin-bottom:32px;}
+.page-header h1{font-size:26px;font-weight:700;color:#fff;margin-bottom:6px;}
+.page-header p{color:var(--text-muted);font-size:14px;line-height:1.6;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px;margin-bottom:20px;}
+.card-title{font-size:16px;font-weight:700;margin-bottom:4px;color:#fff;display:flex;align-items:center;gap:8px;}
+.card-title .icon{font-size:18px;}
+.card-subtitle{font-size:13px;color:var(--text-muted);margin-bottom:24px;}
+.form-group{margin-bottom:22px;}
+.form-group:last-child{margin-bottom:0;}
+label.field-label{display:block;font-size:13px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;}
+input[type="text"],textarea,select{
+  width:100%;background:var(--surface2);border:1px solid var(--border);
+  border-radius:10px;padding:12px 16px;color:var(--text);
+  font-family:inherit;font-size:14px;outline:none;transition:border-color 0.2s;
+}
+input[type="text"]:focus,textarea:focus,select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(108,99,255,0.12);}
+textarea{resize:vertical;min-height:80px;line-height:1.5;}
+select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%239999bb' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;}
+.category-preview{
+  margin-top:12px;background:var(--surface3);border:1px solid var(--border);
+  border-radius:10px;padding:14px 16px;display:none;
+}
+.category-preview.visible{display:block;}
+.category-preview h4{font-size:12px;font-weight:600;color:var(--primary-light);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;}
+.vocab-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.vocab-item{font-size:12.5px;color:var(--text-muted);}
+.vocab-item strong{color:var(--text);font-weight:500;}
+.save-btn{
+  background:linear-gradient(135deg,var(--primary),var(--primary-light));
+  color:#fff;border:none;border-radius:10px;padding:13px 28px;
+  font-size:15px;font-weight:600;cursor:pointer;width:100%;
+  transition:all 0.2s;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.save-btn:hover{opacity:0.92;transform:translateY(-1px);}
+.save-btn:active{transform:none;}
+.save-btn.loading{opacity:0.7;pointer-events:none;}
+.divider{height:1px;background:var(--border);margin:4px 0 24px;}
+/* Toast */
+.toast{
+  position:fixed;bottom:28px;right:28px;
+  background:var(--surface2);border:1px solid rgba(74,222,128,0.35);
+  color:var(--accent);padding:14px 22px;border-radius:10px;
+  font-size:14px;font-weight:500;
+  opacity:0;transform:translateY(8px);pointer-events:none;
+  transition:all 0.3s;box-shadow:0 8px 32px rgba(0,0,0,0.4);
+  display:flex;align-items:center;gap:8px;
+}
+.toast.error{border-color:rgba(251,146,60,0.4);color:var(--warn);}
+.toast.show{opacity:1;transform:translateY(0);}
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="page-header">
+    <h1>🏪 Shop Profile</h1>
+    <p>Configure your business details and category. This helps the AI use the right vocabulary with your customers.</p>
+  </div>
+
+  <!-- Business Details -->
+  <div class="card">
+    <div class="card-title"><span class="icon">📝</span> Business Details</div>
+    <div class="card-subtitle">Basic information about your shop.</div>
+
+    <div class="form-group">
+      <label class="field-label" for="shop_name_display">Shop Name</label>
+      <input type="text" id="shop_name_display" value="{{ shop_name }}" disabled style="opacity:0.6;cursor:not-allowed;" title="Shop name is managed in account settings."/>
+    </div>
+
+    <div class="form-group">
+      <label class="field-label" for="business_subnote">Business Description <span style="color:var(--text-muted);font-weight:400;">(optional)</span></label>
+      <textarea id="business_subnote" placeholder="E.g. South Indian vegetarian restaurant serving fresh meals since 1998…">{{ business_subnote }}</textarea>
+    </div>
+  </div>
+
+  <!-- Shop Category -->
+  <div class="card">
+    <div class="card-title"><span class="icon">🏷️</span> Shop Category</div>
+    <div class="card-subtitle">The AI uses this to pick the right words when talking to your customers.</div>
+
+    <div class="form-group">
+      <label class="field-label" for="shop_category">Category</label>
+      <select id="shop_category" onchange="previewVocab()">
+        <option value="Food &amp; Restaurant">🍽️ Food &amp; Restaurant</option>
+        <option value="Grocery">🛒 Grocery</option>
+        <option value="Clothing &amp; Fashion">👗 Clothing &amp; Fashion</option>
+        <option value="Electronics">📱 Electronics</option>
+        <option value="Pharmacy &amp; Health">💊 Pharmacy &amp; Health</option>
+        <option value="Hardware &amp; Tools">🔧 Hardware &amp; Tools</option>
+        <option value="Salon &amp; Beauty">✂️ Salon &amp; Beauty</option>
+        <option value="Bakery">🥖 Bakery</option>
+        <option value="Stationery">📚 Stationery</option>
+        <option value="General">🏬 General</option>
+      </select>
+
+      <!-- AI vocabulary preview -->
+      <div class="category-preview visible" id="vocab_preview">
+        <h4>AI Vocabulary Preview</h4>
+        <div class="vocab-grid" id="vocab_grid">
+          <!-- populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <button class="save-btn" id="save_btn" onclick="saveProfile()">
+      <span>💾</span> Save Shop Profile
+    </button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const VOCAB_MAP = {
+  "Food & Restaurant":  { catalog:"menu", item:"dish", unit:"serving", action:"order" },
+  "Grocery":            { catalog:"items", item:"product", unit:"unit", action:"buy" },
+  "Clothing & Fashion": { catalog:"catalogue", item:"item", unit:"style", action:"buy" },
+  "Electronics":        { catalog:"products", item:"product", unit:"model", action:"buy" },
+  "Pharmacy & Health":  { catalog:"products", item:"medicine", unit:"strip", action:"buy" },
+  "Hardware & Tools":   { catalog:"catalogue", item:"part", unit:"model", action:"buy" },
+  "Salon & Beauty":     { catalog:"services", item:"service", unit:"session", action:"book" },
+  "Bakery":             { catalog:"menu", item:"item", unit:"serving", action:"order" },
+  "Stationery":         { catalog:"catalogue", item:"product", unit:"unit", action:"buy" },
+  "General":            { catalog:"catalogue", item:"item", unit:"unit", action:"buy" },
+};
+
+function previewVocab() {
+  const cat = document.getElementById('shop_category').value;
+  const vocab = VOCAB_MAP[cat] || VOCAB_MAP['General'];
+  const grid = document.getElementById('vocab_grid');
+  grid.innerHTML = `
+    <div class="vocab-item">Catalog called: <strong>${vocab.catalog}</strong></div>
+    <div class="vocab-item">Items called: <strong>${vocab.item}</strong></div>
+    <div class="vocab-item">Unit called: <strong>${vocab.unit}</strong></div>
+    <div class="vocab-item">CTA action: <strong>${vocab.action}</strong></div>
+  `;
+  document.getElementById('vocab_preview').classList.add('visible');
+}
+
+function showToast(msg, isError = false) {
+  const t = document.getElementById('toast');
+  t.textContent = (isError ? '⚠️ ' : '✅ ') + msg;
+  t.className = 'toast' + (isError ? ' error' : '') + ' show';
+  setTimeout(() => t.className = 'toast' + (isError ? ' error' : ''), 3500);
+}
+
+async function saveProfile() {
+  const btn = document.getElementById('save_btn');
+  btn.classList.add('loading');
+  btn.innerHTML = '<span>⏳</span> Saving…';
+
+  const payload = {
+    shop_category: document.getElementById('shop_category').value,
+    business_subnote: document.getElementById('business_subnote').value.trim(),
+  };
+
+  try {
+    const res = await fetch('/settings/api/shop-profile', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (res.ok && data.status === 'success') {
+      showToast('Shop profile saved!');
+    } else {
+      showToast(data.detail || 'Save failed.', true);
+    }
+  } catch (e) {
+    showToast('Network error — please try again.', true);
+  } finally {
+    btn.classList.remove('loading');
+    btn.innerHTML = '<span>💾</span> Save Shop Profile';
+  }
+}
+
+// Load current data on page load
+async function loadProfile() {
+  try {
+    const res = await fetch('/settings/api/shop-profile', { credentials: 'same-origin' });
+    if (!res.ok) return;
+    const data = await res.json();
+    const d = data.data || {};
+
+    if (d.shop_category) {
+      document.getElementById('shop_category').value = d.shop_category;
+    }
+    if (d.business_subnote) {
+      document.getElementById('business_subnote').value = d.business_subnote;
+    }
+    previewVocab();
+  } catch(e) {
+    // silently fail
+  }
+}
+
+loadProfile();
+</script>
+</body>
+</html>

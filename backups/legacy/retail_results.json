@@ -1,0 +1,37 @@
+[
+  {
+    "case": "A",
+    "category": "Restaurant",
+    "msg": "iphone",
+    "reply": "We mainly serve food \ud83d\ude0a Want to see today's menu?",
+    "passed": true
+  },
+  {
+    "case": "B",
+    "category": "Mobile Shop",
+    "msg": "iphone",
+    "reply": "We don't have *Iphone* right now. \ud83d\ude14\nShall I send your request to the shop owner? *(yes / no)*",
+    "passed": true
+  },
+  {
+    "case": "C",
+    "category": "Mobile Shop",
+    "msg": "charger",
+    "reply": "We don't have *Charger* right now. \ud83d\ude14\nShall I send your request to the shop owner? *(yes / no)*",
+    "passed": true
+  },
+  {
+    "case": "D",
+    "category": "Salon",
+    "msg": "haircut tomorrow 5 pm",
+    "reply": "Would you like me to send a booking request for *5 pm* to the shop owner? \ud83d\udcc5\n*(yes / no)*",
+    "passed": true
+  },
+  {
+    "case": "E",
+    "category": "Mixed General Store",
+    "msg": "water bottle",
+    "reply": "We don't have *Water Bottle* right now. \ud83d\ude14\nShall I send your request to the shop owner? *(yes / no)*",
+    "passed": true
+  }
+]

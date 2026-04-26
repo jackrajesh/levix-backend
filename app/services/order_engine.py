@@ -29,6 +29,75 @@ from .. import models
 
 logger = logging.getLogger("levix.order_engine")
 
+# Change 3: Category-conditional Aliases + P1 Seed Typo Corrections
+_TYPO_CORRECTIONS: dict[str, str] = {
+    # beverages
+    "coke":       "cola",
+    "pepsi":      "cola",
+    "cold drink": "cola",
+    # biryani variants
+    "briyani":   "biryani",
+    "biriyani":  "biryani",
+    "bryani":    "biryani",
+    # mushroom
+    "mashroom":  "mushroom",
+    "musroom":   "mushroom",
+    # ice cream
+    "icecream":  "ice cream",
+    "ice-cream": "ice cream",
+    # chicken
+    "chiken":    "chicken",
+    "chciken":   "chicken",
+    # fried rice
+    "frid rice": "fried rice",
+}
+
+_DEFAULT_ALIASES = {
+    "Food & Restaurant": {
+        "coke": "coke", "pepsi": "pepsi", "coca cola": "coke", "coca-cola": "coke",
+        "coco cola": "coke", "cold drink": "cola",
+        "briyani": "biryani", "biriyani": "biryani", "bryani": "biryani",
+        "mashroom": "mushroom", "musroom": "mushroom",
+        "icecream": "ice cream", "ice-cream": "ice cream",
+        "chiken": "chicken", "chciken": "chicken",
+        "frid rice": "fried rice",
+        "lassi": "juice",
+    },
+    "Electronics": {
+        "iphone": "mobile", "android": "mobile", "macbook": "laptop",
+        "charger": "cable", "earphones": "buds",
+    },
+    "Clothing & Fashion": {
+        "shirt": "top", "tshirt": "top", "pant": "trouser", "shoes": "footwear",
+    },
+    "Pharmacy & Health": {
+        "tablet": "medicine", "capsule": "medicine", "syrup": "medicine",
+    },
+}
+
+
+def normalize_typos(text: str) -> str:
+    """FAIL 3.4: Normalizes common typos BEFORE the matching pipeline starts."""
+    corrections = {
+        "mashroom": "mushroom",
+        "musroom": "mushroom", 
+        "briyani": "biryani",
+        "biriyani": "biryani",
+        "bryani": "biryani",
+        "chiken": "chicken",
+        "chciken": "chicken",
+        "frid": "fried",
+        "icecream": "ice cream"
+    }
+    low = text.lower()
+    for wrong, right in corrections.items():
+        low = low.replace(wrong, right)
+    return low
+
+def _apply_typo_corrections(text: str) -> str:
+    """Apply multi-word and single-word typo corrections before tokenising."""
+    return normalize_typos(text)
+
 
 # ─── Cart item ────────────────────────────────────────────────────────────────
 
@@ -92,25 +161,132 @@ class OrderEngine:
     # ── Product search ────────────────────────────────────────────────────────
 
     @staticmethod
+    def calculate_score(p: models.InventoryItem, corrected_tokens: list[str]) -> int:
+        searchable = (
+            (p.name or "").lower()
+            + " " + (p.category or "").lower()
+            + " " + (p.product_details or "").lower()
+        )
+        name_lower = (p.name or "").lower()
+        hint_joined = " ".join(corrected_tokens)
+        
+        # Exact Match
+        if hint_joined == name_lower:
+            return 100
+            
+        # Descriptors
+        generic_words = {"rice", "biryani", "roti", "naan", "parotta", "chicken", "mutton", "fish", "ice cream", "juice", "milk", "water", "drink"}
+        modifiers = [t for t in corrected_tokens if t not in generic_words]
+        generics = [t for t in corrected_tokens if t in generic_words]
+        
+        primary_descriptor = modifiers[0] if modifiers else None
+        
+        # PRIMARY DESCRIPTOR RULE
+        if primary_descriptor and primary_descriptor not in searchable:
+            return 0
+            
+        # Keyword Overlap
+        overlap = 0
+        for t in corrected_tokens:
+            if t in searchable:
+                overlap += 1
+        
+        if not corrected_tokens: return 0
+        base_score = (overlap / len(corrected_tokens)) * 50
+        
+        # Bonus for name inclusion
+        if name_lower in hint_joined or hint_joined in name_lower:
+            base_score += 30
+            
+        # Bonus for matching all generics
+        if generics and all(g in searchable for g in generics):
+            base_score += 10
+            
+        return int(base_score)
+
+    @staticmethod
     def find_products(
         db:          Session,
         shop_id:     int,
         hint_tokens: list[str],
         limit:       int = 5,
+        shop_category: str = "General / Other",
     ) -> list[dict[str, Any]]:
-        """
-        Fuzzy product search using hint tokens against name + category + details.
-        Returns dicts ordered by token-hit score (best first).
-        """
         if not hint_tokens:
             return []
 
+        hint_str = " ".join(hint_tokens)
+        corrected_str = _apply_typo_corrections(hint_str)
+
+        cat_aliases = _DEFAULT_ALIASES.get(shop_category, {})
+        if shop_category == "General / Other":
+            for aliases in _DEFAULT_ALIASES.values():
+                cat_aliases.update(aliases)
+
+        corrected_tokens = [
+            cat_aliases.get(t.lower(), t.lower())
+            for t in corrected_str.split()
+            if t
+        ]
+        if not corrected_tokens:
+            corrected_tokens = hint_tokens
+
+        # FAIL 3.3: Seed aliases if table is empty
+        alias_count = db.query(models.InventoryAlias).join(models.InventoryItem).filter(models.InventoryItem.shop_id == shop_id).count()
+        if alias_count == 0:
+            seed_aliases = [
+                ("coke", "Coco Cola"),
+                ("cola", "Coco Cola"), 
+                ("cold drink", "Coco Cola"),
+                ("briyani", "biryani"),
+                ("biriyani", "biryani"),
+                ("mashroom", "mushroom"),
+                ("icecream", "ice cream"),
+                ("chiken", "chicken")
+            ]
+            for alias_txt, target_name in seed_aliases:
+                # Find target product
+                target_p = db.query(models.InventoryItem).filter(
+                    models.InventoryItem.shop_id == shop_id,
+                    func.lower(models.InventoryItem.name) == target_name.lower()
+                ).first()
+                if target_p:
+                    new_alias = models.InventoryAlias(
+                        inventory_id=target_p.id,
+                        alias=alias_txt
+                    )
+                    db.add(new_alias)
+            db.commit()
+
+        # FAIL 3.3: Step 1: Check InventoryAlias table for exact alias match (Score 95)
+        for token in corrected_tokens:
+            alias_match = (
+                db.query(models.InventoryAlias)
+                .join(models.InventoryItem)
+                .filter(models.InventoryItem.shop_id == shop_id)
+                .filter(func.lower(models.InventoryAlias.alias) == token.lower())
+                .first()
+            )
+            if alias_match:
+                product = db.query(models.InventoryItem).filter(
+                    models.InventoryItem.id == alias_match.inventory_id,
+                    models.InventoryItem.shop_id == shop_id,
+                    models.InventoryItem.quantity > 0,
+                ).first()
+                if product:
+                    # Return directly with high score to bypass fuzzy
+                    return [{**OrderEngine._product_to_dict(product), "match_score": 95}]
+
+        # Step 3-6: Fuzzy match
         filters = []
-        for token in hint_tokens:
+        for token in corrected_tokens:
             pattern = f"%{token}%"
             filters.append(func.lower(models.InventoryItem.name).like(pattern))
             filters.append(func.lower(models.InventoryItem.category).like(pattern))
             filters.append(func.lower(models.InventoryItem.product_details).like(pattern))
+
+        if not filters:
+            return []
 
         products = (
             db.query(models.InventoryItem)
@@ -121,16 +297,25 @@ class OrderEngine:
             .all()
         )
 
-        def _score(p: models.InventoryItem) -> int:
-            text = (
-                (p.name or "").lower()
-                + " " + (p.category or "").lower()
-                + " " + (p.product_details or "").lower()
-            )
-            return sum(1 for t in hint_tokens if t in text)
+        scored = []
+        all_scores = []
+        for p in products:
+            s = OrderEngine.calculate_score(p, corrected_tokens)
+            all_scores.append((p.name, s))
+            if s >= 60: # Threshold for candidates
+                scored.append((s, OrderEngine._product_to_dict(p)))
 
-        ranked = sorted(products, key=_score, reverse=True)[:limit]
-        return [OrderEngine._product_to_dict(p) for p in ranked]
+        # FAIL 4.4: Debug logging for matching
+        print(f"[MATCH DEBUG] query='{hint_str}' corrected='{corrected_str}' scores={all_scores}")
+
+        scored.sort(key=lambda x: x[0], reverse=True)
+        results = [item for score, item in scored[:limit]]
+        
+        # Add score to results for router to check thresholds
+        for i, res in enumerate(results):
+            res["match_score"] = scored[i][0]
+            
+        return results
 
     @staticmethod
     def get_product_by_id(
@@ -337,31 +522,39 @@ class OrderEngine:
         db:           Session,
         shop_id:      int,
         customer_phone: str,
+        customer_name: str,
         hint:         str,
+        message_text: str = "",
     ) -> None:
         """
-        Upsert into MissingProductRequest so the shop owner can see demand.
+        Insert or increment a MissingProductRequest row (non-blocking).
+        Falls back gracefully if the DB write fails — never crashes the caller.
         """
         try:
             existing = (
                 db.query(models.MissingProductRequest)
-                .filter_by(shop_id=shop_id, product_name=hint.lower()[:100])
+                .filter_by(shop_id=shop_id, product_name=hint[:100])
                 .first()
             )
             if existing:
-                existing.count = (existing.count or 1) + 1
+                existing.count = (existing.count or 0) + 1
+                existing.customer_phone = customer_phone
             else:
-                db.add(
-                    models.MissingProductRequest(
-                        shop_id=shop_id,
-                        product_name=hint.lower()[:100],
-                        customer_phone=customer_phone,
-                    )
+                inquiry = models.MissingProductRequest(
+                    shop_id=shop_id,
+                    product_name=hint[:100],
+                    customer_phone=customer_phone,
+                    count=1,
                 )
+                db.add(inquiry)
             db.commit()
+            logger.info(f"[ORDER] Missing product logged: '{hint}' for shop {shop_id}")
         except Exception as exc:
-            logger.warning(f"[ORDER] log_missing_product failed: {exc}")
-            db.rollback()
+            logger.warning(f"[ORDER] log_missing_product failed (non-fatal): {exc}")
+            try:
+                db.rollback()
+            except Exception:
+                pass
 
     # ── Idempotency ───────────────────────────────────────────────────────────
 

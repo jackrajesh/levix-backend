@@ -1,0 +1,120 @@
+    @staticmethod
+    def calculate_score(p: models.InventoryItem, corrected_tokens: list[str]) -> int:
+        searchable = (
+            (p.name or "").lower()
+            + " " + (p.category or "").lower()
+            + " " + (p.product_details or "").lower()
+        )
+        name_lower = (p.name or "").lower()
+        hint_joined = " ".join(corrected_tokens)
+        
+        # Exact Match
+        if hint_joined == name_lower:
+            return 100
+            
+        # Descriptors
+        generic_words = {"rice", "biryani", "roti", "naan", "parotta", "chicken", "mutton", "fish", "ice cream", "juice", "milk", "water", "drink"}
+        modifiers = [t for t in corrected_tokens if t not in generic_words]
+        generics = [t for t in corrected_tokens if t in generic_words]
+        
+        primary_descriptor = modifiers[0] if modifiers else None
+        
+        # PRIMARY DESCRIPTOR RULE
+        if primary_descriptor and primary_descriptor not in searchable:
+            return 0
+            
+        # Keyword Overlap
+        overlap = 0
+        for t in corrected_tokens:
+            if t in searchable:
+                overlap += 1
+        
+        if len(corrected_tokens) == 0: return 0
+        base_score = (overlap / len(corrected_tokens)) * 50
+        
+        # Bonus for name inclusion
+        if name_lower in hint_joined or hint_joined in name_lower:
+            base_score += 30
+            
+        # Bonus for matching all generics
+        if generics and all(g in searchable for g in generics):
+            base_score += 10
+            
+        return int(base_score)
+
+    @staticmethod
+    def find_products(
+        db:          Session,
+        shop_id:     int,
+        hint_tokens: list[str],
+        limit:       int = 5,
+        shop_category: str = "General / Other",
+    ) -> list[dict[str, Any]]:
+        if not hint_tokens:
+            return []
+
+        hint_str = " ".join(hint_tokens)
+        corrected_str = _apply_typo_corrections(hint_str)
+
+        cat_aliases = _DEFAULT_ALIASES.get(shop_category, {})
+        if shop_category == "General / Other":
+            for aliases in _DEFAULT_ALIASES.values():
+                cat_aliases.update(aliases)
+
+        corrected_tokens = [
+            cat_aliases.get(t.lower(), t.lower())
+            for t in corrected_str.split()
+            if t
+        ]
+        if not corrected_tokens:
+            corrected_tokens = hint_tokens
+
+        # Step 1 + 2: Alias Match
+        generic_words = {"rice", "biryani", "roti", "naan", "parotta", "chicken", "mutton", "fish", "ice cream", "juice", "milk", "water", "drink"}
+        for token in corrected_tokens:
+            if token.lower() in generic_words and len(corrected_tokens) > 1:
+                continue
+                
+            alias_matches = (
+                db.query(models.InventoryAlias)
+                .filter(func.lower(models.InventoryAlias.alias).like(f"%{token}%"))
+                .all()
+            )
+            for alias_match in alias_matches:
+                product = db.query(models.InventoryItem).filter(
+                    models.InventoryItem.id == alias_match.inventory_id,
+                    models.InventoryItem.shop_id == shop_id,
+                    models.InventoryItem.quantity > 0,
+                ).first()
+                if product:
+                    if OrderEngine.calculate_score(product, corrected_tokens) >= 60:
+                        return [OrderEngine._product_to_dict(product)]
+
+        # Step 3-6: Fuzzy match
+        filters = []
+        for token in corrected_tokens:
+            pattern = f"%{token}%"
+            filters.append(func.lower(models.InventoryItem.name).like(pattern))
+            filters.append(func.lower(models.InventoryItem.category).like(pattern))
+            filters.append(func.lower(models.InventoryItem.product_details).like(pattern))
+
+        if not filters:
+            return []
+
+        products = (
+            db.query(models.InventoryItem)
+            .filter(models.InventoryItem.shop_id == shop_id)
+            .filter(models.InventoryItem.quantity > 0)
+            .filter(or_(*filters))
+            .limit(limit * 4)
+            .all()
+        )
+
+        scored = []
+        for p in products:
+            s = OrderEngine.calculate_score(p, corrected_tokens)
+            if s >= 60: # Threshold for auto-add
+                scored.append((s, OrderEngine._product_to_dict(p)))
+
+        scored.sort(key=lambda x: x[0], reverse=True)
+        return [item for score, item in scored[:limit]]

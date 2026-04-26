@@ -1566,11 +1566,29 @@
                 <div class="inventory-card" style="flex-direction:column; align-items:stretch">
                     <h3>Account Profile</h3>
                     <p style="color:var(--text-muted); margin-bottom: 24px">Manage your shop visibility and business details.</p>
-                    <div class="form-group" style="max-width: 400px">
+                    <div class="form-group" style="max-width: 400px; margin-bottom: 16px;">
                         <label class="form-label">Shop Display Name</label>
                         <div style="display:flex; gap:12px">
                             <input type="text" id="set-shop-name" class="form-input">
                             <button class="btn" onclick="updateShopName()">SAVE</button>
+                        </div>
+                    </div>
+                    <div class="form-group" style="max-width: 400px">
+                        <label class="form-label">Shop Category (Language Context)</label>
+                        <div style="display:flex; gap:12px">
+                            <select id="set-shop-category" class="form-input">
+                                <option value="Food & Restaurant">Food & Restaurant</option>
+                                <option value="Grocery">Grocery</option>
+                                <option value="Clothing & Fashion">Clothing & Fashion</option>
+                                <option value="Electronics">Electronics</option>
+                                <option value="Pharmacy & Health">Pharmacy & Health</option>
+                                <option value="Hardware & Tools">Hardware & Tools</option>
+                                <option value="Salon & Beauty">Salon & Beauty</option>
+                                <option value="Bakery">Bakery</option>
+                                <option value="Stationery">Stationery</option>
+                                <option value="General / Other">General / Other</option>
+                            </select>
+                            <button class="btn" onclick="updateShopCategory()">SAVE</button>
                         </div>
                     </div>
                 </div>
@@ -4266,6 +4284,17 @@
              document.getElementById('set-shop-name').value = data.shop_name;
              document.getElementById('mute-toggle').checked = !LevixAudio.isMuted;
              
+             // Fetch shop category if available
+             try {
+                 const catRes = await authFetch('/settings/api/shop-profile');
+                 if (catRes.ok) {
+                     const catData = await catRes.json();
+                     if (catData && catData.data && catData.data.shop_category) {
+                         document.getElementById('set-shop-category').value = catData.data.shop_category;
+                     }
+                 }
+             } catch (e) { console.error('Failed to load shop category', e); }
+             
              const wa = await authFetch('/admin/whatsapp/status');
              const waData = await wa.json();
              const indicator = document.getElementById('wa-indicator');
@@ -4285,6 +4314,14 @@
                 LevixAudio.play('save');
                 showToast('Shop name updated', 'success'); 
                 document.getElementById('shop-name-display').textContent = name; 
+            }
+        }
+        async function updateShopCategory() {
+            const category = document.getElementById('set-shop-category').value;
+            const res = await authFetch('/settings/api/shop-profile', { method:'PATCH', body: { shop_category: category } });
+            if (res.ok) { 
+                LevixAudio.play('save');
+                showToast('Shop category updated', 'success'); 
             }
         }
         async function submitWAConfig() {

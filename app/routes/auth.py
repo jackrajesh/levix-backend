@@ -88,6 +88,7 @@ def get_current_user_info(
         data = {
             "shop_id": identity.shop.id,
             "shop_name": identity.shop.shop_name,
+            "shop_category": identity.shop.shop_category,
             "role": identity.role,
             "user_name": identity.name,
             "user_type": identity.user_type,

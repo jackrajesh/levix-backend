@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from .auth import get_current_shop, UserIdentity, require_permission
-from ..schemas import ConnectWhatsAppRequest, ShopNameUpdate
+from ..schemas import ConnectWhatsAppRequest, ShopNameUpdate, ShopCategoryUpdate
 from ..models import Shop
 from ..database import get_db
 from ..services.sse import broadcast_event
@@ -16,6 +16,13 @@ def update_shop_name(data: ShopNameUpdate, db: Session = Depends(get_db), identi
     shop.shop_name = data.shop_name
     db.commit()
     return {"status": "success", "message": "Shop name updated"}
+
+@router.post("/shop-category")
+def update_shop_category(data: ShopCategoryUpdate, db: Session = Depends(get_db), identity: UserIdentity = Depends(require_permission("settings_edit"))):
+    shop = identity.shop
+    shop.shop_category = data.shop_category
+    db.commit()
+    return {"status": "success", "message": "Shop category updated"}
 
 @router.get("/shop-name")
 def get_shop_name(identity: UserIdentity = Depends(require_permission("settings_view"))):
@@ -59,3 +66,10 @@ def force_refresh(shop_id: int, identity: UserIdentity = Depends(require_permiss
     broadcast_event(shop_id, "new_order", '{"order_id":"MANUAL","customer":"System"}')
     broadcast_event(shop_id, "hard_reload")
     return {"status": "success", "message": f"Refresh triggered for shop {shop_id}"}
+
+@router.get("/alerts")
+def get_alerts(db: Session = Depends(get_db), identity: UserIdentity = Depends(require_permission("settings_view"))):
+    """Task 2 fix: List recent system alerts for the shop."""
+    from ..models import AdminAlert
+    alerts = db.query(AdminAlert).filter(AdminAlert.shop_id == identity.shop.id).order_by(AdminAlert.created_at.desc()).limit(50).all()
+    return alerts

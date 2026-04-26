@@ -1,0 +1,11 @@
+import uvicorn
+import os
+import sys
+
+# Ensure the current directory is in sys.path
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+if __name__ == "__main__":
+    print("Starting Levix Server...")
+    # Run the app from the 'app' package
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)

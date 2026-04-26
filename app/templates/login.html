@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-MC7H8XFN47"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-MC7H8XFN47');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Levix | Store Intelligence Platform</title>
+    <meta name="description" content="Sign in to Levix — the AI-powered WhatsApp store management platform for modern businesses.">
+    <link rel="icon" type="image/png" href="/static/favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --primary-light: #60a5fa;
+            --blue: #3b82f6;
+            --blue-dark: #1d4ed8;
+            --blue-soft: #2563eb;
+            --green: #22c55e;
+            --red: #ef4444;
+            --bg: #040d1a;
+            --surface: rgba(255,255,255,0.04);
+            --surface-hover: rgba(255,255,255,0.08);
+            --border: rgba(59,130,246,0.12);
+            --border-focus: rgba(59,130,246,0.6);
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --text-dim: #64748b;
+            --radius: 14px;
+            --shadow-glow: 0 0 60px rgba(59,130,246,0.15);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+        }
+
+        /* ===== Animated Background ===== */
+        .bg-scene {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+            /* Global blur removed to allow per-element glass effects */
+        }
+
+        /* ===== High-Visibility Active Background ===== */
+        .bg-gradient {
+            position: absolute;
+            inset: 0;
+            background: #02060f;
+            overflow: hidden;
+        }
+
+        /* ===== High-Visibility Active Background ===== */
+        /* ===== Smooth & Controlled Blue Brand Engine ===== */
+        .bg-gradient {
+            position: absolute;
+            inset: 0;
+            background: #01040a;
+            overflow: hidden;
+            perspective: 1200px;
+        }
+
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.3;
+            animation: blob-move var(--dur) ease-in-out infinite alternate;
+        }
+        .blob-1 { width: 900px; height: 900px; background: #0044ff; top: -15%; left: -10%; --dur: 30s; }
+        .blob-2 { width: 700px; height: 700px; background: #0088ff; bottom: -10%; right: -5%; --dur: 35s; }
+
+        .kinetic-x-wrap {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform-origin: center;
+            z-index: 1;
+            pointer-events: none;
+            width: 800px;
+            height: 800px;
+            transform-style: preserve-3d;
+            animation: x-3d-random 120s linear infinite; 
+            filter: blur(25px); /* Deepened blur for bokeh effect */
+        }
+
+        .kinetic-x-svg {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+            opacity: 0.08;
+            transform-style: preserve-3d;
+        }
+
+        /* Volumetric Model Layers */
+        .bg-x-vol {
+            fill: #3b82f6; 
+            stroke: none;
+        }
+
+        /* Massive 11-Layer Extrusion for tangible depth */
+        .v-layer { position: absolute; inset: 0; transform-style: preserve-3d; }
+        
+        .lz-0  { transform: translateZ(0px); fill: #3b82f6; opacity: 1; }
+        .lz-1  { transform: translateZ(-2px); fill: #2563eb; opacity: 0.95; }
+        .lz-2  { transform: translateZ(-4px); fill: #1d4ed8; opacity: 0.9; }
+        .lz-3  { transform: translateZ(-6px); fill: #1e40af; opacity: 0.85; }
+        .lz-4  { transform: translateZ(-8px); fill: #1e3a8a; opacity: 0.8; }
+        .lz-5  { transform: translateZ(-10px); fill: #172554; opacity: 0.75; }
+        .lz-6  { transform: translateZ(-12px); fill: #172554; opacity: 0.7; }
+        .lz-7  { transform: translateZ(-14px); fill: #0f172a; opacity: 0.65; }
+        .lz-8  { transform: translateZ(-16px); fill: #0f172a; opacity: 0.6; }
+        .lz-9  { transform: translateZ(-18px); fill: #020617; opacity: 0.5; }
+        .lz-10 { transform: translateZ(-20px); fill: #020617; opacity: 0.4; }
+
+        @keyframes x-3d-random {
+            0% { transform: translate(-50%, -50%) perspective(1500px) rotateX(20deg) rotateY(0deg) rotateZ(0deg); }
+            33% { transform: translate(-50%, -50%) perspective(1500px) rotateX(160deg) rotateY(180deg) rotateZ(45deg); }
+            66% { transform: translate(-50%, -50%) perspective(1500px) rotateX(-120deg) rotateY(360deg) rotateZ(-45deg); }
+            100% { transform: translate(-50%, -50%) perspective(1500px) rotateX(20deg) rotateY(0deg) rotateZ(0deg); }
+        }
+
+        .kinetic-grid {
+            position: absolute;
+            inset: -100%;
+            opacity: 0.35;
+            background-image: 
+                linear-gradient(rgba(0, 136, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 136, 255, 0.1) 1px, transparent 1px);
+            background-size: 110px 110px;
+            transform: rotateX(50deg) translateZ(-150px);
+            animation: grid-flow-right 180s linear infinite; 
+            filter: blur(16px); /* Stronger frosted glass effect */
+        }
+
+        @keyframes grid-flow-right {
+            from { background-position: 0 0; }
+            to { background-position: 1100px 0; }
+        }
+
+        .brand-keyword {
+            position: absolute;
+            color: #60a5fa;
+            font-weight: 850;
+            text-transform: uppercase;
+            letter-spacing: 0.25em;
+            pointer-events: none;
+            white-space: nowrap;
+            text-shadow: 0 0 15px rgba(59, 130, 246, 0.8); /* Glow through the glass */
+            animation: keyword-storm var(--dur) ease-in-out forwards;
+        }
+
+        @keyframes keyword-storm {
+            0% { transform: scale(0.9) translateY(20px); opacity: 0; }
+            20% { transform: scale(1) translateY(0); opacity: var(--op); }
+            80% { transform: scale(1.05) translateY(-20px); opacity: var(--op); }
+            100% { transform: scale(1.1) translateY(-40px); opacity: 0; }
+        }
+
+        .data-bit {
+            position: absolute;
+            width: 30px; height: 1px;
+            background: #0088ff;
+            opacity: 0.2;
+            animation: bit-travel var(--dur) ease-in-out infinite;
+        }
+
+        /* Digital Glitch Particles (Not Space) */
+        .data-bit {
+            position: absolute;
+            width: 20px; height: 1px;
+            background: #3b82f6;
+            opacity: 0.3;
+            animation: bit-travel var(--dur) linear infinite;
+        }
+
+        @keyframes bit-travel {
+            from { transform: translateX(-100px); opacity: 0; }
+            10% { opacity: 0.4; }
+            90% { opacity: 0.4; }
+            to { transform: translateX(100vw); opacity: 0; }
+        }
+
+        .grid-lines { display: none; } /* Replaced by kinetic-grid */
+
+        /* Particle dots */
+        .particles {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+        }
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background: rgba(96, 165, 250, 0.8);
+            box-shadow: 0 0 10px rgba(96, 165, 250, 0.5);
+            animation: twinkle var(--dur, 4s) ease-in-out infinite;
+            animation-delay: var(--delay, 0s);
+        }
+        @keyframes twinkle {
+            0%, 100% { opacity: 0; transform: scale(0.5); }
+            50% { opacity: 1; transform: scale(1.5); }
+        }
+
+        /* ===== Layout ===== */
+        .page-wrapper {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        /* ===== Left Panel (Hero) ===== */
+        .hero-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(37,99,235,0.15);
+            border: 1px solid rgba(59,130,246,0.3);
+            border-radius: 100px;
+            padding: 6px 16px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #93c5fd;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 32px;
+            max-width: fit-content;
+            animation: slide-in-left 0.8s ease both;
+        }
+
+        .badge-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #60a5fa;
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.7); }
+        }
+
+        .hero-logo {
+            font-size: 4rem;
+            font-weight: 900;
+            letter-spacing: -3px;
+            line-height: 1;
+            margin-bottom: 8px;
+            animation: slide-in-left 0.8s ease 0.1s both;
+        }
+        .hero-logo .x {
+            background: linear-gradient(135deg, #3b82f6, #60a5fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-tagline {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 48px;
+            animation: slide-in-left 0.8s ease 0.2s both;
+        }
+
+        .hero-features {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            animation: slide-in-left 0.8s ease 0.3s both;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .fi-indigo { background: rgba(37,99,235,0.15); border: 1px solid rgba(59,130,246,0.25); }
+        .fi-blue { background: rgba(14,165,233,0.15); border: 1px solid rgba(14,165,233,0.25); }
+        .fi-green { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.25); }
+
+        .feature-text h4 {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 2px;
+        }
+        .feature-text p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* Stats strip */
+        .stats-strip {
+            display: flex;
+            gap: 32px;
+            margin-top: 56px;
+            padding-top: 32px;
+            border-top: 1px solid var(--border);
+            animation: slide-in-left 0.8s ease 0.4s both;
+        }
+        .stat-item {}
+        .stat-item .num {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #3b82f6, #60a5fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .stat-item .lbl {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        @keyframes slide-in-left {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* ===== Right Panel (Form) ===== */
+        .form-panel {
+            width: 480px;
+            min-width: 480px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            background: rgba(255,255,255,0.02);
+            border-left: 1px solid rgba(59,130,246,0.1);
+            backdrop-filter: blur(20px);
+        }
+
+        .form-card {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .form-header {
+            margin-bottom: 32px;
+            animation: slide-in-right 0.8s ease 0.1s both;
+        }
+
+        .form-header h2 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
+        }
+
+        .form-header p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        @keyframes slide-in-right {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Form elements */
+        .form-section {
+            animation: slide-in-right 0.8s ease 0.2s both;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-dim);
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            transition: color 0.2s;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 14px 12px 42px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            outline: none;
+            transition: all 0.25s ease;
+        }
+
+        .form-input::placeholder { color: var(--text-dim); }
+
+        .form-input:focus {
+            border-color: rgba(59,130,246,0.6);
+            background: rgba(59,130,246,0.06);
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.12), 0 0 20px rgba(59,130,246,0.08);
+        }
+
+        .form-input:focus + .input-focus-glow {
+            opacity: 1;
+        }
+
+        .form-input:focus ~ .input-icon { color: #60a5fa; }
+
+        /* Password toggle */
+        .pw-toggle {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-dim);
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            transition: color 0.2s;
+        }
+        .pw-toggle:hover { color: var(--text-muted); }
+
+        /* Submit button */
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 24px;
+            transition: all 0.25s ease;
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.01em;
+        }
+
+        .btn-submit::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+            opacity: 0;
+            transition: opacity 0.25s;
+        }
+
+        .btn-submit:hover:not(:disabled)::before { opacity: 1; }
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 25px rgba(37,99,235,0.45);
+        }
+        .btn-submit:active:not(:disabled) { transform: translateY(0); }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .btn-submit.loading .spinner { display: block; }
+        .btn-submit.loading .btn-label { display: none; }
+
+        /* Status messages */
+        .status-msg {
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-top: 16px;
+            display: none;
+            animation: fade-in 0.3s ease;
+        }
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .status-error {
+            background: rgba(239,68,68,0.12);
+            border: 1px solid rgba(239,68,68,0.25);
+            color: #fca5a5;
+        }
+        .status-success {
+            background: rgba(34,197,94,0.12);
+            border: 1px solid rgba(34,197,94,0.25);
+            color: #86efac;
+        }
+
+        /* Divider */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 24px 0;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+        .divider span {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-dim);
+            white-space: nowrap;
+        }
+
+        /* Toggle footer */
+        .form-footer {
+            text-align: center;
+            margin-top: 28px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+            font-size: 0.875rem;
+            color: var(--text-dim);
+            font-weight: 500;
+        }
+        .form-footer a, .toggle-link {
+            color: #60a5fa;
+            text-decoration: none;
+            font-weight: 700;
+            cursor: pointer;
+            transition: color 0.2s;
+            background: none;
+            border: none;
+            font-family: inherit;
+            font-size: inherit;
+        }
+        .form-footer a:hover, .toggle-link:hover { color: #93c5fd; text-decoration: underline; }
+
+        /* Section transition */
+        .auth-section {
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+        .auth-section.hidden {
+            display: none;
+        }
+
+        /* Forgot password link */
+        .forgot-link {
+            display: block;
+            text-align: right;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-dim);
+            text-decoration: none;
+            margin-top: 6px;
+            transition: color 0.2s;
+        }
+        .forgot-link:hover { color: #60a5fa; }
+
+        /* Input with no icon */
+        .no-icon .form-input { padding-left: 14px; }
+
+        /* ===== X-Burst Preloader ===== */
+        .preloader {
+            position: fixed;
+            inset: 0;
+            background: #01040a;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .preloader-x {
+            font-size: 10rem;
+            font-weight: 950;
+            color: #3b82f6;
+            filter: drop-shadow(0 0 20px #3b82f6);
+            transform: scale(0);
+            animation: x-burst 1.2s cubic-bezier(0.8, 0, 0.2, 1) forwards;
+        }
+
+        .page-wrapper {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        /* ===== Success Overlay ===== */
+        .success-overlay {
+            position: fixed;
+            inset: 0;
+            background: #01040a;
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .success-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .success-logo {
+            font-size: 5rem;
+            font-weight: 950;
+            color: white;
+            filter: drop-shadow(0 0 20px #3b82f6);
+            margin-bottom: 20px;
+            animation: success-pulse 2s infinite ease-in-out;
+        }
+
+        @keyframes success-pulse {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 20px rgba(59,130,246,0.3)); }
+            50% { transform: scale(1.05); filter: drop-shadow(0 0 40px rgba(59,130,246,0.6)); }
+        }
+
+        .success-text {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #60a5fa;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            animation: slide-up-fade 0.5s ease forwards;
+        }
+
+        .success-loader {
+            width: 180px;
+            height: 2px;
+            background: rgba(255,255,255,0.05);
+            margin-top: 32px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .success-loader::after {
+            content: '';
+            position: absolute;
+            left: -40%; top: 0; height: 100%; width: 40%;
+            background: #3b82f6;
+            animation: loader-move 1.5s infinite;
+        }
+
+        @keyframes loader-move {
+            0% { left: -40%; }
+            100% { left: 140%; }
+        }
+
+        /* ===== Preloader HTML ===== */
+
+        /* ===== Interactive Enhancements ===== */
+        .form-input:focus {
+            transform: translateY(-2px);
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .hero-panel { display: none; }
+            .form-panel {
+                width: 100%;
+                min-width: unset;
+                border-left: none;
+                padding: 32px 24px;
+                background: var(--bg);
+            }
+            .form-card { max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Animated Background -->
+<div class="bg-scene">
+    <div class="bg-gradient">
+        <div class="kinetic-grid"></div>
+        <div class="kinetic-x-wrap">
+            <svg class="kinetic-x-svg" viewBox="0 0 1000 1000">
+                <!-- Massive 11-Layer Extrusion for full 3D Volumetric Depth -->
+                <path d="M250,200 L400,200 L500,400 L600,200 L750,200 L575,500 L750,800 L600,800 L500,600 L400,800 L250,800 L425,500 Z" class="bg-x-vol lz-10" />
+                <path d="M250,200 L400,200 L500,400 L600,200 L750,200 L575,500 L750,800 L600,800 L500,600 L400,800 L250,800 L425,500 Z" class="bg-x-vol lz-9" />
+                <path d="M250,200 L400,200 L500,400 L600,200 L750,200 L575,500 L750,800 L600,800 L500,600 L400,800 L250,800 L425,500 Z" class="bg-x-vol lz-8" />
+                <path d="M250,200 L400,200 L500,400 L600,200 L750,200 L575,500 L750,800 L600,800 L500,600 L400,800 L250,800 L425,500 Z" class="bg-x-vol lz-7" />
+                <path d="M250,200 L400,200 L500,400 L600,200 L750,200 L575,500 L750,800 L600,800 L500,600 L400,800 L250,800 L425,500 Z" class="bg-x-vol lz-6" />
+                <path d="M250,200 L400,200 L500,400 L600,200 L750,200 L575,500 L750,800 L600,800 L500,600 L400,800 L250,800 L425,500 Z" class="bg-x-vol lz-5" />
+                <path d="M250,200 L400,200 L500,400 L600,200 L750,200 L575,500 L750,800 L600,800 L500,600 L400,800 L250,800 L425,500 Z" class="bg-x-vol lz-4" />
+                <path d="M250,200 L400,200 L500,400 L600,200 L750,200 L575,500 L750,800 L600,800 L500,600 L400,800 L250,800 L425,500 Z" class="bg-x-vol lz-3" />
+                <path d="M250,200 L400,200 L500,400 L600,200 L750,200 L575,500 L750,800 L600,800 L500,600 L400,800 L250,800 L425,500 Z" class="bg-x-vol lz-2" />
+                <path d="M250,200 L400,200 L500,400 L600,200 L750,200 L575,500 L750,800 L600,800 L500,600 L400,800 L250,800 L425,500 Z" class="bg-x-vol lz-1" />
+                <path d="M250,200 L400,200 L500,400 L600,200 L750,200 L575,500 L750,800 L600,800 L500,600 L400,800 L250,800 L425,500 Z" class="bg-x-vol lz-0" />
+            </svg>
+        </div>
+        <div id="brand-engine-surface" style="position: absolute; inset: 0; z-index: 2;"></div>
+        <div id="data-bits-surface" style="position: absolute; inset: 0; z-index: 1;"></div>
+    </div>
+</div>
+
+<!-- Login Success Overlay -->
+<div id="success-overlay" class="success-overlay">
+    <div class="success-logo">LEVI<span style="color:var(--primary)">X</span></div>
+    <div id="welcome-msg" class="success-text">Syncing Intelligence</div>
+    <div class="success-loader"></div>
+</div>
+
+<div class="page-wrapper">
+
+    <!-- ===== LEFT: Hero Panel ===== -->
+    <div class="hero-panel">
+        <div class="hero-badge">
+            <div class="badge-dot"></div>
+            Next-Gen Store Management
+        </div>
+
+        <div class="hero-logo">LEVI<span class="x">X</span></div>
+        <p class="hero-tagline">Sell smart. Grow fast. Stay ahead.</p>
+
+        <!-- Quote Slider -->
+        <div id="quote-slider" style="margin-bottom:40px; padding: 24px 28px; background: rgba(37,99,235,0.08); border-left: 3px solid #3b82f6; border-radius: 0 16px 16px 0; min-height: 120px; display: flex; flex-direction: column; justify-content: center; position: relative; overflow: hidden; backdrop-filter: blur(4px);">
+            <div id="quote-container" style="position: relative; height: 100%;">
+                <!-- Dynamic Quote will be injected here -->
+            </div>
+        </div>
+
+        <div class="hero-features">
+            <div class="feature-item">
+                <div class="feature-icon fi-indigo">
+                    <svg width="18" height="18" fill="none" stroke="#60a5fa" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                </div>
+                <div class="feature-text">
+                    <h4>WhatsApp AI — Always On</h4>
+                    <p>Instant replies to every customer, day or night</p>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon fi-blue">
+                    <svg width="18" height="18" fill="none" stroke="#38bdf8" stroke-width="2" viewBox="0 0 24 24">
+                        <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+                    </svg>
+                </div>
+                <div class="feature-text">
+                    <h4>Smart Inventory & Orders</h4>
+                    <p>One dashboard to track everything in real time</p>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon fi-green">
+                    <svg width="18" height="18" fill="none" stroke="#4ade80" stroke-width="2" viewBox="0 0 24 24">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                    </svg>
+                </div>
+                <div class="feature-text">
+                    <h4>Revenue & Demand Analytics</h4>
+                    <p>Know what sells, when it sells, and how much</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Future Roadmap teaser -->
+        <div style="margin-top:40px; padding:20px; background: rgba(255,255,255,0.03); border:1px solid rgba(59,130,246,0.12); border-radius:12px;">
+            <p style="font-size:0.7rem; font-weight:800; color:#60a5fa; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:12px;">Coming Soon to Levix</p>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span style="width:6px;height:6px;border-radius:50%;background:#3b82f6;flex-shrink:0"></span>
+                    <span style="font-size:0.82rem; color:var(--text-muted); font-weight:600;">Multi-shop management under one account</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span style="width:6px;height:6px;border-radius:50%;background:#60a5fa;flex-shrink:0"></span>
+                    <span style="font-size:0.82rem; color:var(--text-muted); font-weight:600;">Auto-restock alerts & supplier integrations</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span style="width:6px;height:6px;border-radius:50%;background:#93c5fd;flex-shrink:0"></span>
+                    <span style="font-size:0.82rem; color:var(--text-muted); font-weight:600;">AI-driven pricing recommendations</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== RIGHT: Form Panel ===== -->
+    <div class="form-panel">
+        <div class="form-card">
+
+            <!-- Mobile logo -->
+            <div style="display:none; text-align:center; margin-bottom:32px;" id="mobile-logo">
+                <div style="font-size:2.5rem; font-weight:900; letter-spacing:-2px;">LEVI<span style="background:linear-gradient(135deg,#6366f1,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">X</span></div>
+            </div>
+
+            <!-- ===== LOGIN SECTION ===== -->
+            <div id="login-section" class="auth-section">
+                <div class="form-header">
+                    <h2>Welcome back 👋</h2>
+                    <p>Sign in to access your store dashboard</p>
+                </div>
+
+                <form id="login-form" class="form-section">
+                    <div class="form-group">
+                        <label class="form-label" for="login-email">Email Address</label>
+                        <div class="input-wrapper">
+                            <div class="input-icon">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                            </div>
+                            <input type="email" class="form-input" id="login-email" required placeholder="you@shop.com" autocomplete="email">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="login-password">Password</label>
+                        <div class="input-wrapper">
+                            <div class="input-icon">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            </div>
+                            <input type="password" class="form-input" id="login-password" required placeholder="Enter your password" autocomplete="current-password">
+                            <button type="button" class="pw-toggle" onclick="togglePw('login-password', this)">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </button>
+                        </div>
+                        <a href="/forgot-password" class="forgot-link">Forgot password?</a>
+                    </div>
+
+                    <div id="login-error-msg" class="status-msg status-error"></div>
+
+                    <button type="submit" id="login-submit-btn" class="btn-submit">
+                        <div class="spinner"></div>
+                        <span class="btn-label">Sign In to Dashboard</span>
+                        <svg class="btn-label" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </button>
+                </form>
+
+                <div class="form-footer">
+                    No account yet?&nbsp;
+                    <button class="toggle-link" onclick="showRegister()">Create one free →</button>
+                </div>
+            </div>
+
+            <!-- ===== REGISTER SECTION ===== -->
+            <div id="register-section" class="auth-section hidden">
+                <div class="form-header">
+                    <h2>Create your shop 🚀</h2>
+                    <p>Set up in under 60 seconds, no credit card needed</p>
+                </div>
+
+                <form id="register-form" class="form-section">
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                        <div class="form-group">
+                            <label class="form-label" for="reg-shop-name">Shop Name</label>
+                            <div class="input-wrapper no-icon">
+                                <input type="text" class="form-input" id="reg-shop-name" required placeholder="e.g. Jack's Mart" autocomplete="organization">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="reg-owner-name">Owner Name</label>
+                            <div class="input-wrapper no-icon">
+                                <input type="text" class="form-input" id="reg-owner-name" required placeholder="Your full name" autocomplete="name">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="reg-email">Email Address</label>
+                        <div class="input-wrapper">
+                            <div class="input-icon">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                            </div>
+                            <input type="email" class="form-input" id="reg-email" required placeholder="you@shop.com" autocomplete="email">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="reg-phone">Phone Number</label>
+                        <div class="input-wrapper">
+                            <div class="input-icon">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13 19.79 19.79 0 0 1 1.61 4.4 2 2 0 0 1 3.6 2.22h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l.91-.91a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21.93 17z"/></svg>
+                            </div>
+                            <input type="tel" class="form-input" id="reg-phone" pattern="[0-9]{10}" maxlength="10" required placeholder="10-digit mobile number" autocomplete="tel">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="reg-password">Password</label>
+                        <div class="input-wrapper">
+                            <div class="input-icon">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            </div>
+                            <input type="password" class="form-input" id="reg-password" required placeholder="Create a strong password" autocomplete="new-password">
+                            <button type="button" class="pw-toggle" onclick="togglePw('reg-password', this)">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="reg-status-msg" class="status-msg"></div>
+
+                    <button type="submit" id="register-submit-btn" class="btn-submit">
+                        <div class="spinner"></div>
+                        <span class="btn-label">Create My Shop →</span>
+                    </button>
+                </form>
+
+                <div class="form-footer">
+                    Already have an account?&nbsp;
+                    <button class="toggle-link" onclick="showLogin()">Sign in here</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Redirect if already authenticated
+    // ===== 20+ Year Animator: Massive Kinetic Brand Library =====
+    const surface = document.getElementById('brand-engine-surface');
+    const bitsSurface = document.getElementById('data-bits-surface');
+    
+    const keywords = [
+        'SALES', 'GROWTH', 'WHATSAPP AI', 'SMART ORDERS', '24/7 AUTOMATION', 'LEVIX', 'REVENUE', 'INVENTORY',
+        'PROFIT', 'CONVERSION', 'SCALABILITY', 'ROI', 'MOMENTUM', 'RETAIL', 'MERCHANT', 'OMNI-CHANNEL',
+        'SUCCESS', 'ALGORITHM', 'STOCKS', 'CATALOG', 'CHATBOT', 'MOBILE FIRST', 'NEXT-GEN', 'CUSTOME-CARE',
+        'REPLY INSTANT', 'ECOMMERCE', 'POWERFUL', 'ROBUST', 'API SYNC', 'CLOUD DATA', 'REAL-TIME', 'INSIGHTS',
+        'ANALYTICS', 'DEMAND', 'SUPPLY', 'LOGISTICS', 'CHECKOUT', 'PORTAL', 'SHOP OWNER', 'UNLIMITED',
+        'ELEGANT', 'MODERN', 'DASHBOARD', 'MATRICS', 'TRENDS', 'AUTO-REPLY', 'BROADCAST', 'AUDIENCE',
+        'ENGAGEMENT', 'RETENTION', 'LOYALTY', 'REACH', 'STRATEGY', 'OPTIMIZE', 'INTEGRATION', 'WEBHOOK',
+        'DATABASE', 'SECURITY', 'ENCRYPTION', 'PRODUCTIVITY', 'EFFICIENCY', 'STREAMLINE', 'VELOCITY',
+        'ACCELERATE', 'IMPACT', 'VALUE', 'PREMIUM', 'SaaS', 'STOREFRONT', 'DIGITAL', 'CONNECTED',
+        'SMART SHOP', 'AI AGENT', 'CHAT AGENT', 'MESSAGE FLOW', 'ORDER FLOW', 'BOOKING ID', 'TRACKING',
+        'NOTIFICATIONS', 'AUTO-PILOT', 'SMART STOCK', 'RE-STOCK', 'LOW STOCK ALERT', 'SALES GRAPH',
+        'PERFORMANCE', 'GROWTH ENGINE', 'REVENUE STREAM', 'CUSTOMER BASE', 'MARKETPLACE', 'SEAMLESS',
+        'FRICTIONLESS', 'FUTURE-PROOF', 'STABLE', 'SCALABLE', 'GLOBAL', 'LOCAL', 'TRUSTED', 'SECURE'
+    ];
+
+    function spawnKeyword() {
+        const word = document.createElement('div');
+        word.className = 'brand-keyword';
+        word.textContent = keywords[Math.floor(Math.random() * keywords.length)];
+        
+        const x = (5 + Math.random() * 90) + '%';
+        const y = (5 + Math.random() * 90) + '%';
+        
+        // Randomize motion and size for "Data Storm" look
+        const scale = 0.6 + Math.random() * 0.8;
+        const driftX = (Math.random() - 0.5) * 60 + 'px';
+        const opacity = 0.15 + Math.random() * 0.45;
+        const duration = 8 + Math.random() * 5 + 's'; /* Shorter lifespan */
+
+        word.style.left = x;
+        word.style.top = y;
+        word.style.fontSize = (0.7 + Math.random() * 0.7) + 'rem';
+        word.style.setProperty('--sc', scale);
+        word.style.setProperty('--mx', driftX);
+        word.style.setProperty('--op', opacity);
+        word.style.setProperty('--dur', duration);
+        
+        surface.appendChild(word);
+        setTimeout(() => word.remove(), parseFloat(duration) * 1000);
+    }
+
+    function spawnDataBit() {
+        const bit = document.createElement('div');
+        bit.className = 'data-bit';
+        bit.style.top = Math.random() * 100 + '%';
+        bit.style.left = '-100px';
+        bit.style.height = '1px';
+        bit.style.width = (30 + Math.random() * 100) + 'px';
+        bit.style.setProperty('--dur', (6 + Math.random() * 8) + 's');
+        
+        bitsSurface.appendChild(bit);
+        setTimeout(() => bit.remove(), 15000);
+    }
+
+    // Calm Branding Frequency
+    setInterval(spawnKeyword, 4500); 
+    setInterval(spawnDataBit, 6000);
+
+    // Initial burst - gentle
+    for(let i=0; i<8; i++) setTimeout(spawnKeyword, Math.random() * 3000);
+    for(let i=0; i<10; i++) setTimeout(spawnDataBit, Math.random() * 4000);
+
+    // Section Toggles, Login, and Register logic remains unchanged
+
+    // ===== Password Toggle =====
+    function togglePw(inputId, btn) {
+        const input = document.getElementById(inputId);
+        const isHidden = input.type === 'password';
+        input.type = isHidden ? 'text' : 'password';
+        btn.querySelector('svg').innerHTML = isHidden
+            ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>'
+            : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+    }
+
+    // ===== Section Toggles =====
+    function showRegister() {
+        document.getElementById('login-section').classList.add('hidden');
+        document.getElementById('register-section').classList.remove('hidden');
+        document.getElementById('login-error-msg').style.display = 'none';
+    }
+
+    function showLogin() {
+        document.getElementById('register-section').classList.add('hidden');
+        document.getElementById('login-section').classList.remove('hidden');
+        document.getElementById('reg-status-msg').style.display = 'none';
+    }
+
+    // ===== Login Submission — Backend unchanged =====
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+        const btn = document.getElementById('login-submit-btn');
+        const errorMsg = document.getElementById('login-error-msg');
+
+        btn.classList.add('loading');
+        btn.disabled = true;
+        errorMsg.style.display = 'none';
+
+        const formData = new URLSearchParams();
+        formData.append('username', email);
+        formData.append('password', password);
+
+        try {
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formData
+            });
+            const data = await response.json();
+
+            if (response.ok && data.access_token) {
+                localStorage.setItem('token', data.access_token);
+                
+                // Fancy Redirect Sequence
+                const overlay = document.getElementById('success-overlay');
+                const welcome = document.getElementById('welcome-msg');
+                const hour = new Date().getHours();
+                let greeting = 'Welcome back';
+                if (hour >= 5 && hour < 12) greeting = 'Good Morning';
+                else if (hour >= 12 && hour < 17) greeting = 'Good Afternoon';
+                else if (hour >= 17 && hour < 22) greeting = 'Good Evening';
+                
+                welcome.textContent = `${greeting.toUpperCase()}, SYNCING YOUR STORE...`;
+                overlay.classList.add('active');
+                
+                setTimeout(() => {
+                    window.location.href = '/dashboard';
+                }, 1800);
+            } else {
+                errorMsg.textContent = data.detail || 'Invalid credentials. Please try again.';
+                errorMsg.className = 'status-msg status-error';
+                errorMsg.style.display = 'block';
+                btn.classList.remove('loading');
+                btn.disabled = false;
+            }
+        } catch (err) {
+            errorMsg.textContent = 'Network error. Please check your connection.';
+            errorMsg.className = 'status-msg status-error';
+            errorMsg.style.display = 'block';
+            btn.classList.remove('loading');
+            btn.disabled = false;
+        }
+    });
+
+    // ===== Register Submission — Backend unchanged =====
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const shop_name = document.getElementById('reg-shop-name').value.trim();
+        const owner_name = document.getElementById('reg-owner-name').value.trim();
+        const email = document.getElementById('reg-email').value.trim();
+        const phone_number = document.getElementById('reg-phone').value.trim();
+        const password = document.getElementById('reg-password').value;
+        const btn = document.getElementById('register-submit-btn');
+        const statusMsg = document.getElementById('reg-status-msg');
+
+        if (!shop_name || !owner_name || !email || !phone_number || !password) {
+            statusMsg.textContent = 'All fields are required.';
+            statusMsg.className = 'status-msg status-error';
+            statusMsg.style.display = 'block';
+            return;
+        }
+        if (!/^\d{10}$/.test(phone_number)) {
+            statusMsg.textContent = 'Phone number must be exactly 10 digits.';
+            statusMsg.className = 'status-msg status-error';
+            statusMsg.style.display = 'block';
+            return;
+        }
+
+        btn.classList.add('loading');
+        btn.disabled = true;
+        statusMsg.style.display = 'none';
+
+        try {
+            const response = await fetch('/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ shop_name, owner_name, email, phone_number, password })
+            });
+            const data = await response.json().catch(() => null);
+
+            if (response.ok) {
+                statusMsg.textContent = data?.message || '🎉 Account created! Signing you in...';
+                statusMsg.className = 'status-msg status-success';
+                statusMsg.style.display = 'block';
+                document.getElementById('register-form').reset();
+
+                setTimeout(() => {
+                    showLogin();
+                    document.getElementById('login-email').value = email;
+                    document.getElementById('login-password').focus();
+                }, 2000);
+            } else {
+                statusMsg.textContent = data?.detail || data?.message || 'Registration failed. Please try again.';
+                statusMsg.className = 'status-msg status-error';
+                statusMsg.style.display = 'block';
+            }
+        } catch (err) {
+            statusMsg.textContent = 'Network error. Please try again.';
+            statusMsg.className = 'status-msg status-error';
+            statusMsg.style.display = 'block';
+        } finally {
+            btn.classList.remove('loading');
+            btn.disabled = false;
+        }
+    });
+    // ===== 50 Dynamic Brand Quotes =====
+    const levixQuotes = [
+        { q: "Your shop never sleeps, your AI never stops — every message answered, every sale it clocks.", a: "The Levix Promise" },
+        { q: "Orders in the morning, insights late at night — Levix keeps your business shining bright.", a: "Intelligent Growth" },
+        { q: "No more missed inquiries, no more lost leads — Levix delivers exactly what your shop needs.", a: "Total Automation" },
+        { q: "Automate your chats, accelerate your gain — Levix takes away the retail pain.", a: "Efficiency Peak" },
+        { q: "The modern way to sell and grow — Levix keeps your business in the flow.", a: "Market Leader" },
+        { q: "Retail made simple, growth made fast — a business partnership built to last.", a: "Founder Focused" },
+        { q: "Scale your store with the speed of light — Levix AI works day and night.", a: "Speed of Sale" },
+        { q: "Every customer heard, every order tracked — the power of Levix is a matter of fact.", a: "Trust Engine" },
+        { q: "Turn every message into a sale — with Levix AI, you'll never fail.", a: "Revenue Booster" },
+        { q: "Your business assistant, smart and keen — the sharpest retail tool you've ever seen.", a: "Smart Shop" },
+        { q: "Inventory management in the palm of your hand — the best-run shop in all the land.", a: "Total Control" },
+        { q: "From shop setup to automated replies — watch your brand's popularity rise.", a: "Brand Lift" },
+        { q: "Sell on WhatsApp with total ease — Levix handles the hard parts, if you please.", a: "Simple Selling" },
+        { q: "Growth is a choice, and Levix is the tool — making smart selling the golden rule.", a: "Growth Logic" },
+        { q: "A smarter dashboard for a smarter you — see what the power of Levix can do.", a: "Intelligence Hub" },
+        { q: "No more manual work, no more delay — Levix AI leads the way.", a: "Auto-Pilot" },
+        { q: "The pulse of your store in every report — the business partner you'll never fall short.", a: "Life Pulse" },
+        { q: "Connect with shoppers, seal the deal — Levix makes the future of retail real.", a: "Deal Maker" },
+        { q: "Real-time updates, real-world gain — break free from the manual inventory chain.", a: "Live Data" },
+        { q: "WhatsApp selling, simplified and sleek — the competitive edge that you seek.", a: "Tech Edge" },
+        { q: "Your global store, your local touch — Levix AI does so much.", a: "Global Reach" },
+        { q: "Reliable, fast, and remarkably smart — Levix wins every customer's heart.", a: "Customer Joy" },
+        { q: "A digital assistant that knows your stock — better than any old-school grandfather clock.", a: "Digital Clerk" },
+        { q: "Data-driven decisions, growth-driven mind — leaving the slow-moving shops behind.", a: "Data First" },
+        { q: "From startup shop to retail giant — Levix keeps your infrastructure compliant.", a: "Compliance" },
+        { q: "The engine of growth for the modern age — turning to Levix's dynamic page.", a: "New Era" },
+        { q: "Chat to convert, sell to succeed — Levix is exactly the boost you need.", a: "Success Path" },
+        { q: "Smart inventory, smarter sales — Levix is where the winning prevails.", a: "Winners Choice" },
+        { q: "Automatic bookings, systematic growth — Levix and your shop, a powerful oath.", a: "Strong Bond" },
+        { q: "Manage your catalog with a single click — the Levix system is incredibly quick.", a: "Swift Ops" },
+        { q: "A retail revolution in your inbox today — Levix AI has come to stay.", a: "Retail Revolution" },
+        { q: "The future of retail is here to stay — let Levix guide you every step of the way.", a: "Future Proof" },
+        { q: "Powerful features, simple to use — Levix is a choice you'll never lose.", a: "Power User" },
+        { q: "Unlock the potential of your retail space — with Levix, you'll always win the race.", a: "Race Winner" },
+        { q: "Responsive support, innovative design — Levix is where your business will shine.", a: "Innovation" },
+        { q: "Efficiency redefined, success assured — with Levix, your growth is secured.", a: "Secure Growth" },
+        { q: "Dynamic analytics, actionable facts — Levix is where your business acts.", a: "Actionable AI" },
+        { q: "Seamless integration with the tools you love — Levix is the solution from above.", a: "Integrated Hub" },
+        { q: "Customer satisfaction at an all-time high — watch your retail business fly.", a: "High Flyer" },
+        { q: "The standard for excellence in retail tech — with Levix, you're on the right deck.", a: "Gold Standard" },
+        { q: "Innovative automation, reliable results — Levix is the key that avoids insults.", a: "Reliable AI" },
+        { q: "Expertly crafted for the modern shop — with Levix, your sales will never stop.", a: "Agile Store" },
+        { q: "A vision for growth, a passion for sales — Levix is where your business scales.", a: "Scaling Goal" },
+        { q: "Transforming the way you do retail today — Levix is paving a brand new way.", a: "Transformation" },
+        { q: "The ultimate partner for your shop's success — Levix is better than all the rest.", a: "Elite Partner" },
+        { q: "Retail intelligence at your fingertips — Levix is where your business flips.", a: "Digital Edge" },
+        { q: "Smart commerce, better living — Levix is the gift that keeps on giving.", a: "Better Biz" },
+        { q: "Leading the charge in automated sales — Levix is where your business sails.", a: "Leader" },
+        { q: "A world of possibilities in a single tool — Levix is the retail business rule.", a: "Business Rule" },
+        { q: "Your shop's best friend, your brand's best ally — Levix is the one that reaches the sky.", a: "The Skywards" }
+    ];
+
+    const quoteContainer = document.getElementById('quote-container');
+
+    function updateQuote() {
+        const quoteObj = levixQuotes[Math.floor(Math.random() * levixQuotes.length)];
+        
+        // Create new slide
+        const slide = document.createElement('div');
+        slide.className = 'quote-slide';
+        slide.style.cssText = 'transition: all 0.8s ease; opacity: 0; transform: translateX(40px); position: absolute; top: 0; left: 0; width: 100%;';
+        
+        slide.innerHTML = `
+            <p style="font-size:1.05rem; font-weight:600; color:#bfdbfe; line-height:1.6; font-style:italic;">"${quoteObj.q}"</p>
+            <span style="font-size:0.75rem; color:var(--text-dim); font-weight:700; text-transform:uppercase; letter-spacing:0.05em; margin-top:12px; display:block;">— ${quoteObj.a}</span>
+        `;
+        
+        // Handle current active
+        const current = quoteContainer.querySelector('.quote-slide.active');
+        if (current) {
+            current.style.opacity = '0';
+            current.style.transform = 'translateX(-40px)';
+            current.classList.remove('active');
+            setTimeout(() => current.remove(), 800);
+        }
+        
+        quoteContainer.appendChild(slide);
+        
+        // Initial setup for the very first quote
+        if (!current) {
+            slide.style.position = 'relative';
+        }
+
+        // Trigger animation
+        setTimeout(() => {
+            slide.style.opacity = '1';
+            slide.style.transform = 'translateX(0)';
+            slide.classList.add('active');
+        }, 50);
+    }
+
+    // Initial quote
+    updateQuote();
+    setInterval(updateQuote, 6500);
+
+</script>
+</body>
+</html>

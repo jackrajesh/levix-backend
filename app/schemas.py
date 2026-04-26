@@ -30,11 +30,15 @@ class TokenData(BaseModel):
 class MeResponse(BaseModel):
     shop_id: int
     shop_name: Optional[str] = None
+    shop_category: Optional[str] = "General / Other"
     role: Optional[str] = "owner"
     user_name: Optional[str] = None
     user_type: Optional[str] = "owner"
     is_team_member: Optional[bool] = False
     permissions: Optional[list] = []
+
+class ShopCategoryUpdate(BaseModel):
+    shop_category: str
 
 class ForgotPasswordRequest(BaseModel):
     email: EmailStr

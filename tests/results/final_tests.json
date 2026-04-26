@@ -1,0 +1,102 @@
+{
+  "TEST_A (Restaurant - Unrelated)": [
+    {
+      "user": "iphone",
+      "bot": "We mainly serve food 😊 Want to see today's menu?"
+    }
+  ],
+  "TEST_B (Mobile Shop - Valid)": [
+    {
+      "user": "iphone",
+      "bot": "We don't have *Iphone* right now. 😔\nShall I send your request to the shop owner? *(yes / no)*"
+    },
+    {
+      "user": "charger",
+      "bot": "Please reply *yes* to confirm, or *no* to cancel 😊"
+    },
+    {
+      "user": "biryani",
+      "bot": "We mainly handle mobile phones & accessories 😊 Need help choosing one?"
+    }
+  ],
+  "TEST_C (Food Shop - Cart & Checkout)": [
+    {
+      "user": "2 fried rice, 1 coke",
+      "bot": "Added to cart:\n✅ 2x Fried Rice\n✅ 1x Coke\n\n*Cart total: ₹300*"
+    },
+    {
+      "user": "checkout",
+      "bot": "✅ *Order Summary*\n• 2x Fried Rice ₹200\n• 1x Coke ₹100\n\n*Total: ₹300*\n\nHow would you like to receive it?\nReply *pickup* or *delivery*"
+    },
+    {
+      "user": "pickup",
+      "bot": "Great, you'll pick it up! 🏪\nHere's your order:\n• 2x Fried Rice\n• 1x Coke\n\nTotal: *₹300*\n\nShall I confirm? _(yes / no)_"
+    },
+    {
+      "user": "yes",
+      "bot": "🎉 Order *#80764* confirmed!\nStatus: *PENDING*\n🏪 Pickup from store\nTotal: *₹300*\n\nSee you soon!"
+    }
+  ],
+  "TEST_D (Salon - Service Booking)": [
+    {
+      "user": "haircut tomorrow 5pm",
+      "bot": "Got it! Requesting: *haircut tomorrow 5pm*\nShall I confirm this booking? *(yes / no)*"
+    },
+    {
+      "user": "yes",
+      "bot": "🎉 Booking *#44691* confirmed!\nService: *haircut tomorrow 5pm*\nStatus: *CONFIRMED*\n\nSee you soon!"
+    }
+  ],
+  "TEST_E (Address Merging)": [
+    {
+      "user": "coke",
+      "bot": "✅ Added *1x Coke* (₹100 each)\nCart total: *₹100*\n\nAnything else?"
+    },
+    {
+      "user": "checkout",
+      "bot": "✅ *Order Summary*\n• 1x Coke ₹100\n\n*Total: ₹100*\n\nHow would you like to receive it?\nReply *pickup* or *delivery*"
+    },
+    {
+      "user": "delivery",
+      "bot": "Perfect! 🚗 Please share your delivery address.\n_(Street / flat no / area / city)_"
+    },
+    {
+      "user": "Arasu Colony",
+      "bot": "Could you give a bit more detail on the address? Like the street name or landmark 😊"
+    },
+    {
+      "user": "Karuppana Samy Street",
+      "bot": "Got it! Delivering to:\n_arasu colony, karuppana samy street_\n\nHere's your order:\n• 1x Coke\n\nTotal: *₹140*\n\nConfirm order? _(yes / no)_\n_(₹40 delivery charge included)_"
+    },
+    {
+      "user": "Near Church",
+      "bot": "Please reply *yes* to confirm, or *no* to cancel 😊"
+    },
+    {
+      "user": "yes",
+      "bot": "🎉 Order *#54428* confirmed!\nStatus: *PENDING*\n📍 Delivering to: _arasu colony, karuppana samy street_\nTotal: *₹140*\n\nWe'll notify you when it's on the way!"
+    }
+  ],
+  "TEST_F (Missing Request)": [
+    {
+      "user": "water packet",
+      "bot": "We don't have *Water Packet* right now. 😔\nShall I send your request to the shop owner? *(yes / no)*"
+    },
+    {
+      "user": "yes",
+      "bot": "✅ Got it! Your request for *Water Packet* has been sent to the owner.\nThey'll look into it. Anything else?"
+    }
+  ],
+  "TEST_G (Track Order)": [
+    {
+      "user": "track my order",
+      "bot": "Order *#80764* — ⏳ *PENDING*\nItems: 2x Fried Rice; 1x Coke\nTotal: *₹300.00*"
+    }
+  ],
+  "TEST_H (Track Booking)": [
+    {
+      "user": "track my order",
+      "bot": "Booking *#44691* — ✅ *CONFIRMED*\nhaircut tomorrow 5pm"
+    }
+  ]
+}

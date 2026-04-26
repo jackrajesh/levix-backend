@@ -17,6 +17,7 @@ States:
   awaiting_confirmation → full order assembled, waiting for YES/NO
   completed         → order confirmed and written to DB
   cancelled         → customer cancelled
+  onboarding        → collecting new customer name and phone
 
 Transition rules are enforced but not blocking — invalid transitions
 are logged as warnings and the state is updated anyway (permissive mode).
@@ -39,16 +40,20 @@ logger = logging.getLogger("levix.conversation")
 # ─── Valid state transitions ──────────────────────────────────────────────────
 
 VALID_TRANSITIONS: dict[str, set[str]] = {
-    "idle":                      {"shopping", "cart_active", "idle"},
-    "shopping":                  {"shopping", "cart_active", "completed", "idle"},
-    "cart_active":               {"cart_active", "shopping", "awaiting_delivery_mode", "awaiting_confirmation", "awaiting_clear_confirm", "awaiting_yes_no", "cancelled", "idle"},
-    "awaiting_delivery_mode":    {"cart_active", "awaiting_address", "awaiting_confirmation", "cancelled"},
-    "awaiting_address":          {"awaiting_address", "awaiting_confirmation", "cart_active", "cancelled"},
-    "awaiting_confirmation":     {"cart_active", "completed", "cancelled"},
+    "idle":                      {"shopping", "cart_active", "idle", "onboarding", "browsing"},
+    "onboarding":                {"onboarding", "idle", "shopping", "browsing"},
+    "browsing":                  {"browsing", "shopping", "cart_active", "idle", "awaiting_inquiry_or_menu"},
+    "shopping":                  {"shopping", "cart_active", "completed", "idle", "awaiting_yes_no", "awaiting_clarification", "browsing"},
+    "cart_active":               {"cart_active", "shopping", "awaiting_delivery_mode", "awaiting_confirmation", "awaiting_clear_confirm", "awaiting_yes_no", "cancelled", "idle", "awaiting_clarification", "browsing"},
+    "awaiting_delivery_mode":    {"cart_active", "awaiting_address", "awaiting_confirmation", "cancelled", "shopping"},
+    "awaiting_address":          {"awaiting_address", "awaiting_confirmation", "cart_active", "cancelled", "shopping"},
+    "awaiting_confirmation":     {"cart_active", "completed", "cancelled", "shopping"},
     "awaiting_clear_confirm":    {"shopping", "cart_active", "cancelled"},
-    "awaiting_yes_no":           {"shopping", "cart_active", "awaiting_address", "awaiting_confirmation", "idle"},
-    "completed":                 {"idle", "shopping"},
-    "cancelled":                 {"idle", "shopping"},
+    "awaiting_yes_no":           {"shopping", "cart_active", "awaiting_address", "awaiting_confirmation", "idle", "awaiting_yes_no"},
+    "awaiting_clarification":    {"shopping", "cart_active", "idle"},
+    "awaiting_inquiry_or_menu":  {"browsing", "shopping", "idle"},
+    "completed":                 {"idle", "shopping", "cart_active"},
+    "cancelled":                 {"idle", "shopping", "cart_active"},
 }
 
 ALL_STATES = set(VALID_TRANSITIONS.keys())

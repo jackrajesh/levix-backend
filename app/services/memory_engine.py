@@ -65,6 +65,33 @@ class SessionMemory:
     pending_payload:      Optional[dict] = None  # arbitrary payload for the action
     pending_created_at:   Optional[str] = None   # ISO timestamp
 
+    # Gap 1: Rate Limiting
+    message_timestamps:   list[float] = field(default_factory=list) # List of time.time() stamps
+
+    # Gap 5: Failed Order Retry
+    retry_payload:        Optional[dict] = None  # Stores data for re-attempting DB write
+    retry_count:          int = 0
+
+    # Gap 6: Ambiguous Product Clarification
+    ambiguous_options:    list[dict] = field(default_factory=list) # List of candidate products
+
+    # Gap 4: Last modified item tracking (for "add 2 more", "make it 5")
+    last_item_id:         Optional[int] = None
+
+    # Change 4: Onboarding Flow tracking
+    onboarding_step:      Optional[str] = None # "collect_name" | "collect_phone"
+    retry_phone_count:    int = 0
+
+    # FAIL 2.2 / 6.2: Upsell tracking
+    upsell_active:        bool = False
+    upsell_product:       Optional[str] = None
+
+    # FAIL 4.5: Pending inquiry tracking
+    pending_inquiry_product: Optional[str] = None
+    
+    # FAIL 6.3: Shop category
+    shop_category:        str = "General"
+
     # ── Serialisation ─────────────────────────────────────────────────────────
 
     def to_dict(self) -> dict[str, Any]:
@@ -125,8 +152,33 @@ class MemoryEngine:
         """
         Load both layers from the DB. Creates the CustomerProfile if needed.
         """
+        # FAIL 1.7: Debug for returning customer lookup
+        print(f"[ONBOARDING] Looking up phone={phone} shop_id={session.shop_id}")
         profile = CustomerProfileEngine.get_or_create(db, session.shop_id, phone)
+        print(f"[ONBOARDING] Found profile: {profile.customer_name} (orders={profile.total_orders})")
+        
         session_mem = SessionMemory.from_dict(session.collected_fields or {})
+        
+        # FAIL 6.3: Load shop category into session context
+        shop = db.query(models.Shop).get(session.shop_id)
+        if shop:
+            session_mem.shop_category = getattr(shop, "shop_category", "General")
+        
+        # Change 4: Onboarding Flow initiation for new customers
+        name = profile.customer_name or ""
+        profile_phone = profile.customer_phone or ""
+        
+        needs_onboarding = (
+            not name.strip() or 
+            name.strip().lower() in ("vip", "customer", "unknown", "guest") or
+            not profile_phone.strip() or 
+            len(profile_phone.strip()) < 10
+        )
+        
+        if needs_onboarding and session.category != "onboarding":
+            session.category = "onboarding"
+            session_mem.onboarding_step = "collect_name"
+            
         return cls(session_mem, profile)
 
     # ── Persist ───────────────────────────────────────────────────────────────
@@ -148,7 +200,13 @@ class MemoryEngine:
         # Passive learning: push session signals into long-term profile
         CustomerProfileEngine.learn_from_session(db, mem.profile, new_fields)
 
+        # Safety sync
+        if mem.session.customer_name and not mem.profile.customer_name:
+            mem.profile.customer_name = mem.session.customer_name
+        
         db.add(session)
+        db.add(mem.profile)
+        logger.info(f"[MEMORY] Flushing session={session.session_id} profile_name={mem.profile.customer_name} (phone={mem.profile.customer_phone})")
         db.commit()
 
     # ── Convenience mutators ──────────────────────────────────────────────────

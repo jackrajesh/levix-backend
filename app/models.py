@@ -25,6 +25,7 @@ class Shop(Base):
     # Phase 5: Universal Retail Settings
     business_category = Column(String, nullable=True)
     business_subnote = Column(Text, nullable=True)
+    shop_category = Column(String(50), nullable=True, default="General")
 
     reset_tokens = relationship("PasswordResetToken", back_populates="shop", cascade="all, delete-orphan")
     inventory = relationship("InventoryItem", back_populates="shop", cascade="all, delete-orphan")
@@ -141,6 +142,20 @@ class PendingRequest(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     shop = relationship("Shop", back_populates="pending_requests")
+
+class PendingInquiry(Base):
+    __tablename__ = "pending_inquiries"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    shop_id = Column(Integer, ForeignKey("shops.id"), index=True, nullable=False)
+    customer_name = Column(String, nullable=True)
+    customer_phone = Column(String(20), nullable=True)
+    product_requested = Column(String, nullable=False)
+    message_text = Column(String, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    status = Column(String, default="new")
+    
+    shop = relationship("Shop")
 
 class SalesRecord(Base):
     __tablename__ = "sales_records"
@@ -411,3 +426,27 @@ class MissingProductRequest(Base):
     count = Column(Integer, default=1)
     last_requested_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class PendingSSEEvent(Base):
+    """Gap 7 fix: Persistent queue for SSE events to ensure delivery upon dashboard reconnection."""
+    __tablename__ = "pending_sse_events"
+
+    id = Column(Integer, primary_key=True, index=True)
+    shop_id = Column(Integer, ForeignKey("shops.id"), index=True, nullable=False)
+    event_type = Column(String, nullable=False) # e.g. "new_order"
+    data = Column(JSON, nullable=False)
+    delivered = Column(Boolean, default=False, index=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
+
+class AdminAlert(Base):
+    """Task 2 fix: Tracks repeated failures for shop owners/admins."""
+    __tablename__ = "admin_alerts"
+
+    id = Column(Integer, primary_key=True, index=True)
+    shop_id = Column(Integer, ForeignKey("shops.id"), index=True, nullable=False)
+    alert_type = Column(String, nullable=False, index=True)  # e.g. 'order_failure_burst'
+    failure_count = Column(Integer, default=1)
+    details = Column(JSON, nullable=True)
+    resolved = Column(Boolean, default=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)

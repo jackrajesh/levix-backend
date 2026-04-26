@@ -1,0 +1,608 @@
+{
+    "missing_in_current": [
+        {
+            "path": "final_tests.json",
+            "backup_size": 3010
+        },
+        {
+            "path": "final_tests.py",
+            "backup_size": 1978
+        },
+        {
+            "path": "live_proof.py",
+            "backup_size": 21757
+        },
+        {
+            "path": "live_proof_results.json",
+            "backup_size": 3832
+        },
+        {
+            "path": "retail_results.json",
+            "backup_size": 1112
+        },
+        {
+            "path": "retail_test.py",
+            "backup_size": 1880
+        },
+        {
+            "path": "run.py",
+            "backup_size": 336
+        },
+        {
+            "path": "run_e2e_tests.py",
+            "backup_size": 4258
+        },
+        {
+            "path": "scratch_migration.py",
+            "backup_size": 2905
+        },
+        {
+            "path": "test_ai_fallback.py",
+            "backup_size": 1308
+        },
+        {
+            "path": "test_cart.py",
+            "backup_size": 1115
+        },
+        {
+            "path": "test_commerce.py",
+            "backup_size": 2287
+        },
+        {
+            "path": "test_matching.py",
+            "backup_size": 1346
+        },
+        {
+            "path": "test_max.py",
+            "backup_size": 1890
+        },
+        {
+            "path": "test_pilot.py",
+            "backup_size": 1880
+        },
+        {
+            "path": "test_results.json",
+            "backup_size": 3950
+        },
+        {
+            "path": "test_routing.py",
+            "backup_size": 195
+        },
+        {
+            "path": "transcript_results.json",
+            "backup_size": 4417
+        },
+        {
+            "path": "transcript_test.py",
+            "backup_size": 11259
+        },
+        {
+            "path": "app\\auth.py",
+            "backup_size": 2367
+        },
+        {
+            "path": "app\\database.py",
+            "backup_size": 2318
+        },
+        {
+            "path": "app\\models.py",
+            "backup_size": 21079
+        },
+        {
+            "path": "app\\permissions.py",
+            "backup_size": 9521
+        },
+        {
+            "path": "app\\core\\ai_client.py",
+            "backup_size": 8900
+        },
+        {
+            "path": "app\\core\\prompt_builder.py",
+            "backup_size": 3718
+        },
+        {
+            "path": "app\\core\\webhook_guard.py",
+            "backup_size": 1964
+        },
+        {
+            "path": "assets\\logo\\LEVIX BT.png",
+            "backup_size": 58524
+        },
+        {
+            "path": "backup\\scratch\\check_routes.py",
+            "backup_size": 217
+        },
+        {
+            "path": "backup\\scratch\\create_test_user.py",
+            "backup_size": 928
+        },
+        {
+            "path": "backup\\scratch\\fix_db_columns.py",
+            "backup_size": 722
+        },
+        {
+            "path": "backup\\scratch\\verify_polish.py",
+            "backup_size": 1687
+        },
+        {
+            "path": "CLAUDE_FILES\\intent_engine.py",
+            "backup_size": 12332
+        },
+        {
+            "path": "CLAUDE_FILES\\memory_engine.py",
+            "backup_size": 12338
+        },
+        {
+            "path": "CLAUDE_FILES\\order_engine.py",
+            "backup_size": 14852
+        },
+        {
+            "path": "CLAUDE_FILES\\router.py",
+            "backup_size": 26726
+        },
+        {
+            "path": "config\\.env",
+            "backup_size": 1009
+        },
+        {
+            "path": "config\\.env.example",
+            "backup_size": 493
+        },
+        {
+            "path": "scratch\\check_cols.py",
+            "backup_size": 397
+        },
+        {
+            "path": "scratch\\check_cols_v3.py",
+            "backup_size": 403
+        },
+        {
+            "path": "scratch\\check_schema.py",
+            "backup_size": 317
+        },
+        {
+            "path": "scratch\\check_types.py",
+            "backup_size": 398
+        },
+        {
+            "path": "scratch\\migrate_leads_v2.py",
+            "backup_size": 555
+        },
+        {
+            "path": "scratch\\read_err.py",
+            "backup_size": 371
+        },
+        {
+            "path": "scratch\\read_err2.py",
+            "backup_size": 451
+        },
+        {
+            "path": "scratch\\test_lead_output.txt",
+            "backup_size": 18732
+        },
+        {
+            "path": "static\\favicon.png",
+            "backup_size": 45160
+        },
+        {
+            "path": "templates\\dashboard.html",
+            "backup_size": 296792
+        },
+        {
+            "path": "templates\\forgot-password.html",
+            "backup_size": 15319
+        },
+        {
+            "path": "templates\\login.html",
+            "backup_size": 56391
+        },
+        {
+            "path": "templates\\register.html",
+            "backup_size": 9570
+        },
+        {
+            "path": "templates\\reset-password.html",
+            "backup_size": 20648
+        },
+        {
+            "path": "templates\\chat_widget\\widget.html",
+            "backup_size": 19633
+        },
+        {
+            "path": "templates\\dashboard\\inbox.html",
+            "backup_size": 20007
+        },
+        {
+            "path": "templates\\settings\\ai.html",
+            "backup_size": 4560
+        },
+        {
+            "path": "tmp\\.active_shop_id",
+            "backup_size": 1
+        },
+        {
+            "path": "tmp\\add_is_deleted.py",
+            "backup_size": 448
+        },
+        {
+            "path": "tmp\\check_logs.py",
+            "backup_size": 627
+        },
+        {
+            "path": "tmp\\check_syntax.py",
+            "backup_size": 476
+        },
+        {
+            "path": "tmp\\cleanup_db.py",
+            "backup_size": 914
+        },
+        {
+            "path": "tmp\\debug_webhook.py",
+            "backup_size": 2174
+        },
+        {
+            "path": "tmp\\diagnose_api.py",
+            "backup_size": 1393
+        },
+        {
+            "path": "tmp\\diagnose_gemini.py",
+            "backup_size": 1285
+        },
+        {
+            "path": "tmp\\final_verify.py",
+            "backup_size": 1184
+        },
+        {
+            "path": "tmp\\inspect_hashes.py",
+            "backup_size": 842
+        },
+        {
+            "path": "tmp\\intent_verify.py",
+            "backup_size": 1626
+        },
+        {
+            "path": "tmp\\migrate_phone.py",
+            "backup_size": 619
+        },
+        {
+            "path": "tmp\\migrate_whatsapp_fields.py",
+            "backup_size": 952
+        },
+        {
+            "path": "tmp\\reset_all_users.py",
+            "backup_size": 1001
+        },
+        {
+            "path": "tmp\\stabilization_verify.py",
+            "backup_size": 1701
+        },
+        {
+            "path": "tmp\\test_admin.db",
+            "backup_size": 94208
+        },
+        {
+            "path": "tmp\\test_analytics_hardening.py",
+            "backup_size": 1419
+        },
+        {
+            "path": "tmp\\test_final_flow.py",
+            "backup_size": 1368
+        },
+        {
+            "path": "tmp\\test_final_overhaul.py",
+            "backup_size": 2082
+        },
+        {
+            "path": "tmp\\test_gemini.py",
+            "backup_size": 496
+        },
+        {
+            "path": "tmp\\test_parser_resilience.py",
+            "backup_size": 2507
+        },
+        {
+            "path": "tmp\\test_rbac_api.db",
+            "backup_size": 270336
+        },
+        {
+            "path": "tmp\\test_replies.py",
+            "backup_size": 1235
+        },
+        {
+            "path": "tmp\\test_verification.py",
+            "backup_size": 923
+        },
+        {
+            "path": "tmp\\test_webhook.db",
+            "backup_size": 94208
+        },
+        {
+            "path": "tmp\\verify_db_path.py",
+            "backup_size": 663
+        },
+        {
+            "path": "tmp\\verify_db_time.py",
+            "backup_size": 1478
+        },
+        {
+            "path": "tmp\\verify_integration.py",
+            "backup_size": 1391
+        },
+        {
+            "path": "tmp\\verify_replies.py",
+            "backup_size": 2691
+        },
+        {
+            "path": "tmp\\verify_safety.py",
+            "backup_size": 2913
+        },
+        {
+            "path": "tmp\\verify_soft_delete.py",
+            "backup_size": 2261
+        }
+    ],
+    "size_mismatch": [
+        {
+            "path": "app\\routes\\analytics.py",
+            "backup_size": 35933,
+            "current_size": 36778
+        },
+        {
+            "path": "app\\routes\\auth.py",
+            "backup_size": 18864,
+            "current_size": 19421
+        },
+        {
+            "path": "app\\routes\\inbox.py",
+            "backup_size": 17011,
+            "current_size": 17437
+        },
+        {
+            "path": "app\\routes\\inventory.py",
+            "backup_size": 14724,
+            "current_size": 15128
+        },
+        {
+            "path": "app\\routes\\logs.py",
+            "backup_size": 7703,
+            "current_size": 7911
+        },
+        {
+            "path": "app\\routes\\orders.py",
+            "backup_size": 6016,
+            "current_size": 6153
+        },
+        {
+            "path": "app\\routes\\pages.py",
+            "backup_size": 898,
+            "current_size": 2477
+        },
+        {
+            "path": "app\\routes\\pending.py",
+            "backup_size": 6581,
+            "current_size": 6746
+        },
+        {
+            "path": "app\\routes\\plans.py",
+            "backup_size": 7274,
+            "current_size": 7463
+        },
+        {
+            "path": "app\\routes\\sales.py",
+            "backup_size": 13767,
+            "current_size": 14104
+        },
+        {
+            "path": "app\\routes\\team.py",
+            "backup_size": 15842,
+            "current_size": 16285
+        },
+        {
+            "path": "app\\routes\\webhooks.py",
+            "backup_size": 6264,
+            "current_size": 6469
+        },
+        {
+            "path": "app\\services\\ai_matcher.py",
+            "backup_size": 9509,
+            "current_size": 9738
+        },
+        {
+            "path": "app\\services\\ai_router.py",
+            "backup_size": 16113,
+            "current_size": 16396
+        },
+        {
+            "path": "app\\services\\hybrid_matcher.py",
+            "backup_size": 14516,
+            "current_size": 14854
+        },
+        {
+            "path": "app\\services\\intent_engine.py",
+            "backup_size": 29868,
+            "current_size": 19674
+        },
+        {
+            "path": "app\\services\\logger.py",
+            "backup_size": 2150,
+            "current_size": 2282
+        },
+        {
+            "path": "app\\services\\memory_engine.py",
+            "backup_size": 9005,
+            "current_size": 8897
+        },
+        {
+            "path": "app\\services\\message_formatter.py",
+            "backup_size": 15112,
+            "current_size": 15511
+        },
+        {
+            "path": "app\\services\\order_controller.py",
+            "backup_size": 9994,
+            "current_size": 10268
+        },
+        {
+            "path": "app\\services\\order_engine.py",
+            "backup_size": 15758,
+            "current_size": 16117
+        },
+        {
+            "path": "app\\services\\product_service.py",
+            "backup_size": 12265,
+            "current_size": 12618
+        },
+        {
+            "path": "app\\services\\recommendation_engine.py",
+            "backup_size": 14519,
+            "current_size": 15576
+        },
+        {
+            "path": "app\\services\\router_engine.py",
+            "backup_size": 36509,
+            "current_size": 28621
+        },
+        {
+            "path": "app\\services\\sales_engine.py",
+            "backup_size": 12024,
+            "current_size": 12296
+        },
+        {
+            "path": "app\\services\\session_engine.py",
+            "backup_size": 4301,
+            "current_size": 4416
+        },
+        {
+            "path": "app\\services\\shop_service.py",
+            "backup_size": 1278,
+            "current_size": 1380
+        },
+        {
+            "path": "app\\services\\sse.py",
+            "backup_size": 3166,
+            "current_size": 3306
+        },
+        {
+            "path": "app\\services\\subscription_service.py",
+            "backup_size": 4943,
+            "current_size": 5138
+        },
+        {
+            "path": "app\\services\\validation_engine.py",
+            "backup_size": 12111,
+            "current_size": 12388
+        },
+        {
+            "path": "app\\services\\whatsapp_service.py",
+            "backup_size": 2315,
+            "current_size": 2459
+        },
+        {
+            "path": "data\\levix.db",
+            "backup_size": 0,
+            "current_size": 4096
+        }
+    ],
+    "extra_in_current": [
+        "audit_report.json",
+        "app\\core\\auth.py",
+        "app\\core\\database.py",
+        "app\\core\\permissions.py",
+        "app\\models\\__init__.py",
+        "app\\static\\favicon.png",
+        "app\\templates\\dashboard.html",
+        "app\\templates\\forgot-password.html",
+        "app\\templates\\login.html",
+        "app\\templates\\register.html",
+        "app\\templates\\reset-password.html",
+        "app\\templates\\chat_widget\\widget.html",
+        "app\\templates\\dashboard\\inbox.html",
+        "app\\templates\\settings\\ai.html",
+        "assets\\branding\\LEVIX BT.png",
+        "backups\\legacy\\.gitignore",
+        "backups\\legacy\\fix_core_imports.py",
+        "backups\\legacy\\fix_routes_auth.py",
+        "backups\\legacy\\Procfile",
+        "backups\\legacy\\requirements.txt",
+        "backups\\legacy\\retail_results.json",
+        "backups\\legacy\\runtime.txt",
+        "backups\\legacy\\safe_fix_imports.py",
+        "backups\\legacy\\scratch_migration.py",
+        "backups\\scratch\\check_routes.py",
+        "backups\\scratch\\create_test_user.py",
+        "backups\\scratch\\fix_db_columns.py",
+        "backups\\scratch\\verify_polish.py",
+        "data\\levix.db-shm",
+        "data\\levix.db-wal",
+        "docs\\archive_claude\\intent_engine.py",
+        "docs\\archive_claude\\memory_engine.py",
+        "docs\\archive_claude\\order_engine.py",
+        "docs\\archive_claude\\router.py",
+        "docs\\archive_claude\\CLAUDE_FILES\\intent_engine.py",
+        "docs\\archive_claude\\CLAUDE_FILES\\memory_engine.py",
+        "docs\\archive_claude\\CLAUDE_FILES\\order_engine.py",
+        "docs\\archive_claude\\CLAUDE_FILES\\router.py",
+        "logs\\app.log",
+        "logs\\error.log",
+        "logs\\tmp\\.active_shop_id",
+        "logs\\tmp\\add_is_deleted.py",
+        "logs\\tmp\\check_logs.py",
+        "logs\\tmp\\check_syntax.py",
+        "logs\\tmp\\cleanup_db.py",
+        "logs\\tmp\\debug_webhook.py",
+        "logs\\tmp\\diagnose_api.py",
+        "logs\\tmp\\diagnose_gemini.py",
+        "logs\\tmp\\final_verify.py",
+        "logs\\tmp\\inspect_hashes.py",
+        "logs\\tmp\\intent_verify.py",
+        "logs\\tmp\\migrate_phone.py",
+        "logs\\tmp\\migrate_whatsapp_fields.py",
+        "logs\\tmp\\reset_all_users.py",
+        "logs\\tmp\\stabilization_verify.py",
+        "logs\\tmp\\test_admin.db",
+        "logs\\tmp\\test_analytics_hardening.py",
+        "logs\\tmp\\test_final_flow.py",
+        "logs\\tmp\\test_final_overhaul.py",
+        "logs\\tmp\\test_gemini.py",
+        "logs\\tmp\\test_parser_resilience.py",
+        "logs\\tmp\\test_rbac_api.db",
+        "logs\\tmp\\test_replies.py",
+        "logs\\tmp\\test_verification.py",
+        "logs\\tmp\\test_webhook.db",
+        "logs\\tmp\\verify_db_path.py",
+        "logs\\tmp\\verify_db_time.py",
+        "logs\\tmp\\verify_integration.py",
+        "logs\\tmp\\verify_replies.py",
+        "logs\\tmp\\verify_safety.py",
+        "logs\\tmp\\verify_soft_delete.py",
+        "scratch\\audit.py",
+        "scripts\\run.py",
+        "scripts\\scratch\\check_cols.py",
+        "scripts\\scratch\\check_cols_v3.py",
+        "scripts\\scratch\\check_schema.py",
+        "scripts\\scratch\\check_types.py",
+        "scripts\\scratch\\migrate_leads_v2.py",
+        "scripts\\scratch\\read_err.py",
+        "scripts\\scratch\\read_err2.py",
+        "scripts\\scratch\\test_lead_output.txt",
+        "tests\\final_tests.py",
+        "tests\\integration\\run_e2e_tests.py",
+        "tests\\live\\live_proof.py",
+        "tests\\results\\final_tests.json",
+        "tests\\results\\live_proof_results.json",
+        "tests\\results\\test_results.json",
+        "tests\\results\\transcript_results.json",
+        "tests\\unit\\live_proof.py",
+        "tests\\unit\\retail_test.py",
+        "tests\\unit\\run_e2e_tests.py",
+        "tests\\unit\\scratch_migration.py",
+        "tests\\unit\\test_ai_fallback.py",
+        "tests\\unit\\test_cart.py",
+        "tests\\unit\\test_commerce.py",
+        "tests\\unit\\test_matching.py",
+        "tests\\unit\\test_max.py",
+        "tests\\unit\\test_pilot.py",
+        "tests\\unit\\test_routing.py",
+        "tests\\unit\\transcript_test.py"
+    ]
+}
