@@ -1,3 +1,28 @@
+<style>
+    /* Critical fallback so install button stays styled even if stale global CSS is served */
+    .nav-menu .btn-install {
+        background: #0f172a;
+        color: #fff;
+        border: 1px solid #0f172a;
+        border-radius: 10px;
+        min-height: 40px;
+        padding: 10px 16px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+        cursor: pointer;
+    }
+    .nav-menu .btn-install:hover {
+        background: #020617;
+        border-color: #020617;
+    }
+    .nav-menu .btn-install[hidden] {
+        display: none !important;
+    }
+</style>
 <nav class="navbar">
     <div class="nav-container">
         <a href="/" class="logo-brand logo-light" aria-label="LEVIX home"><span class="logo-text">LEVI</span><span class="logo-x">X</span></a>

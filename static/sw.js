@@ -1,6 +1,6 @@
 /* LEVIX conservative service worker (Phase 3) */
 
-const STATIC_CACHE = "levix-static-v4";
+const STATIC_CACHE = "levix-static-v5";
 const OFFLINE_URL = "/static/offline.html";
 
 const PRECACHE_URLS = [
@@ -8,8 +8,8 @@ const PRECACHE_URLS = [
   "/static/manifest.json?v=20260528d",
   "/static/favicon.png?v=20260528d",
   "/static/logo.png",
-  "/static/global.css",
-  "/static/mobile-fixes.css",
+  "/static/global.css?v=20260528e",
+  "/static/mobile-fixes.css?v=20260528e",
   "/static/theme.js",
   "/static/i18n.js",
   "/static/icons/icon-192.png?v=20260528d",
@@ -20,7 +20,9 @@ const PRECACHE_URLS = [
 
 const NETWORK_FIRST_STATIC_PATHS = [
   "/static/manifest.json",
-  "/static/favicon.png"
+  "/static/favicon.png",
+  "/static/global.css",
+  "/static/mobile-fixes.css"
 ];
 
 const NETWORK_ONLY_PREFIXES = [
