@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+    {% include 'partials/pwa_core.html' %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Install LEVIX App</title>
+    <meta name="description" content="Install LEVIX on your phone home screen for quick access to billing, inventory, and orders.">
+    <link rel="icon" type="image/png" href="/static/favicon.png?v=20260529">
+    <link rel="stylesheet" href="/static/global.css?v=20260529">
+    <link rel="stylesheet" href="/static/mobile-fixes.css?v=20260529">
+    <script src="/static/pwa-install.js?v=20260529" defer></script>
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+            background: #f8fafc;
+            font-family: Inter, system-ui, sans-serif;
+            color: #0f172a;
+        }
+        .install-card {
+            width: min(100%, 420px);
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 28px 24px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+        }
+        .install-card img {
+            width: 88px;
+            height: 88px;
+            border-radius: 18px;
+            margin-bottom: 16px;
+        }
+        .install-card h1 {
+            font-size: 1.35rem;
+            margin: 0 0 8px;
+        }
+        .install-card p {
+            margin: 0 0 20px;
+            color: #64748b;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        .btn-install-page {
+            width: 100%;
+            min-height: 48px;
+            border: none;
+            border-radius: 10px;
+            background: #0f172a;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .install-links {
+            margin-top: 16px;
+            font-size: 0.88rem;
+        }
+        .install-links a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <main class="install-card">
+        <img src="/static/icons/icon-192.png" width="88" height="88" alt="LEVIX app icon">
+        <h1>Install LEVIX</h1>
+        <p>Add LEVIX to your home screen for one-tap access. No camera or location permission is required to install.</p>
+        <button type="button" class="btn-install-page" id="install-app-btn">Add to Home Screen</button>
+        <div class="install-links">
+            <a href="/">Back to website</a>
+            &nbsp;·&nbsp;
+            <a href="/login">Sign in</a>
+        </div>
+    </main>
+</body>
+</html>

@@ -4,11 +4,7 @@
 {% set seo_robots = seo_robots|default("index,follow,max-image-preview:large") %}
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#000000">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="LEVIX">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+{% include 'partials/pwa_core.html' %}
 <title>{{ seo_title }}</title>
 <meta name="description" content="{{ seo_description }}">
 <meta name="robots" content="{{ seo_robots }}">
@@ -25,10 +21,8 @@
 <meta name="twitter:title" content="{{ seo_title }}">
 <meta name="twitter:description" content="{{ seo_description }}">
 <meta name="twitter:image" content="{{ seo_image }}">
-<link rel="manifest" href="/manifest.webmanifest?v=20260528f">
-<link rel="icon" type="image/png" href="/static/favicon.png?v=20260528f">
-<link rel="apple-touch-icon" href="/static/icons/icon-192.png?v=20260528f">
-<script src="/static/pwa-install.js?v=20260528f" defer></script>
+<link rel="icon" type="image/png" href="/static/favicon.png?v=20260529">
+<script src="/static/pwa-install.js?v=20260529" defer></script>
 {% include 'partials/seo_schema.html' %}
 <script>
 (() => {
@@ -40,7 +34,7 @@
     const link = document.createElement("link");
     link.id = "levix-mobile-fixes";
     link.rel = "stylesheet";
-    link.href = "/static/mobile-fixes.css?v=20260528f";
+    link.href = "/static/mobile-fixes.css?v=20260529";
     document.head.appendChild(link);
   };
 

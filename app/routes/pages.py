@@ -166,6 +166,11 @@ async def terms(request: Request):
 async def contact(request: Request):
     return render_page(request, "contact.html")
 
+
+@router.get("/install-app")
+async def install_app(request: Request):
+    return render_page(request, "install-app.html")
+
 # =========================================================
 # SEO FILES
 # =========================================================

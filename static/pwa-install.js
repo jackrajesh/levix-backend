@@ -1,14 +1,10 @@
 /**
- * LEVIX PWA install helper — Android Chrome + iOS Safari + desktop.
+ * LEVIX PWA install — permanent mobile + desktop flow.
+ * Install does NOT require camera/location permissions.
  */
 (() => {
   const INSTALL_BTN_ID = "install-app-btn";
   const MODAL_ID = "levix-install-modal";
-  const STORAGE_INSTALLED = "levix-pwa-installed";
-
-  const isStandalone =
-    window.matchMedia("(display-mode: standalone)").matches ||
-    window.navigator.standalone === true;
 
   const ua = navigator.userAgent || "";
   const isIOS =
@@ -16,6 +12,14 @@
     (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   const isAndroid = /Android/i.test(ua);
   const isMobile = isIOS || isAndroid || window.innerWidth <= 768;
+
+  const isStandalone =
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.navigator.standalone === true;
+
+  const isInAppBrowser =
+    /Instagram|FBAN|FBAV|Twitter|LinkedInApp|Snapchat|Line\//i.test(ua) ||
+    (isAndroid && /\bwv\b/.test(ua));
 
   const isSecure = window.isSecureContext === true;
 
@@ -43,7 +47,7 @@
     btn.setAttribute("aria-busy", loading ? "true" : "false");
     if (loading) {
       btn.dataset.prevLabel = btn.textContent;
-      btn.textContent = "Installing…";
+      btn.textContent = "Preparing install…";
     } else if (btn.dataset.prevLabel) {
       btn.textContent = btn.dataset.prevLabel;
       delete btn.dataset.prevLabel;
@@ -66,7 +70,10 @@
     modal.setAttribute("aria-labelledby", "levix-install-modal-title");
 
     const stepsHtml = steps
-      .map((step, i) => `<li><span class="levix-install-step-num">${i + 1}</span><span>${step}</span></li>`)
+      .map(
+        (step, i) =>
+          `<li><span class="levix-install-step-num">${i + 1}</span><span>${step}</span></li>`
+      )
       .join("");
 
     modal.innerHTML = `
@@ -91,76 +98,101 @@
     document.body.classList.add("levix-install-modal-open");
   }
 
+  function showInAppBrowserHelp() {
+    openModal(
+      "Open in Chrome or Safari first",
+      [
+        "You opened LEVIX inside another app (Instagram, Facebook, etc.).",
+        "Tap the <strong>menu (⋮)</strong> and choose <strong>Open in Chrome</strong> or <strong>Open in browser</strong>.",
+        "Then install from Chrome (Android) or Safari (iPhone).",
+      ],
+      "In-app browsers cannot install apps to your home screen."
+    );
+  }
+
   function showIOSInstructions() {
     openModal(
-      "Add LEVIX to your Home Screen",
+      "Add LEVIX to Home Screen (iPhone/iPad)",
       [
-        "Open this site in <strong>Safari</strong> (Chrome on iPhone cannot install apps to the home screen).",
-        "Tap the <strong>Share</strong> button at the bottom of Safari.",
-        "Scroll and tap <strong>Add to Home Screen</strong>.",
-        "Tap <strong>Add</strong> in the top-right corner.",
+        "Use <strong>Safari</strong> — Chrome on iPhone cannot add real home screen apps.",
+        "Tap <strong>Share</strong> (square with arrow) at the bottom.",
+        "Scroll down and tap <strong>Add to Home Screen</strong>.",
+        "Tap <strong>Add</strong> (top right).",
       ],
-      "After adding, open LEVIX from your home screen like any other app."
+      "LEVIX will appear on your home screen like a normal app. No extra permissions are required."
     );
   }
 
-  function showAndroidManualInstructions() {
+  function showAndroidManualInstructions(extraNote) {
     openModal(
-      "Install LEVIX on your phone",
+      "Install LEVIX on Android",
       [
-        "Make sure you are on <strong>https://levixapp.in</strong> (not http).",
-        "Tap the browser <strong>menu</strong> (three dots, top-right).",
-        "Tap <strong>Install app</strong> or <strong>Add to Home screen</strong>.",
-        "Confirm when prompted — the icon should appear on your home screen.",
+        "Use <strong>Google Chrome</strong> (recommended).",
+        "Open <strong>https://levixapp.in</strong> (must show a lock icon).",
+        "Tap <strong>⋮ Menu</strong> → <strong>Install app</strong> or <strong>Add to Home screen</strong>.",
+        "Confirm — wait until the icon appears on your home screen.",
       ],
-      "If you already tried installing, remove the old LEVIX shortcut first, then install again."
+      extraNote ||
+        "If install spins forever: sign into Google Play Store, remove any old LEVIX shortcut, then try again. Settings → Apps → Chrome → Install unknown apps (allow)."
     );
   }
 
-  function showInsecureContextHelp() {
+  function showInsecureHelp() {
     openModal(
-      "Install requires a secure connection",
+      "Secure connection required",
       [
-        "Open <strong>https://levixapp.in</strong> in your browser.",
-        "Do not use http:// or a local IP address on your phone.",
-        "Then tap Install App again.",
+        "Open <strong>https://levixapp.in</strong> (with the lock icon).",
+        "Do not use http:// or a local IP on your phone.",
       ],
-      "PWAs can only be installed over HTTPS."
+      "PWAs install only over HTTPS. No special permission popup is needed for install."
     );
   }
 
-  async function cleanupLegacyServiceWorkers() {
-    if (!("serviceWorker" in navigator)) return;
+  async function waitForServiceWorker(timeoutMs) {
+    if (!("serviceWorker" in navigator)) return false;
+    const start = Date.now();
     try {
-      const registrations = await navigator.serviceWorker.getRegistrations();
-      await Promise.all(
-        registrations.map((registration) => {
-          const scope = registration.scope || "";
-          if (scope.includes("/static/")) {
-            return registration.unregister();
-          }
-          return Promise.resolve();
-        })
-      );
+      if (window.__levixSwReady) {
+        await Promise.race([
+          window.__levixSwReady,
+          new Promise((resolve) => setTimeout(resolve, timeoutMs)),
+        ]);
+      }
+      if (navigator.serviceWorker.controller) return true;
+      await Promise.race([
+        navigator.serviceWorker.ready,
+        new Promise((resolve) => setTimeout(resolve, timeoutMs)),
+      ]);
+      return Boolean(navigator.serviceWorker.controller);
     } catch (_) {
-      // Non-fatal.
+      return Date.now() - start < timeoutMs && Boolean(navigator.serviceWorker.controller);
     }
   }
 
-  async function registerRootServiceWorker() {
-    if (!("serviceWorker" in navigator)) return false;
+  async function verifyInstallAssets() {
     try {
-      await cleanupLegacyServiceWorkers();
-      const registration = await navigator.serviceWorker.register("/sw.js", {
-        scope: "/",
-        updateViaCache: "none",
+      const manifestRes = await fetch("/manifest.webmanifest", { cache: "no-store" });
+      if (!manifestRes.ok) return { ok: false, reason: "manifest" };
+      const manifest = await manifestRes.json();
+      const icons = Array.isArray(manifest.icons) ? manifest.icons : [];
+      const required = icons.filter((icon) => {
+        const sizes = String(icon.sizes || "");
+        return sizes.includes("192") || sizes.includes("512");
       });
-      if (registration.waiting) {
-        registration.waiting.postMessage({ type: "SKIP_WAITING" });
+      for (const icon of required.slice(0, 2)) {
+        const iconPath = (() => {
+          try {
+            return new URL(icon.src, window.location.origin).pathname;
+          } catch (_) {
+            return icon.src;
+          }
+        })();
+        const iconRes = await fetch(iconPath, { cache: "no-store" });
+        if (!iconRes.ok) return { ok: false, reason: "icon" };
       }
-      return true;
+      return { ok: true };
     } catch (_) {
-      return false;
+      return { ok: false, reason: "network" };
     }
   }
 
@@ -174,11 +206,9 @@
     }
 
     let deferredInstallPrompt = null;
-
     const defaultLabel = isMobile ? "Add to Home Screen" : "Install App";
     installBtn.textContent = defaultLabel;
 
-    // On phones, always show the CTA — iOS never fires beforeinstallprompt.
     if (isMobile) {
       showInstallBtn(installBtn, defaultLabel);
     }
@@ -191,23 +221,18 @@
 
     window.addEventListener("appinstalled", () => {
       deferredInstallPrompt = null;
-      try {
-        localStorage.setItem(STORAGE_INSTALLED, "1");
-      } catch (_) {}
       hideInstallBtn(installBtn);
       closeModal();
     });
 
-    try {
-      if (localStorage.getItem(STORAGE_INSTALLED) === "1" && !deferredInstallPrompt) {
-        // User installed before; keep button available on mobile in case they removed the icon.
-        if (!isMobile) hideInstallBtn(installBtn);
-      }
-    } catch (_) {}
-
     installBtn.addEventListener("click", async () => {
+      if (isInAppBrowser) {
+        showInAppBrowserHelp();
+        return;
+      }
+
       if (!isSecure) {
-        showInsecureContextHelp();
+        showInsecureHelp();
         return;
       }
 
@@ -216,44 +241,60 @@
         return;
       }
 
+      setBtnLoading(installBtn, true);
+
+      const swReady = await waitForServiceWorker(8000);
+      const assets = await verifyInstallAssets();
+
+      if (!swReady || !assets.ok) {
+        setBtnLoading(installBtn, false);
+        showAndroidManualInstructions(
+          !swReady
+            ? "App worker is still loading. Use Chrome menu → Install app, or refresh and try again."
+            : "Install files could not be verified. Check your connection and use Chrome menu → Install app."
+        );
+        return;
+      }
+
       if (deferredInstallPrompt) {
-        setBtnLoading(installBtn, true);
         try {
           await deferredInstallPrompt.prompt();
           const choice = await deferredInstallPrompt.userChoice;
           deferredInstallPrompt = null;
+          setBtnLoading(installBtn, false);
           if (choice && choice.outcome === "accepted") {
             hideInstallBtn(installBtn);
-          } else {
-            showInstallBtn(installBtn, defaultLabel);
-            if (isAndroid) showAndroidManualInstructions();
+            return;
           }
+          showAndroidManualInstructions(
+            "Install was cancelled or blocked. Use Chrome ⋮ menu → Install app. Ensure Google Play Store is signed in."
+          );
+          return;
         } catch (_) {
-          showInstallBtn(installBtn, defaultLabel);
-          if (isAndroid) showAndroidManualInstructions();
-        } finally {
+          deferredInstallPrompt = null;
           setBtnLoading(installBtn, false);
+          showAndroidManualInstructions();
+          return;
         }
-        return;
       }
 
+      setBtnLoading(installBtn, false);
       if (isAndroid) {
-        showAndroidManualInstructions();
+        showAndroidManualInstructions(
+          "If the button does not open install: Chrome ⋮ → Install app. This does not need camera or location permission."
+        );
         return;
       }
 
-      // Desktop without deferred prompt (Safari, Firefox, etc.)
       openModal(
         "Install LEVIX",
         [
-          "Look for an install icon in the address bar, or",
-          "Open the browser menu and choose <strong>Install LEVIX</strong> or <strong>Install app</strong>.",
+          "Use Chrome or Edge.",
+          "Click the install icon in the address bar, or open the browser menu → <strong>Install LEVIX</strong>.",
         ],
-        "If you do not see an install option, try Chrome or Edge on desktop."
+        "No extra permissions are required to install."
       );
     });
-
-    registerRootServiceWorker();
   }
 
   if (document.readyState === "loading") {

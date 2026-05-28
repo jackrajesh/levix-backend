@@ -476,13 +476,26 @@ async def add_production_headers(request: Request, call_next):
     response.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
     response.headers.setdefault("Permissions-Policy", "geolocation=(), microphone=(), camera=()")
 
-    if path.endswith("/sw.js") or path == "/sw.js":
-        response.headers.setdefault("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+    pwa_no_cache_paths = {
+        "/sw.js",
+        "/manifest.webmanifest",
+        "/static/sw.js",
+        "/static/manifest.json",
+        "/static/pwa-install.js",
+    }
+    pwa_no_cache_prefixes = (
+        "/static/icons/",
+    )
+
+    if path in pwa_no_cache_paths or path.endswith("/sw.js"):
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
         response.headers.setdefault("Service-Worker-Allowed", "/")
+    elif any(path.startswith(prefix) for prefix in pwa_no_cache_prefixes):
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
     elif path.startswith("/static/"):
         if path.endswith("sw.js"):
             response.headers.setdefault("Service-Worker-Allowed", "/")
-            response.headers.setdefault("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+            response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
         else:
             response.headers.setdefault("Cache-Control", "public, max-age=86400")
     elif path in {"/sitemap.xml", "/robots.txt"}:
