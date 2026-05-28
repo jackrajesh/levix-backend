@@ -476,8 +476,15 @@ async def add_production_headers(request: Request, call_next):
     response.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
     response.headers.setdefault("Permissions-Policy", "geolocation=(), microphone=(), camera=()")
 
-    if path.startswith("/static/"):
-        response.headers.setdefault("Cache-Control", "public, max-age=86400")
+    if path.endswith("/sw.js") or path == "/sw.js":
+        response.headers.setdefault("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+        response.headers.setdefault("Service-Worker-Allowed", "/")
+    elif path.startswith("/static/"):
+        if path.endswith("sw.js"):
+            response.headers.setdefault("Service-Worker-Allowed", "/")
+            response.headers.setdefault("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+        else:
+            response.headers.setdefault("Cache-Control", "public, max-age=86400")
     elif path in {"/sitemap.xml", "/robots.txt"}:
         response.headers.setdefault("Cache-Control", "public, max-age=3600")
     elif response.headers.get("content-type", "").startswith("text/html"):

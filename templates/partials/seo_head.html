@@ -25,9 +25,10 @@
 <meta name="twitter:title" content="{{ seo_title }}">
 <meta name="twitter:description" content="{{ seo_description }}">
 <meta name="twitter:image" content="{{ seo_image }}">
-<link rel="manifest" href="/static/manifest.json?v=20260528d">
-<link rel="icon" type="image/png" href="/static/favicon.png?v=20260528d">
-<link rel="apple-touch-icon" href="/static/icons/icon-192.png?v=20260528d">
+<link rel="manifest" href="/manifest.webmanifest?v=20260528f">
+<link rel="icon" type="image/png" href="/static/favicon.png?v=20260528f">
+<link rel="apple-touch-icon" href="/static/icons/icon-192.png?v=20260528f">
+<script src="/static/pwa-install.js?v=20260528f" defer></script>
 {% include 'partials/seo_schema.html' %}
 <script>
 (() => {
@@ -39,7 +40,7 @@
     const link = document.createElement("link");
     link.id = "levix-mobile-fixes";
     link.rel = "stylesheet";
-    link.href = "/static/mobile-fixes.css?v=20260528e";
+    link.href = "/static/mobile-fixes.css?v=20260528f";
     document.head.appendChild(link);
   };
 
@@ -373,23 +374,5 @@
     loadMobileFixes();
     setupAnimationSystem();
   }
-})();
-</script>
-<script>
-(() => {
-  if (!("serviceWorker" in navigator)) return;
-
-  const registerLevixSW = async () => {
-    try {
-      await navigator.serviceWorker.register("/static/sw.js", {
-        scope: "/static/",
-        updateViaCache: "none"
-      });
-    } catch (_) {
-      // Intentionally silent to avoid impacting UX.
-    }
-  };
-
-  window.addEventListener("load", registerLevixSW, { once: true });
 })();
 </script>

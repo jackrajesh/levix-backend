@@ -23,6 +23,8 @@ SITEMAP_PATH = STATIC_DIR / "sitemap.xml"
 ROBOTS_PATH = STATIC_DIR / "robots.txt"
 FAVICON_PATH = STATIC_DIR / "favicon.png"
 LLMS_PATH = STATIC_DIR / "llms.txt"
+SW_PATH = STATIC_DIR / "sw.js"
+MANIFEST_PATH = STATIC_DIR / "manifest.json"
 
 # =========================================================
 # CACHE HEADERS
@@ -219,6 +221,28 @@ async def llms():
 async def favicon():
     return FileResponse(
         path=FAVICON_PATH
+    )
+
+
+@router.get("/sw.js", include_in_schema=False)
+async def service_worker():
+    """Root-scoped service worker required for mobile PWA install."""
+    return FileResponse(
+        path=SW_PATH,
+        media_type="application/javascript",
+        headers={
+            **NO_CACHE_HEADERS,
+            "Service-Worker-Allowed": "/",
+        },
+    )
+
+
+@router.get("/manifest.webmanifest", include_in_schema=False)
+async def web_manifest():
+    return FileResponse(
+        path=MANIFEST_PATH,
+        media_type="application/manifest+json",
+        headers=NO_CACHE_HEADERS,
     )
 
 # =========================================================

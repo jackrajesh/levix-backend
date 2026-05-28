@@ -32,7 +32,7 @@
             <a href="/about" class="nav-link" data-path="/about">About</a>
             <a href="/founder" class="nav-link" data-path="/founder">Founder</a>
             <a href="/contact" class="nav-link" data-path="/contact">Contact</a>
-            <button type="button" class="btn-install" id="install-app-btn" hidden>Install App</button>
+            <button type="button" class="btn-install" id="install-app-btn" hidden aria-label="Install LEVIX app">Install App</button>
             <a href="/login" class="btn-signin">Sign In</a>
         </div>
         <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu" aria-expanded="false" onclick="toggleNavMenu()">
@@ -92,41 +92,4 @@
             if (window.innerWidth > 768) toggleNavMenu(false);
         });
     });
-</script>
-<script>
-    (() => {
-        let deferredInstallPrompt = null;
-        const installBtn = document.getElementById("install-app-btn");
-        if (!installBtn) return;
-
-        const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone;
-        if (isStandalone) {
-            installBtn.hidden = true;
-            return;
-        }
-
-        window.addEventListener("beforeinstallprompt", (event) => {
-            event.preventDefault();
-            deferredInstallPrompt = event;
-            installBtn.hidden = false;
-        });
-
-        window.addEventListener("appinstalled", () => {
-            deferredInstallPrompt = null;
-            installBtn.hidden = true;
-        });
-
-        installBtn.addEventListener("click", async () => {
-            if (!deferredInstallPrompt) return;
-            installBtn.disabled = true;
-            try {
-                deferredInstallPrompt.prompt();
-                await deferredInstallPrompt.userChoice;
-            } finally {
-                deferredInstallPrompt = null;
-                installBtn.hidden = true;
-                installBtn.disabled = false;
-            }
-        });
-    })();
 </script>

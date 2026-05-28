@@ -1,21 +1,23 @@
 /* LEVIX conservative service worker (Phase 3) */
 
-const STATIC_CACHE = "levix-static-v5";
+const STATIC_CACHE = "levix-static-v6";
 const OFFLINE_URL = "/static/offline.html";
 
 const PRECACHE_URLS = [
   OFFLINE_URL,
-  "/static/manifest.json?v=20260528d",
-  "/static/favicon.png?v=20260528d",
+  "/static/manifest.json?v=20260528f",
+  "/manifest.webmanifest",
+  "/static/favicon.png?v=20260528f",
   "/static/logo.png",
-  "/static/global.css?v=20260528e",
-  "/static/mobile-fixes.css?v=20260528e",
+  "/static/global.css?v=20260528f",
+  "/static/mobile-fixes.css?v=20260528f",
+  "/static/pwa-install.js?v=20260528f",
   "/static/theme.js",
   "/static/i18n.js",
-  "/static/icons/icon-192.png?v=20260528d",
-  "/static/icons/icon-512.png?v=20260528d",
-  "/static/icons/icon-maskable-192.png?v=20260528d",
-  "/static/icons/icon-maskable-512.png?v=20260528d"
+  "/static/icons/icon-192.png?v=20260528f",
+  "/static/icons/icon-512.png?v=20260528f",
+  "/static/icons/icon-maskable-192.png?v=20260528f",
+  "/static/icons/icon-maskable-512.png?v=20260528f"
 ];
 
 const NETWORK_FIRST_STATIC_PATHS = [
@@ -62,6 +64,12 @@ self.addEventListener("install", (event) => {
       )
       .then(() => self.skipWaiting())
   );
+});
+
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener("activate", (event) => {
