@@ -1,21 +1,21 @@
 /* LEVIX conservative service worker (Phase 3) */
 
-const STATIC_CACHE = "levix-static-v3";
+const STATIC_CACHE = "levix-static-v4";
 const OFFLINE_URL = "/static/offline.html";
 
 const PRECACHE_URLS = [
   OFFLINE_URL,
-  "/static/manifest.json?v=20260528b",
-  "/static/favicon.png?v=20260528b",
+  "/static/manifest.json?v=20260528d",
+  "/static/favicon.png?v=20260528d",
   "/static/logo.png",
   "/static/global.css",
   "/static/mobile-fixes.css",
   "/static/theme.js",
   "/static/i18n.js",
-  "/static/icons/icon-192.png?v=20260528b",
-  "/static/icons/icon-512.png?v=20260528b",
-  "/static/icons/icon-maskable-192.png?v=20260528b",
-  "/static/icons/icon-maskable-512.png?v=20260528b"
+  "/static/icons/icon-192.png?v=20260528d",
+  "/static/icons/icon-512.png?v=20260528d",
+  "/static/icons/icon-maskable-192.png?v=20260528d",
+  "/static/icons/icon-maskable-512.png?v=20260528d"
 ];
 
 const NETWORK_FIRST_STATIC_PATHS = [
