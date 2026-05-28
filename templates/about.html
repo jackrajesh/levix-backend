@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en-IN" data-theme="light">
+<head>
+    {% set seo_page = "about" %}
+    {% set schema_page_type = "AboutPage" %}
+    {% set seo_path = "/about" %}
+    {% set seo_title = "About LEVIX Technologies | Retail Workflow Software for Indian MSMEs" %}
+    {% set seo_description = "Learn how LEVIX Technologies builds practical billing, inventory, and retail workflow software for Indian MSMEs, founded by Rajesh Kanna." %}
+    {% set seo_image_alt = "About LEVIX Technologies" %}
+    {% include 'partials/seo_head.html' %}
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Unified Components Stylesheet -->
+    <link rel="stylesheet" href="/static/global.css">
+    
+    <style>
+        :root {
+            --bg: #fafbfe;
+            --surface: #ffffff;
+            --radius: 16px;
+        }
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.75;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        
+        /* === PAGE HEADER === */
+        .page-header {
+            padding: 64px 0 32px;
+            text-align: center;
+        }
+        .page-header h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            line-height: 1.2;
+            margin-bottom: 12px;
+        }
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        /* === CONTENT LAYOUT === */
+        .content-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            margin-bottom: 56px;
+            /* Clip anything that tries to escape */
+            overflow: hidden;
+        }
+        
+        .content-box h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin: 32px 0 16px;
+            letter-spacing: -0.3px;
+            color: var(--text);
+        }
+        .content-box h2:first-of-type { margin-top: 0; }
+        
+        .content-box p {
+            margin-bottom: 20px;
+            color: var(--text-secondary);
+            font-size: 0.975rem;
+        }
+        .content-box strong {
+            color: var(--text);
+            font-weight: 600;
+        }
+        
+        /* Values Grid */
+        .values-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 24px 0 32px;
+        }
+        
+        .value-card {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            transition: var(--transition-smooth);
+        }
+        .value-card:hover {
+            border-color: var(--primary);
+            background: #ffffff;
+        }
+        .value-card h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--text);
+        }
+        .value-card p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin: 0;
+            line-height: 1.6;
+        }
+        
+        /* Info block */
+        .info-box {
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            box-sizing: border-box;
+            width: 100%;
+            min-width: 0;
+        }
+        
+        .info-box h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            margin: 0 0 16px 0;
+            color: var(--text);
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 9px 0;
+            border-bottom: 1px solid rgba(15,23,42,0.06);
+            font-size: 0.875rem;
+            gap: 12px;
+        }
+        .info-row:last-of-type {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: var(--text);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .info-value {
+            color: var(--text-secondary);
+            text-align: right;
+            word-break: break-word;
+            min-width: 0;
+        }
+        .info-value a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            word-break: break-all;
+        }
+        .info-value a:hover {
+            text-decoration: underline;
+        }
+        
+        /* ─── Profile two-column grid ───────────────────────────────────
+           3fr left (details) + 2fr right (founder card).
+           Both columns shrink proportionally — no fixed px that can blow
+           out of the parent's padded content area.
+        ─────────────────────────────────────────────────────────────── */
+        .profile-row {
+            display: grid;
+            grid-template-columns: 3fr 2fr;
+            gap: 24px;
+            align-items: stretch;
+            margin-top: 24px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        .profile-left-col,
+        .profile-right-col {
+            min-width: 0;        /* Critical: lets grid items shrink below content size */
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Override global.css founder-trust-card so it fills its grid cell */
+        .profile-right-col .founder-trust-card {
+            margin: 0;
+            flex: 1;
+            box-sizing: border-box;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Make the left info-box fill its column too */
+        .profile-left-col .info-box {
+            margin: 0;
+            flex: 1;
+        }
+        
+        /* === RESPONSIVE === */
+        @media (max-width: 820px) {
+            .page-header h1 { font-size: 2rem; }
+            .content-box { padding: 24px; overflow: visible; }
+            .values-grid { grid-template-columns: 1fr; }
+            .profile-row {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            .info-row {
+                flex-wrap: wrap;
+                gap: 4px;
+            }
+            .info-value { text-align: left; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR INCLUSION -->
+    {% include 'partials/navbar.html' %}
+
+    <main class="container">
+        <header class="page-header">
+            <h1>About LEVIX Technologies</h1>
+            <p>Practical billing, inventory, POS-style order management, and WhatsApp workflow software for Indian MSMEs.</p>
+        </header>
+
+        <section class="content-box">
+            <h2>Our Origin Story</h2>
+            <p>
+                Operating a physical business in India is a live balancing act. Merchants must manage incoming walk-in buyers, handle stream of catalog enquiries on WhatsApp, check physical stock availability, and record local credit history manually.
+            </p>
+            <p>
+                <strong>LEVIX Technologies</strong> was founded by <a href="/founder">Rajesh Kanna</a> to provide a dedicated, lightweight operations engine for domestic MSMEs. We build software tools that fit standard retail flows natively, avoiding the bloat and complexity of general enterprise systems.
+            </p>
+
+            <h2>Core Operational Values</h2>
+            <div class="values-grid">
+                <div class="value-card">
+                    <h3>🎯 Direct Utility</h3>
+                    <p>Shop operations should not require tutorials. Every screen is designed to be understood and used by any team member in less than two minutes.</p>
+                </div>
+                <div class="value-card">
+                    <h3>🇮🇳 Domestic Alignment</h3>
+                    <p>From local Kiranas and sweet bakeries to boutiques and salons, we align our system directly with Indian retail structures.</p>
+                </div>
+                <div class="value-card">
+                    <h3>💰 Highly Accessible</h3>
+                    <p>High-quality workflow automation should be affordable. We offer a transparent SaaS platform starting at ₹799/month.</p>
+                </div>
+                <div class="value-card">
+                    <h3>⚡ Structured Isolation</h3>
+                    <p>Your sales records, customer lists, and stock balances are strictly isolated, securely stored, and highly available.</p>
+                </div>
+            </div>
+
+            <h2>Business Profile &amp; Leadership</h2>
+            <p>
+                Transparency forms the baseline of authority. Below are the verified details of our business entity and leadership.
+            </p>
+            
+            <div class="profile-row">
+                <!-- Left Column -->
+                <div class="profile-left-col">
+                    <div class="info-box" style="margin: 0; flex: 1; display: flex; flex-direction: column;">
+                        <h3 style="margin-top: 0;">LEVIX Technologies — Registered Profile</h3>
+                        <div class="info-row">
+                            <span class="info-label">Brand Identifier</span>
+                            <span class="info-value">LEVIX</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Website Domain</span>
+                            <span class="info-value">levixapp.in</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Legal Registration</span>
+                            <span class="info-value">Registered MSME India</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">MSME Registration Owner</span>
+                            <span class="info-value">Sumathi Rajarathinam</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Founder &amp; CEO</span>
+                            <span class="info-value"><a href="/founder">Rajesh Kanna</a></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Development HQ</span>
+                            <span class="info-value">Karur, Tamil Nadu, India</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Registered Office</span>
+                            <span class="info-value">Mayiladuthurai, Tamil Nadu, India</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Support Email</span>
+                            <span class="info-value"><a href="mailto:levixsupport@gmail.com">levixsupport@gmail.com</a></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Column -->
+                <div class="profile-right-col">
+                    <div class="founder-trust-card" style="margin: 0; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                        <div>
+                            <div class="founder-card-header">
+                                <img src="/static/founder.png" alt="Rajesh Kanna — Founder of LEVIX" class="founder-avatar" aria-label="Rajesh Kanna" loading="lazy">
+                                <div class="founder-meta">
+                                    <h4>Rajesh Kanna <span class="founder-verified-badge" aria-label="Verified Profile">Verified</span></h4>
+                                    <p>Founder &amp; CEO — LEVIX Technologies</p>
+                                </div>
+                            </div>
+                            <p class="founder-card-desc">Building practical business operations software for Indian businesses.</p>
+                        </div>
+                        <div class="founder-card-ctas">
+                            <a href="https://www.linkedin.com/in/rajeshkanna-levix/" class="btn-founder-primary" target="_blank" rel="noopener noreferrer" aria-label="Connect with Rajesh Kanna on LinkedIn (opens in new tab)">
+                                <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true" style="margin-right:2px;"><path d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .633-.526 1.146-1.175 1.146H1.175C.526 16 0 15.487 0 14.854V1.146zm4.943 12.248V6.169H2.542v7.225h2.401zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248-.822 0-1.359.54-1.359 1.248 0 .694.521 1.248 1.327 1.248h.016zm10.92 8.212V9.302c0-2.285-1.217-3.349-2.847-3.349-1.314 0-1.897.722-2.227 1.232v-.986H7.135c.032.678 0 7.225 0 7.225h2.4v-4.03c0-.215.015-.43.078-.584.17-.42.553-.855 1.2-1.2.846-.644 1.944-.644 1.944 1.763v4.051h2.4z"/></svg>
+                                Connect on LinkedIn
+                            </a>
+                            <a href="/founder" class="btn-founder-secondary" aria-label="Visit Rajesh Kanna's founder page">
+                                View Founder Profile
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h2 style="margin-top:36px;">Our Operational Focus</h2>
+            <p>
+                We spend our days refining checkout flows, optimizing local database transaction speeds, and improving conversational order intakes. By grounding our solutions in real business metrics, LEVIX Technologies ensures your physical counters remain fast, organized, and profitable.
+            </p>
+        </section>
+    </main>
+
+    <!-- FOOTER INCLUSION -->
+    {% include 'partials/footer.html' %}
+
+</body>
+</html>

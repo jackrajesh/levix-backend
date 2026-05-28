@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, Date, Numeric, Text, JSON, Float
+import uuid
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, Date, Numeric, Text, JSON, Float, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from .database import Base
@@ -6,7 +7,7 @@ from .database import Base
 class Shop(Base):
     __tablename__ = "shops"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
     shop_name = Column(String, nullable=False)
     owner_name = Column(String, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
@@ -27,6 +28,14 @@ class Shop(Base):
     business_subnote = Column(Text, nullable=True)
     shop_category = Column(String(50), nullable=True, default="General")
 
+    # Approval / Lifecycle fields (Phase: Production Readiness)
+    # Values: 'pending' | 'approved' | 'rejected' | 'banned' | 'trial'
+    approval_status = Column(String(20), nullable=False, default="pending", index=True)
+    rejection_reason = Column(Text, nullable=True)
+    approved_at = Column(DateTime(timezone=True), nullable=True)
+    approved_by = Column(String, nullable=True)   # admin email who approved
+    deleted_at = Column(DateTime(timezone=True), nullable=True)  # soft delete timestamp
+
     reset_tokens = relationship("PasswordResetToken", back_populates="shop", cascade="all, delete-orphan")
     inventory = relationship("InventoryItem", back_populates="shop", cascade="all, delete-orphan")
     logs = relationship("LogEntry", back_populates="shop", cascade="all, delete-orphan")
@@ -45,12 +54,13 @@ class Shop(Base):
     ai_leads = relationship("AILead", back_populates="shop", cascade="all, delete-orphan")
     ai_sessions = relationship("AIConversationSession", back_populates="shop", cascade="all, delete-orphan")
     ai_analytics = relationship("AIAnalyticsEvent", back_populates="shop", cascade="all, delete-orphan")
+    ai_usage = relationship("AIUsage", back_populates="shop", cascade="all, delete-orphan")
 
 class PasswordResetToken(Base):
     __tablename__ = "password_reset_tokens"
     
-    id = Column(Integer, primary_key=True, index=True)
-    shop_id = Column(Integer, ForeignKey("shops.id"), nullable=False)
+    id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    shop_id = Column(String, ForeignKey("shops.id"), nullable=False)
     otp_hash = Column(String, nullable=False)
     expires_at = Column(DateTime(timezone=True), nullable=False)
     used = Column(Boolean, default=False)
@@ -62,38 +72,43 @@ class PasswordResetToken(Base):
 class InventoryItem(Base):
     __tablename__ = "inventory_items"
     
-    id = Column(Integer, primary_key=True, index=True)
-    shop_id = Column(Integer, ForeignKey("shops.id"), index=True, nullable=False)
+    id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    shop_id = Column(String, ForeignKey("shops.id"), index=True, nullable=False)
     name = Column(String, nullable=False)
     quantity = Column(Integer, default=0, nullable=False)
     price = Column(Numeric(10, 2), default=0, nullable=False)
-    status = Column(String, default="out_of_stock")
-    stock_warning_active = Column(Boolean, default=False)
-    # AI Assistant fields
-    product_details = Column(Text, nullable=True)  # Human-readable AI context (sizes, variants, delivery info)
-    category = Column(String, nullable=True)        # footwear | food | service | apparel | custom | general
+    barcode = Column(String, nullable=True, index=True)
+    category = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
+    __table_args__ = (UniqueConstraint('shop_id', 'barcode', name='_shop_barcode_uc'),)
+
     shop = relationship("Shop", back_populates="inventory")
-    aliases = relationship("InventoryAlias", back_populates="inventory_item", cascade="all, delete-orphan")
     sales = relationship("SalesRecord", back_populates="inventory_item")
+
+class Product(Base):
+    __tablename__ = "products"
     
-class InventoryAlias(Base):
-    __tablename__ = "inventory_aliases"
+    id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    shop_id = Column(String, ForeignKey("shops.id"), index=True, nullable=False)
+    name = Column(String, nullable=False)
+    description = Column(Text, nullable=True)
+    price = Column(Numeric(10, 2), default=0, nullable=False)
+    quantity = Column(Integer, default=0, nullable=False)
+    status = Column(String, default="available")
+    category = Column(String, nullable=True)
+    image_url = Column(String, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     
-    id = Column(Integer, primary_key=True, index=True)
-    inventory_id = Column(Integer, ForeignKey("inventory_items.id"), nullable=False)
-    alias = Column(String, index=True, nullable=False)
-    
-    inventory_item = relationship("InventoryItem", back_populates="aliases")
 
 class LogEntry(Base):
     __tablename__ = "log_entries"
     
-    id = Column(Integer, primary_key=True, index=True)
-    shop_id = Column(Integer, ForeignKey("shops.id"), index=True, nullable=False)
+    id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    shop_id = Column(String, ForeignKey("shops.id"), index=True, nullable=False)
     product_name = Column(String, nullable=False)
-    product_id = Column(Integer, nullable=True)
+    product_id = Column(String, nullable=True)
     status = Column(String, nullable=False)
     is_matched = Column(Boolean, default=True) # New: tracked for analytics
     match_source = Column(String, nullable=True) # New: 'direct', 'fuzzy', 'ai', 'pending'
@@ -107,8 +122,8 @@ class ActivityLog(Base):
     __tablename__ = "activity_logs"
     
     id = Column(Integer, primary_key=True, index=True)
-    shop_id = Column(Integer, ForeignKey("shops.id"), index=True, nullable=False)
-    user_id = Column(Integer, nullable=True) # ID of team member or owner
+    shop_id = Column(String, ForeignKey("shops.id"), index=True, nullable=False)
+    user_id = Column(String, nullable=True) # ID of team member or owner
     user_name = Column(String, nullable=True)
     role = Column(String, nullable=True)
     category = Column(String, nullable=False, index=True) # Sales, Orders, Inventory, etc.
@@ -132,37 +147,99 @@ class ActivityLog(Base):
 class PendingRequest(Base):
     __tablename__ = "pending_requests"
     
-    id = Column(Integer, primary_key=True, index=True)
-    shop_id = Column(Integer, ForeignKey("shops.id"), index=True, nullable=False)
+    id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    shop_id = Column(String, ForeignKey("shops.id"), index=True, nullable=False)
     product_name = Column(String, nullable=False)
-    product_id = Column(Integer, ForeignKey("inventory_items.id"), nullable=True)
+    product_id = Column(String, ForeignKey("inventory_items.id"), nullable=True)
     customer_message = Column(String, nullable=True)
+    customer_name = Column(String, nullable=True)
+    customer_phone = Column(String(20), nullable=True)
     request_type = Column(String, default="customer") # 'customer' or 'oos_warning'
     category_context = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     shop = relationship("Shop", back_populates="pending_requests")
 
-class PendingInquiry(Base):
-    __tablename__ = "pending_inquiries"
+class ConversationCategory(Base):
+    __tablename__ = "conversation_categories"
     
-    id = Column(Integer, primary_key=True, index=True)
-    shop_id = Column(Integer, ForeignKey("shops.id"), index=True, nullable=False)
-    customer_name = Column(String, nullable=True)
-    customer_phone = Column(String(20), nullable=True)
-    product_requested = Column(String, nullable=False)
-    message_text = Column(String, nullable=True)
+    id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    shop_id = Column(String, ForeignKey("shops.id"), index=True, nullable=False)
+    name = Column(String, nullable=False)
+    color = Column(String, nullable=True, default="#3b82f6")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    status = Column(String, default="new")
     
     shop = relationship("Shop")
+
+class ConversationSession(Base):
+    __tablename__ = "conversation_sessions"
+    
+    id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    shop_id = Column(String, ForeignKey("shops.id"), index=True, nullable=False)
+    inquiry_number = Column(String, index=True, unique=True, nullable=True)
+    customer_phone = Column(String(20), index=True, nullable=False)
+    customer_name = Column(String, nullable=True)
+    status = Column(String, default="NEW", index=True) # NEW, ONGOING, WAITING_CUSTOMER, RESOLVED, ARCHIVED
+    category_id = Column(String, ForeignKey("conversation_categories.id"), index=True, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    last_message_at = Column(DateTime(timezone=True), server_default=func.now())
+    completed_at = Column(DateTime(timezone=True), nullable=True)
+    
+    # New Inquiry Lifecycle columns
+    inquiry_status = Column(String, default="ACTIVE", index=True) # ACTIVE, PAUSED, WAITING_SUPPORT, WAITING_CUSTOMER, RESOLVED, CANCELLED
+    inquiry_context_id = Column(String, nullable=True)
+    paused_at = Column(DateTime(timezone=True), nullable=True)
+    resumed_at = Column(DateTime(timezone=True), nullable=True)
+    cancelled_at = Column(DateTime(timezone=True), nullable=True)
+    
+    # Operational Hardening Columns
+    conversation_type = Column(String, default="INQUIRY", index=True) # INQUIRY, ORDER
+    is_deleted = Column(Boolean, default=False, index=True)
+    deleted_at = Column(DateTime(timezone=True), nullable=True)
+    
+    shop = relationship("Shop")
+    category = relationship("ConversationCategory")
+    messages = relationship("ConversationMessage", back_populates="session", cascade="all, delete-orphan", order_by="ConversationMessage.timestamp")
+
+    @classmethod
+    def generate_unique_number(cls, db_session):
+        import random
+        while True:
+            num = random.randint(10000, 99999)
+            inq_num = f"INQ-{num}"
+            exists = db_session.query(cls).filter(cls.inquiry_number == inq_num).first()
+            if not exists:
+                return inq_num
+
+    @classmethod
+    def generate_unique_order_number(cls, db_session):
+        import random
+        while True:
+            num = random.randint(10000, 99999)
+            ord_num = f"ORD-{num}"
+            exists = db_session.query(cls).filter(cls.inquiry_number == ord_num).first()
+            if not exists:
+                return ord_num
+
+class ConversationMessage(Base):
+    __tablename__ = "conversation_messages"
+    
+    id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    session_id = Column(String, ForeignKey("conversation_sessions.id"), index=True, nullable=False)
+    sender_type = Column(String, nullable=False) # CUSTOMER, OWNER, SYSTEM
+    message = Column(String, nullable=False)
+    timestamp = Column(DateTime(timezone=True), server_default=func.now())
+    whatsapp_message_id = Column(String, nullable=True, unique=True)
+    
+    session = relationship("ConversationSession", back_populates="messages")
 
 class SalesRecord(Base):
     __tablename__ = "sales_records"
     
-    id = Column(Integer, primary_key=True, index=True)
-    shop_id = Column(Integer, ForeignKey("shops.id"), index=True, nullable=False)
-    product_id = Column(Integer, ForeignKey("inventory_items.id"), nullable=True)
+    id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    shop_id = Column(String, ForeignKey("shops.id"), index=True, nullable=False)
+    product_id = Column(String, ForeignKey("inventory_items.id"), nullable=True)
     product_name = Column(String, nullable=True)
     date = Column(Date, nullable=False)
     quantity = Column(Integer, nullable=False)
@@ -176,8 +253,8 @@ class SalesRecord(Base):
 class CustomerSession(Base):
     __tablename__ = "customer_sessions"
     
-    id = Column(Integer, primary_key=True, index=True)
-    shop_id = Column(Integer, ForeignKey("shops.id"), index=True, nullable=False)
+    id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    shop_id = Column(String, ForeignKey("shops.id"), index=True, nullable=False)
     customer_phone = Column(String(20), index=True, nullable=False)
     is_ordering = Column(Boolean, default=False)
     can_order = Column(Boolean, default=False)
@@ -190,8 +267,8 @@ class CustomerProfile(Base):
     """Phase 1: Long Term Persistent Customer Memory."""
     __tablename__ = "customer_profiles"
     
-    id = Column(Integer, primary_key=True, index=True)
-    shop_id = Column(Integer, ForeignKey("shops.id"), index=True, nullable=False)
+    id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    shop_id = Column(String, ForeignKey("shops.id"), index=True, nullable=False)
     customer_phone = Column(String(20), index=True, nullable=False)
     customer_name = Column(String, nullable=True)
     
@@ -226,28 +303,50 @@ class CustomerProfile(Base):
 class Order(Base):
     __tablename__ = "orders"
     
-    id = Column(Integer, primary_key=True, index=True)
-    shop_id = Column(Integer, ForeignKey("shops.id"), index=True, nullable=False)
+    id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    shop_id = Column(String, ForeignKey("shops.id"), index=True, nullable=False)
+    customer_id = Column(String, ForeignKey("customer_profiles.id"), nullable=True)
     booking_id = Column(String, unique=True, index=True, nullable=False)
     order_id = Column(String, unique=True, index=True, nullable=False)
+    
     customer_name = Column(String, nullable=False)
     phone = Column(String(20), nullable=False)
     address = Column(String, nullable=False)
-    product = Column(String, nullable=False)
-    quantity = Column(Integer, default=1, nullable=False)
-    unit_price = Column(Numeric(10, 2), default=0, nullable=False)
+    
+    # Legacy flat fields (for simple one-item orders or summary)
+    product = Column(String, nullable=True)
+    quantity = Column(Integer, default=1, nullable=True)
+    unit_price = Column(Numeric(10, 2), default=0, nullable=True)
+    
     total_amount = Column(Numeric(10, 2), default=0, nullable=False)
-    status = Column(String, default="pending", index=True) # "pending", "accepted", "rejected", "completed"
+    status = Column(String, default="PENDING", index=True) # "PENDING", "CONFIRMED", "CANCELLED", "DELIVERED"
+    delivery_type = Column(String(8), nullable=True) # "delivery" or "pickup"
+    notes = Column(Text, nullable=True)
+    
     created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
     
     shop = relationship("Shop", back_populates="orders")
+    items = relationship("OrderItem", back_populates="order", cascade="all, delete-orphan")
+
+class OrderItem(Base):
+    __tablename__ = "order_items"
+    
+    id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    order_id = Column(String, ForeignKey("orders.id"), nullable=False)
+    product_id = Column(String, ForeignKey("inventory_items.id"), nullable=False)
+    name = Column(String, nullable=False)
+    price = Column(Numeric(10, 2), nullable=False)
+    quantity = Column(Integer, nullable=False)
+    subtotal = Column(Numeric(10, 2), nullable=False)
+    
+    order = relationship("Order", back_populates="items")
 
 class OrderLog(Base):
     __tablename__ = "order_logs"
     
-    id = Column(Integer, primary_key=True, index=True)
-    shop_id = Column(Integer, ForeignKey("shops.id"), index=True, nullable=False)
+    id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    shop_id = Column(String, ForeignKey("shops.id"), index=True, nullable=False)
     order_id = Column(String, index=True, nullable=False)
     action = Column(String, nullable=False) # order_created, order_accepted, etc.
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
@@ -272,12 +371,12 @@ class Subscription(Base):
     __tablename__ = "subscriptions"
     
     id = Column(Integer, primary_key=True, index=True)
-    shop_id = Column(Integer, ForeignKey("shops.id"), unique=True, nullable=False)
+    shop_id = Column(String, ForeignKey("shops.id"), unique=True, nullable=False)
     plan_id = Column(Integer, ForeignKey("plans.id"), nullable=False)
     status = Column(String, default="active") # active, expired, cancelled
     start_date = Column(DateTime(timezone=True), server_default=func.now())
     renewal_date = Column(DateTime(timezone=True))
-    razorpay_subscription_id = Column(String, nullable=True)
+    cashfree_subscription_id = Column(String, nullable=True)
     
     shop = relationship("Shop", back_populates="subscription")
     plan = relationship("Plan")
@@ -296,7 +395,7 @@ class ShopAddon(Base):
     __tablename__ = "shop_addons"
     
     id = Column(Integer, primary_key=True, index=True)
-    shop_id = Column(Integer, ForeignKey("shops.id"), nullable=False)
+    shop_id = Column(String, ForeignKey("shops.id"), nullable=False)
     addon_id = Column(Integer, ForeignKey("addons.id"), nullable=False)
     activated_at = Column(DateTime(timezone=True), server_default=func.now())
     expiry_date = Column(DateTime(timezone=True), nullable=True)
@@ -309,7 +408,7 @@ class ShopRole(Base):
     __tablename__ = "shop_roles"
 
     id = Column(Integer, primary_key=True, index=True)
-    shop_id = Column(Integer, ForeignKey("shops.id"), nullable=False)
+    shop_id = Column(String, ForeignKey("shops.id"), nullable=False)
     name = Column(String, nullable=False)  # e.g. "Cashier", "Inventory Editor"
     permissions = Column(JSON, nullable=True)  # List of permission keys granted
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -317,8 +416,8 @@ class ShopRole(Base):
 class TeamMember(Base):
     __tablename__ = "team_members"
     
-    id = Column(Integer, primary_key=True, index=True)
-    shop_id = Column(Integer, ForeignKey("shops.id"), nullable=False)
+    id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    shop_id = Column(String, ForeignKey("shops.id"), nullable=False)
     name = Column(String, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
     password_hash = Column(String, nullable=False)
@@ -335,12 +434,12 @@ class BillingHistory(Base):
     __tablename__ = "billing_history"
     
     id = Column(Integer, primary_key=True, index=True)
-    shop_id = Column(Integer, ForeignKey("shops.id"), nullable=False)
+    shop_id = Column(String, ForeignKey("shops.id"), nullable=False)
     amount = Column(Numeric(10, 2), nullable=False)
     plan_name = Column(String, nullable=False)
     status = Column(String, default="paid") # paid, failed, pending
     invoice_id = Column(String, unique=True, nullable=True)
-    payment_id = Column(String, nullable=True) # Razorpay payment ID
+    payment_id = Column(String, nullable=True) # Cashfree payment ID
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     shop = relationship("Shop", back_populates="billing_history")
@@ -355,12 +454,12 @@ class AIConversationSession(Base):
     __tablename__ = "ai_conversation_sessions"
 
     id = Column(Integer, primary_key=True, index=True)
-    shop_id = Column(Integer, ForeignKey("shops.id"), index=True, nullable=False)
+    shop_id = Column(String, ForeignKey("shops.id"), index=True, nullable=False)
     session_id = Column(String, unique=True, index=True, nullable=False)
     customer_phone = Column(String(20), index=True, nullable=True)
     # What the AI has gathered so far
     collected_fields = Column(JSON, nullable=True, default=dict)
-    matched_product_id = Column(Integer, nullable=True)
+    matched_product_id = Column(String, nullable=True)
     matched_product_name = Column(String, nullable=True)
     last_intent = Column(String, nullable=True)
     intent_confidence = Column(Numeric(4, 2), nullable=True)
@@ -379,14 +478,14 @@ class AIConversationSession(Base):
 
 class AILead(Base):
     """Structured lead created by the AI assistant when intent + fields are ready."""
-    __tablename__ = "ai_leads_v3"
+    __tablename__ = "ai_leads"
 
     id = Column(Integer, primary_key=True, index=True)
-    shop_id = Column(Integer, ForeignKey("shops.id"), index=True, nullable=False)
+    shop_id = Column(String, ForeignKey("shops.id"), index=True, nullable=False)
     session_id = Column(String, index=True, nullable=True)
     customer_name = Column(String, nullable=True)
     phone = Column(String(20), nullable=True)
-    product_id = Column(Integer, nullable=True)
+    product_id = Column(String, nullable=True)
     product_name = Column(String, nullable=True)
     category = Column(String, nullable=True)
     intent = Column(String, nullable=True)
@@ -401,12 +500,12 @@ class AILead(Base):
     shop = relationship("Shop", back_populates="ai_leads")
 
 
-class AIAnalyticsEvent(Base) :
+class AIAnalyticsEvent(Base):
     """Tracks AI funnel events: chat_started, lead_created, conversion, abandoned, etc."""
     __tablename__ = "ai_analytics_events"
 
     id = Column(Integer, primary_key=True, index=True)
-    shop_id = Column(Integer, ForeignKey("shops.id"), index=True, nullable=False)
+    shop_id = Column(String, ForeignKey("shops.id"), index=True, nullable=False)
     event_type = Column(String, nullable=False, index=True)
     session_id = Column(String, nullable=True, index=True)
     event_data = Column(JSON, nullable=True)
@@ -420,7 +519,7 @@ class MissingProductRequest(Base):
     __tablename__ = "missing_product_requests"
 
     id = Column(Integer, primary_key=True, index=True)
-    shop_id = Column(Integer, ForeignKey("shops.id"), index=True, nullable=False)
+    shop_id = Column(String, ForeignKey("shops.id"), index=True, nullable=False)
     product_name = Column(String, nullable=False, index=True)
     customer_phone = Column(String(20), nullable=True)
     count = Column(Integer, default=1)
@@ -433,7 +532,7 @@ class PendingSSEEvent(Base):
     __tablename__ = "pending_sse_events"
 
     id = Column(Integer, primary_key=True, index=True)
-    shop_id = Column(Integer, ForeignKey("shops.id"), index=True, nullable=False)
+    shop_id = Column(String, ForeignKey("shops.id"), index=True, nullable=False)
     event_type = Column(String, nullable=False) # e.g. "new_order"
     data = Column(JSON, nullable=False)
     delivered = Column(Boolean, default=False, index=True)
@@ -444,9 +543,82 @@ class AdminAlert(Base):
     __tablename__ = "admin_alerts"
 
     id = Column(Integer, primary_key=True, index=True)
-    shop_id = Column(Integer, ForeignKey("shops.id"), index=True, nullable=False)
+    shop_id = Column(String, ForeignKey("shops.id"), index=True, nullable=False)
     alert_type = Column(String, nullable=False, index=True)  # e.g. 'order_failure_burst'
     failure_count = Column(Integer, default=1)
     details = Column(JSON, nullable=True)
     resolved = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
+
+class AIUsage(Base):
+    """Tracks daily AI usage and cooldowns for Smart AI sustainability."""
+    __tablename__ = "ai_usage"
+
+    id = Column(Integer, primary_key=True, index=True)
+    shop_id = Column(String, ForeignKey("shops.id"), index=True, nullable=False)
+    date = Column(Date, server_default=func.current_date(), index=True)
+    request_count = Column(Integer, default=0)
+    total_spend = Column(Numeric(10, 4), default=0) # Tracks equivalent ₹ spend
+    cooldown_until = Column(DateTime(timezone=True), nullable=True)
+
+    shop = relationship("Shop", back_populates="ai_usage")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# OBSERVABILITY & FORENSICS MODELS
+# ─────────────────────────────────────────────────────────────────────────────
+
+class ConversationEventLog(Base):
+    """
+    Append-only audit trail for all conversation lifecycle events.
+    Never mutated after creation. Used for forensics, replay, and diagnostics.
+    """
+    __tablename__ = "conversation_event_log"
+
+    id = Column(Integer, primary_key=True, index=True)
+    event_id = Column(String, unique=True, index=True, nullable=False, default=lambda: f"evt_{uuid.uuid4().hex[:16]}")
+    session_id = Column(String, index=True, nullable=True)       # ConversationSession.id or AIConversationSession.session_id
+    flow_id = Column(String, index=True, nullable=True)          # Logical flow identifier
+    shop_id = Column(String, index=True, nullable=True)
+    customer_phone = Column(String(20), index=True, nullable=True)
+    event_type = Column(String, nullable=False, index=True)       # From EventType enum
+    previous_state = Column(String, nullable=True)
+    next_state = Column(String, nullable=True)
+    trigger_source = Column(String, nullable=True)                # "webhook", "command", "system", "ai", "owner", "timer"
+    trigger_reason = Column(String, nullable=True)                # Human-readable reason
+    message_id = Column(String, nullable=True)                    # WhatsApp message ID
+    webhook_id = Column(String, nullable=True)                    # Raw webhook event ID
+    actor_type = Column(String, nullable=True)                    # "customer", "owner", "system", "ai", "controller"
+    actor_id = Column(String, nullable=True)                      # Phone number or user ID
+    recovery_type = Column(String, nullable=True)                 # "checkpoint", "fallback", "auto_recover", null
+    checkpoint_id = Column(String, nullable=True)
+    metadata_json = Column(JSON, nullable=True)                   # Arbitrary structured data
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
+
+
+class WebhookAuditLog(Base):
+    """
+    Forensic audit trail for every inbound webhook event.
+    Tracks dedup, latency, retries, and processing results.
+    """
+    __tablename__ = "webhook_audit_log"
+
+    id = Column(Integer, primary_key=True, index=True)
+    webhook_event_id = Column(String, unique=True, index=True, nullable=False, default=lambda: f"wh_{uuid.uuid4().hex[:16]}")
+    shop_id = Column(String, index=True, nullable=True)
+    wa_message_id = Column(String, index=True, nullable=True)     # WhatsApp msg ID for dedup
+    sender_phone = Column(String(20), nullable=True)
+    phone_number_id = Column(String, nullable=True)               # WhatsApp Phone Number ID
+    payload_hash = Column(String, nullable=True)                  # SHA256 of raw body for forensics
+    message_type = Column(String, nullable=True)                  # "text", "button", "interactive", "status"
+    raw_message_text = Column(String, nullable=True)              # Extracted text (truncated 500 chars)
+    is_duplicate = Column(Boolean, default=False, index=True)
+    processing_result = Column(String, nullable=True)             # "success", "duplicate", "error", "ignored", "no_shop"
+    route_target = Column(String, nullable=True)                  # "router_engine", "guided_engine", etc.
+    response_status = Column(String, nullable=True)               # "sent", "send_failed", "no_reply"
+    outbound_wa_id = Column(String, nullable=True)                # WA message ID of outbound reply
+    retry_count = Column(Integer, default=0)
+    processing_latency_ms = Column(Integer, nullable=True)        # End-to-end processing time
+    error_summary = Column(String, nullable=True)                 # Truncated error message if failed
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
+

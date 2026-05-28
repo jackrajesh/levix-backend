@@ -31,12 +31,10 @@ def get_shop_name(identity: UserIdentity = Depends(require_permission("settings_
 
 @router.post("/connect-whatsapp")
 def connect_whatsapp(data: ConnectWhatsAppRequest, identity: UserIdentity = Depends(require_permission("settings_edit")), db: Session = Depends(get_db)):
-    """
-    Securely attach WhatsApp Cloud API credentials to a shop.
-    Returns success message on completion.
-    The access token is encrypted before storage.
-    """
+    if not data.shop_id:
+        data.shop_id = identity.shop.id
     return connect_whatsapp_to_shop(data, db)
+
 
 @router.get("/whatsapp/status")
 def whatsapp_status(identity: UserIdentity = Depends(require_permission("settings_view"))):
@@ -49,10 +47,12 @@ def whatsapp_status(identity: UserIdentity = Depends(require_permission("setting
 
 @router.post("/whatsapp/config")
 def update_whatsapp_config(data: ConnectWhatsAppRequest, identity: UserIdentity = Depends(require_permission("settings_edit")), db: Session = Depends(get_db)):
+    if not data.shop_id:
+        data.shop_id = identity.shop.id
     return connect_whatsapp_to_shop(data, db)
 
 @router.post("/force-refresh/{shop_id}")
-def force_refresh(shop_id: int, identity: UserIdentity = Depends(require_permission("settings_edit"))):
+def force_refresh(shop_id: str, identity: UserIdentity = Depends(require_permission("settings_edit"))):
     if identity.shop.id != shop_id:
          from fastapi import HTTPException
          raise HTTPException(status_code=403, detail="Not authorized for this shop")

@@ -1,0 +1,140 @@
+{% set seo_url = "https://levixapp.in" ~ seo_path %}
+{% set page_type = schema_page_type|default("WebPage") %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://levixapp.in/#organization",
+      "name": "LEVIX Technologies",
+      "alternateName": ["LEVIX", "Levix", "Levixapp", "Levixapp.in"],
+      "url": "https://levixapp.in/",
+      "logo": {
+        "@type": "ImageObject",
+        "@id": "https://levixapp.in/#logo",
+        "url": "https://levixapp.in/static/logo.png",
+        "caption": "LEVIX Technologies logo"
+      },
+      "description": "LEVIX Technologies builds practical billing, inventory, POS, and retail workflow software for Indian MSMEs and local shop operators.",
+      "founder": {
+        "@id": "https://levixapp.in/#founder"
+      },
+      "knowsAbout": [
+        "GST billing software India",
+        "inventory management software India",
+        "POS software for retailers",
+        "kirana store software",
+        "retail workflow software India"
+      ],
+      "areaServed": {
+        "@type": "Country",
+        "name": "India"
+      }
+    },
+    {
+      "@type": "Person",
+      "@id": "https://levixapp.in/#founder",
+      "name": "Rajesh Kanna",
+      "jobTitle": "Founder & CEO",
+      "url": "https://levixapp.in/founder",
+      "sameAs": [
+        "https://www.linkedin.com/in/rajeshkanna-levix/"
+      ],
+      "worksFor": {
+        "@id": "https://levixapp.in/#organization"
+      },
+      "description": "Rajesh Kanna is the Founder and CEO of LEVIX Technologies, the creator of the LEVIX business workflow platform for Indian retail MSMEs."
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://levixapp.in/#software",
+      "name": "LEVIX",
+      "alternateName": "LEVIX Technologies",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "url": "https://levixapp.in/",
+      "description": "LEVIX is a web-based business workflow platform for billing, inventory, POS-style order management, customer inboxes, and WhatsApp-assisted retail operations.",
+      "creator": {
+        "@id": "https://levixapp.in/#organization"
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": "799",
+        "priceCurrency": "INR",
+        "url": "https://levixapp.in/pricing"
+      }
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://levixapp.in/#website",
+      "url": "https://levixapp.in/",
+      "name": "LEVIX Technologies",
+      "alternateName": "LEVIX",
+      "publisher": {
+        "@id": "https://levixapp.in/#organization"
+      }
+    },
+    {
+      "@type": {{ page_type|tojson }},
+      "@id": {{ (seo_url ~ "#webpage")|tojson }},
+      "url": {{ seo_url|tojson }},
+      "name": {{ seo_title|tojson }},
+      "description": {{ seo_description|tojson }},
+      "isPartOf": {
+        "@id": "https://levixapp.in/#website"
+      },
+      "publisher": {
+        "@id": "https://levixapp.in/#organization"
+      }{% if seo_page == "founder" %},
+      "mainEntity": {
+        "@id": "https://levixapp.in/#founder"
+      }{% elif seo_page in ["home", "pricing"] %},
+      "mainEntity": {
+        "@id": "https://levixapp.in/#software"
+      }{% elif seo_page == "about" %},
+      "mainEntity": {
+        "@id": "https://levixapp.in/#organization"
+      }{% endif %}
+    }{% if seo_page == "pricing" %},
+    {
+      "@type": "FAQPage",
+      "@id": "https://levixapp.in/pricing#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Is the Base Plan compulsory?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. All add-ons require the Base Plan. You cannot subscribe to add-ons without an active Base Plan."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I add or remove add-ons later?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "You can add new features at any time. Active add-ons remain active until the current billing period expires."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is there a free trial?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Trial access is granted based on business verification. Businesses may request a trial through the contact page."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How is payment collected?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Payments are processed securely through Cashfree with support for UPI, cards, and net banking."
+          }
+        }
+      ]
+    }{% endif %}
+  ]
+}
+</script>

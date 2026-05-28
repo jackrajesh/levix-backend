@@ -1,0 +1,414 @@
+Connecting to: postgresql://neondb_owner:npg_cjF5KTfi0IMq@ep-empty-fog-a14am452-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+
+Tables:
+
+Table: password_reset_tokens
+  Column: id, Type: VARCHAR
+  Column: shop_id, Type: VARCHAR
+  Column: otp_hash, Type: VARCHAR
+  Column: expires_at, Type: TIMESTAMP
+  Column: used, Type: BOOLEAN
+  Column: created_at, Type: TIMESTAMP
+  Column: attempt_count, Type: INTEGER
+
+Table: customer_sessions
+  Column: id, Type: VARCHAR
+  Column: shop_id, Type: VARCHAR
+  Column: customer_phone, Type: VARCHAR(20)
+  Column: is_ordering, Type: BOOLEAN
+  Column: can_order, Type: BOOLEAN
+  Column: step, Type: VARCHAR
+  Column: session_data, Type: VARCHAR
+  Column: booking_id, Type: VARCHAR
+  Column: updated_at, Type: TIMESTAMP
+
+Table: log_entries
+  Column: id, Type: VARCHAR
+  Column: shop_id, Type: VARCHAR
+  Column: product_name, Type: VARCHAR
+  Column: product_id, Type: VARCHAR
+  Column: status, Type: VARCHAR
+  Column: is_matched, Type: BOOLEAN
+  Column: match_source, Type: VARCHAR
+  Column: timestamp, Type: TIMESTAMP
+  Column: performed_by, Type: VARCHAR
+  Column: user_type, Type: VARCHAR
+
+Table: inventory_aliases
+  Column: id, Type: VARCHAR
+  Column: inventory_id, Type: VARCHAR
+  Column: alias, Type: VARCHAR
+
+Table: order_logs
+  Column: id, Type: VARCHAR
+  Column: shop_id, Type: VARCHAR
+  Column: order_id, Type: VARCHAR
+  Column: action, Type: VARCHAR
+  Column: timestamp, Type: TIMESTAMP
+  Column: performed_by, Type: VARCHAR
+  Column: user_type, Type: VARCHAR
+
+Table: orders
+  Column: id, Type: TEXT
+  Column: shop_id, Type: TEXT
+  Column: customer_id, Type: TEXT
+  Column: order_id, Type: TEXT
+  Column: booking_id, Type: TEXT
+  Column: status, Type: VARCHAR(16)
+  Column: delivery_type, Type: VARCHAR(8)
+  Column: total_amount, Type: NUMERIC(10, 2)
+  Column: address, Type: TEXT
+  Column: notes, Type: TEXT
+  Column: created_at, Type: TIMESTAMP
+  Column: updated_at, Type: TIMESTAMP
+  Column: customer_name, Type: VARCHAR
+  Column: phone, Type: VARCHAR
+  Column: product, Type: VARCHAR
+  Column: quantity, Type: INTEGER
+  Column: unit_price, Type: NUMERIC(10, 2)
+
+Table: sales_records
+  Column: id, Type: VARCHAR
+  Column: shop_id, Type: VARCHAR
+  Column: product_id, Type: VARCHAR
+  Column: product_name, Type: VARCHAR
+  Column: date, Type: DATE
+  Column: quantity, Type: INTEGER
+  Column: price, Type: NUMERIC(10, 2)
+  Column: performed_by, Type: VARCHAR
+  Column: user_type, Type: VARCHAR
+
+Table: pending_requests
+  Column: id, Type: VARCHAR
+  Column: shop_id, Type: VARCHAR
+  Column: product_name, Type: VARCHAR
+  Column: product_id, Type: VARCHAR
+  Column: customer_message, Type: VARCHAR
+  Column: request_type, Type: VARCHAR
+  Column: created_at, Type: TIMESTAMP
+  Column: category_context, Type: VARCHAR
+
+Table: ai_leads
+  Column: id, Type: INTEGER
+  Column: shop_id, Type: VARCHAR
+  Column: session_id, Type: VARCHAR
+  Column: customer_name, Type: VARCHAR
+  Column: phone, Type: VARCHAR(20)
+  Column: product_id, Type: INTEGER
+  Column: product_name, Type: VARCHAR
+  Column: category, Type: VARCHAR
+  Column: intent, Type: VARCHAR
+  Column: collected_data, Type: JSON
+  Column: summary, Type: TEXT
+  Column: status, Type: VARCHAR
+  Column: source, Type: VARCHAR
+  Column: confidence, Type: NUMERIC(4, 2)
+  Column: created_at, Type: TIMESTAMP
+  Column: updated_at, Type: TIMESTAMP
+
+Table: customer_profiles
+  Column: id, Type: VARCHAR
+  Column: shop_id, Type: VARCHAR
+  Column: customer_phone, Type: VARCHAR(20)
+  Column: customer_name, Type: VARCHAR
+  Column: first_seen_at, Type: TIMESTAMP
+  Column: last_seen_at, Type: TIMESTAMP
+  Column: visit_count, Type: INTEGER
+  Column: message_count, Type: INTEGER
+  Column: total_orders, Type: INTEGER
+  Column: total_leads, Type: INTEGER
+  Column: favorite_products, Type: JSON
+  Column: favorite_categories, Type: JSON
+  Column: avg_budget, Type: DOUBLE PRECISION
+  Column: max_budget, Type: DOUBLE PRECISION
+  Column: preferred_spice_level, Type: VARCHAR
+  Column: veg_preference, Type: VARCHAR
+  Column: usual_people_count, Type: INTEGER
+  Column: last_order_summary, Type: TEXT
+  Column: last_order_at, Type: TIMESTAMP
+  Column: last_5_orders, Type: JSON
+  Column: conversion_score, Type: INTEGER
+  Column: vip_tier, Type: VARCHAR
+  Column: notes, Type: JSON
+  Column: created_at, Type: TIMESTAMP
+  Column: updated_at, Type: TIMESTAMP
+
+Table: activity_logs
+  Column: id, Type: INTEGER
+  Column: shop_id, Type: VARCHAR
+  Column: user_id, Type: VARCHAR
+  Column: user_name, Type: VARCHAR
+  Column: role, Type: VARCHAR
+  Column: category, Type: VARCHAR
+  Column: action, Type: VARCHAR
+  Column: target, Type: VARCHAR
+  Column: action_type, Type: VARCHAR
+  Column: entity_type, Type: VARCHAR
+  Column: entity_name, Type: VARCHAR
+  Column: old_value, Type: VARCHAR
+  Column: new_value, Type: VARCHAR
+  Column: old_values, Type: JSON
+  Column: new_values, Type: JSON
+  Column: actor_name, Type: VARCHAR
+  Column: severity, Type: VARCHAR
+  Column: metadata, Type: JSON
+  Column: ip_address, Type: VARCHAR
+  Column: created_at, Type: TIMESTAMP
+
+Table: pending_inquiries
+  Column: id, Type: VARCHAR
+  Column: shop_id, Type: VARCHAR
+  Column: customer_name, Type: VARCHAR
+  Column: customer_phone, Type: VARCHAR(20)
+  Column: product_requested, Type: VARCHAR
+  Column: message_text, Type: VARCHAR
+  Column: created_at, Type: TIMESTAMP
+  Column: status, Type: VARCHAR
+
+Table: shop_roles
+  Column: id, Type: INTEGER
+  Column: shop_id, Type: VARCHAR
+  Column: name, Type: VARCHAR
+  Column: permissions, Type: JSON
+  Column: created_at, Type: TIMESTAMP
+
+Table: team_members
+  Column: id, Type: VARCHAR
+  Column: shop_id, Type: VARCHAR
+  Column: name, Type: VARCHAR
+  Column: email, Type: VARCHAR
+  Column: password_hash, Type: VARCHAR
+  Column: role, Type: VARCHAR
+  Column: permissions, Type: JSON
+  Column: is_active, Type: BOOLEAN
+  Column: status, Type: VARCHAR
+  Column: last_login, Type: TIMESTAMP
+  Column: created_at, Type: TIMESTAMP
+
+Table: billing_history
+  Column: id, Type: INTEGER
+  Column: shop_id, Type: VARCHAR
+  Column: amount, Type: NUMERIC(10, 2)
+  Column: plan_name, Type: VARCHAR
+  Column: status, Type: VARCHAR
+  Column: invoice_id, Type: VARCHAR
+  Column: payment_id, Type: VARCHAR
+  Column: created_at, Type: TIMESTAMP
+
+Table: ai_conversation_sessions
+  Column: id, Type: INTEGER
+  Column: shop_id, Type: VARCHAR
+  Column: session_id, Type: VARCHAR
+  Column: customer_phone, Type: VARCHAR(20)
+  Column: collected_fields, Type: JSON
+  Column: matched_product_id, Type: INTEGER
+  Column: matched_product_name, Type: VARCHAR
+  Column: last_intent, Type: VARCHAR
+  Column: intent_confidence, Type: NUMERIC(4, 2)
+  Column: category, Type: VARCHAR
+  Column: missing_fields, Type: JSON
+  Column: turn_count, Type: INTEGER
+  Column: is_active, Type: BOOLEAN
+  Column: lead_created, Type: BOOLEAN
+  Column: source, Type: VARCHAR
+  Column: conversation_history, Type: JSON
+  Column: created_at, Type: TIMESTAMP
+  Column: updated_at, Type: TIMESTAMP
+
+Table: ai_leads_v3
+  Column: id, Type: INTEGER
+  Column: shop_id, Type: VARCHAR
+  Column: session_id, Type: VARCHAR
+  Column: customer_name, Type: VARCHAR
+  Column: phone, Type: VARCHAR(20)
+  Column: product_id, Type: INTEGER
+  Column: product_name, Type: VARCHAR
+  Column: category, Type: VARCHAR
+  Column: intent, Type: VARCHAR
+  Column: collected_data, Type: JSON
+  Column: summary, Type: TEXT
+  Column: status, Type: VARCHAR
+  Column: source, Type: VARCHAR
+  Column: confidence, Type: NUMERIC(4, 2)
+  Column: created_at, Type: TIMESTAMP
+  Column: updated_at, Type: TIMESTAMP
+
+Table: ai_analytics_events
+  Column: id, Type: INTEGER
+  Column: shop_id, Type: VARCHAR
+  Column: event_type, Type: VARCHAR
+  Column: session_id, Type: VARCHAR
+  Column: event_data, Type: JSON
+  Column: created_at, Type: TIMESTAMP
+
+Table: missing_product_requests
+  Column: id, Type: INTEGER
+  Column: shop_id, Type: VARCHAR
+  Column: product_name, Type: VARCHAR
+  Column: customer_phone, Type: VARCHAR(20)
+  Column: count, Type: INTEGER
+  Column: last_requested_at, Type: TIMESTAMP
+  Column: created_at, Type: TIMESTAMP
+
+Table: pending_sse_events
+  Column: id, Type: INTEGER
+  Column: shop_id, Type: VARCHAR
+  Column: event_type, Type: VARCHAR
+  Column: data, Type: JSON
+  Column: delivered, Type: BOOLEAN
+  Column: created_at, Type: TIMESTAMP
+
+Table: admin_alerts
+  Column: id, Type: INTEGER
+  Column: shop_id, Type: VARCHAR
+  Column: alert_type, Type: VARCHAR
+  Column: failure_count, Type: INTEGER
+  Column: details, Type: JSON
+  Column: resolved, Type: BOOLEAN
+  Column: created_at, Type: TIMESTAMP
+
+Table: staff
+  Column: id, Type: TEXT
+  Column: shop_id, Type: TEXT
+  Column: name, Type: TEXT
+  Column: email, Type: TEXT
+  Column: password_hash, Type: TEXT
+  Column: role, Type: TEXT
+  Column: permissions, Type: JSONB
+  Column: is_active, Type: BOOLEAN
+  Column: created_at, Type: TIMESTAMP
+  Column: updated_at, Type: TIMESTAMP
+
+Table: products
+  Column: id, Type: TEXT
+  Column: shop_id, Type: TEXT
+  Column: name, Type: TEXT
+  Column: description, Type: TEXT
+  Column: price, Type: NUMERIC(10, 2)
+  Column: quantity, Type: INTEGER
+  Column: status, Type: TEXT
+  Column: category_id, Type: TEXT
+  Column: image_url, Type: TEXT
+  Column: created_at, Type: TIMESTAMP
+  Column: updated_at, Type: TIMESTAMP
+
+Table: product_categories
+  Column: id, Type: TEXT
+  Column: shop_id, Type: TEXT
+  Column: name, Type: TEXT
+  Column: created_at, Type: TIMESTAMP
+  Column: updated_at, Type: TIMESTAMP
+
+Table: order_items
+  Column: id, Type: TEXT
+  Column: order_id, Type: TEXT
+  Column: product_id, Type: TEXT
+  Column: name, Type: TEXT
+  Column: price, Type: NUMERIC(10, 2)
+  Column: quantity, Type: INTEGER
+  Column: subtotal, Type: NUMERIC(10, 2)
+
+Table: customers
+  Column: id, Type: TEXT
+  Column: phone, Type: TEXT
+  Column: name, Type: TEXT
+  Column: created_at, Type: TIMESTAMP
+  Column: updated_at, Type: TIMESTAMP
+
+Table: order_status_history
+  Column: id, Type: TEXT
+  Column: order_id, Type: TEXT
+  Column: status, Type: VARCHAR(16)
+  Column: actor_role, Type: VARCHAR(8)
+  Column: notes, Type: TEXT
+  Column: created_at, Type: TIMESTAMP
+
+Table: otp_tokens
+  Column: id, Type: TEXT
+  Column: phone, Type: TEXT
+  Column: otp_hash, Type: TEXT
+  Column: expires_at, Type: TIMESTAMP
+  Column: used, Type: BOOLEAN
+  Column: created_at, Type: TIMESTAMP
+
+Table: shop_owners
+  Column: id, Type: TEXT
+  Column: email, Type: TEXT
+  Column: phone_number, Type: TEXT
+  Column: password_hash, Type: TEXT
+  Column: name, Type: TEXT
+  Column: created_at, Type: TIMESTAMP
+  Column: updated_at, Type: TIMESTAMP
+
+Table: subscriptions
+  Column: id, Type: INTEGER
+  Column: shop_id, Type: VARCHAR
+  Column: plan_id, Type: INTEGER
+  Column: status, Type: VARCHAR
+  Column: start_date, Type: TIMESTAMP
+  Column: renewal_date, Type: TIMESTAMP
+  Column: cashfree_subscription_id, Type: VARCHAR
+
+Table: plans
+  Column: id, Type: INTEGER
+  Column: name, Type: VARCHAR
+  Column: price, Type: NUMERIC(10, 2)
+  Column: interval, Type: VARCHAR
+  Column: features, Type: JSON
+  Column: limits, Type: JSON
+  Column: is_active, Type: BOOLEAN
+  Column: display_order, Type: INTEGER
+
+Table: shop_addons
+  Column: id, Type: INTEGER
+  Column: shop_id, Type: VARCHAR
+  Column: addon_id, Type: INTEGER
+  Column: activated_at, Type: TIMESTAMP
+  Column: expiry_date, Type: TIMESTAMP
+
+Table: addons
+  Column: id, Type: INTEGER
+  Column: name, Type: VARCHAR
+  Column: price, Type: NUMERIC(10, 2)
+  Column: description, Type: TEXT
+  Column: features, Type: JSON
+  Column: is_active, Type: BOOLEAN
+
+Table: inventory_items
+  Column: id, Type: VARCHAR
+  Column: shop_id, Type: VARCHAR
+  Column: name, Type: VARCHAR
+  Column: quantity, Type: INTEGER
+  Column: price, Type: NUMERIC(10, 2)
+  Column: status, Type: VARCHAR
+  Column: stock_warning_active, Type: BOOLEAN
+  Column: created_at, Type: TIMESTAMP
+  Column: product_details, Type: TEXT
+  Column: category, Type: VARCHAR
+
+Table: shops
+  Column: id, Type: TEXT
+  Column: owner_id, Type: TEXT
+  Column: name, Type: TEXT
+  Column: slug, Type: TEXT
+  Column: is_live, Type: BOOLEAN
+  Column: delivery_config, Type: JSONB
+  Column: category, Type: TEXT
+  Column: created_at, Type: TIMESTAMP
+  Column: updated_at, Type: TIMESTAMP
+  Column: shop_name, Type: VARCHAR
+  Column: owner_name, Type: VARCHAR
+  Column: email, Type: VARCHAR
+  Column: password_hash, Type: VARCHAR
+  Column: phone_number, Type: VARCHAR
+  Column: whatsapp_phone_number_id, Type: VARCHAR
+  Column: whatsapp_access_token, Type: VARCHAR
+  Column: whatsapp_business_account_id, Type: VARCHAR
+  Column: address, Type: TEXT
+  Column: description, Type: TEXT
+  Column: is_active, Type: BOOLEAN
+  Column: config, Type: TEXT
+  Column: shop_category, Type: VARCHAR
+  Column: settings, Type: JSON
+  Column: business_category, Type: VARCHAR
+  Column: business_subnote, Type: TEXT

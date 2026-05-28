@@ -40,7 +40,7 @@ class AIChatRequest(BaseModel):
     session_id: Optional[str] = None
     customer_phone: Optional[str] = None
     source: Optional[str] = "web"
-    shop_id: Optional[int] = None   # Widget may pass this; auth validates
+    shop_id: Optional[str] = None   # Widget may pass this; auth validates
 
 
 class AIChatResponse(BaseModel):
@@ -100,7 +100,7 @@ async def ai_chat(
 
 @router.post("/chat/public", response_model=AIChatResponse)
 async def ai_chat_public(
-    shop_id: int,
+    shop_id: str,
     request: AIChatRequest,
     db: Session = Depends(get_db),
 ):
@@ -374,7 +374,7 @@ def get_ai_analytics(
 # HELPERS
 # ══════════════════════════════════════════════════════════════════════════════
 
-def _get_lead_or_404(db: Session, lead_id: int, shop_id: int) -> models.AILead:
+def _get_lead_or_404(db: Session, lead_id: int, shop_id: str) -> models.AILead:
     lead = (
         db.query(models.AILead)
         .filter(models.AILead.id == lead_id, models.AILead.shop_id == shop_id)

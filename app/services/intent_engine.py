@@ -46,6 +46,7 @@ _STOP_WORDS = {
     "that", "this", "these", "those", "what", "which", "who", "whom",
     "please", "just", "like", "want", "get", "give", "tell", "show",
     "let", "make", "put", "take", "go", "come", "send", "bring",
+    "iruka", "irukka", "undo", "vendum", "kidaikuma", "venum",
 }
 
 # Universal Domain Semantic Map
@@ -473,7 +474,7 @@ _PAT_NAME_UPDATE = re.compile(
 
 # Bug 3/6 fix: Stock check / availability query — do NOT add to cart
 _PAT_STOCK_CHECK = re.compile(
-    r"\b(do\s+you\s+have|is\s+there|got\s+any|have\s+you\s+got|any\s+stock|in\s+stock|available|availability|stock\s+check|do\s+u\s+have|you\s+have)\b",
+    r"\b(do\s+you\s+have|is\s+there|got\s+any|have\s+you\s+got|any\s+stock|in\s+stock|available|availability|stock\s+check|do\s+u\s+have|you\s+have|iruka|irukka|undo|kidaikuma)\b",
     re.IGNORECASE,
 )
 

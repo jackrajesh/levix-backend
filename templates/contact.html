@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+    {% set seo_page = "contact" %}
+    {% set schema_page_type = "ContactPage" %}
+    {% set seo_path = "/contact" %}
+    {% set seo_title = "Contact LEVIX Technologies | Support for Indian Retail Software" %}
+    {% set seo_description = "Contact LEVIX Technologies for help with billing, inventory, POS-style workflows, WhatsApp ordering, pricing, and retail software setup." %}
+    {% set seo_image_alt = "Contact LEVIX Technologies" %}
+    {% include 'partials/seo_head.html' %}
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Unified Components Stylesheet -->
+    <link rel="stylesheet" href="/static/global.css">
+    
+    <style>
+        :root {
+            --bg: #fafbfe;
+            --surface: #ffffff;
+            --radius: 16px;
+        }
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        
+        /* === CONTACT HERO SECTION === */
+        .contact-hero {
+            padding: 64px 0 40px;
+            text-align: center;
+        }
+        
+        .contact-hero h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 800;
+            letter-spacing: -1.2px;
+            color: var(--text);
+            margin-bottom: 12px;
+            line-height: 1.2;
+        }
+        
+        .contact-hero p {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            max-width: 680px;
+            margin: 0 auto 24px;
+            line-height: 1.6;
+        }
+        
+        .contact-trust-row {
+            display: inline-flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            background: var(--primary-light);
+            border: 1px solid var(--border);
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        /* === GRID LAYOUT === */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.1fr;
+            gap: 48px;
+            padding-bottom: 72px;
+        }
+        
+        /* === CONTACT INFO (LEFT) === */
+        .contact-info h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: var(--text);
+        }
+        
+        .contact-card-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            margin-bottom: 24px;
+        }
+        
+        .contact-item {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+            align-items: flex-start;
+        }
+        .contact-item:last-of-type {
+            margin-bottom: 0;
+        }
+        
+        .contact-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+        }
+        
+        .contact-details {
+            flex-grow: 1;
+        }
+        .contact-details h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 3px;
+        }
+        .contact-details p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        
+        /* WhatsApp Green Theming */
+        .ci-whatsapp {
+            background: #e8faf0;
+            border-color: #c6f6d5;
+            color: #15803d;
+        }
+        .link-whatsapp {
+            color: #15803d !important;
+            font-weight: 700;
+        }
+        .link-whatsapp:hover {
+            color: #166534 !important;
+        }
+        
+        /* Hours & Trust indicators */
+        .hours-box {
+            border-top: 1px solid var(--border);
+            padding-top: 16px;
+            margin-top: 16px;
+        }
+        .hours-box h4 {
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--text);
+        }
+        .hours-box p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+        
+        /* === CONTACT FORM (RIGHT) === */
+        .contact-form-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+        }
+        
+        .contact-form-box h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: var(--text);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+        
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 12px 14px;
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            color: var(--text);
+            outline: none;
+            transition: var(--transition-smooth);
+        }
+        
+        .form-input:focus, .form-textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .form-textarea {
+            resize: vertical;
+            min-height: 130px;
+        }
+        
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+        
+        .btn-submit:hover:not(:disabled) {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+        }
+        
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .form-status {
+            margin-top: 14px;
+            padding: 12px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: none;
+        }
+        
+        .form-success {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+        }
+        
+        .form-error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+        }
+        
+        /* === RESPONSIVE === */
+        @media (max-width: 768px) {
+            .contact-grid {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+            .contact-hero h1 {
+                font-size: 2.1rem;
+            }
+            .contact-form-box {
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR INCLUSION -->
+    {% include 'partials/navbar.html' %}
+
+    <main class="container">
+        <!-- CONTACT HERO (Correction 1) -->
+        <section class="contact-hero">
+            <h1>Contact LEVIX Technologies</h1>
+            <p>Questions about pricing, setup, billing, inventory, WhatsApp workflows, or your business workflow? Reach the LEVIX team directly.</p>
+            <div class="contact-trust-row" role="note" aria-label="Trust Signals">
+                <span>🇮🇳 MSME Registered</span>
+                <span>•</span>
+                <span>⚡ Human Support</span>
+                <span>•</span>
+                <span>Built for Indian Businesses</span>
+            </div>
+        </section>
+
+        <!-- CONTENT GRID -->
+        <div class="contact-grid">
+            
+            <!-- LEFT COLUMN: DIRECT CHANNELS & FOUNDER TRUST CARD -->
+            <div class="contact-info">
+                <h2>Direct Channels</h2>
+                
+                <div class="contact-card-box">
+                    <div class="contact-item">
+                        <div class="contact-icon" aria-hidden="true">📧</div>
+                        <div class="contact-details">
+                            <h3>Official Email Support</h3>
+                            <p>For support tickets, accounts, or business proposals.</p>
+                            <a href="mailto:levixsupport@gmail.com" class="click-affordance-link" aria-label="Send email to levixsupport@gmail.com">levixsupport@gmail.com</a>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon ci-whatsapp" aria-hidden="true">💬</div>
+                        <div class="contact-details">
+                            <h3>WhatsApp Live Chat</h3>
+                            <p>Fast responses for local merchants and setup support.</p>
+                            <a href="https://wa.me/916369812535" class="click-affordance-link link-whatsapp" target="_blank" rel="noopener noreferrer" aria-label="Chat on WhatsApp (opens in new tab)">Chat on WhatsApp</a>
+                        </div>
+                    </div>
+                    
+                    <div class="hours-box">
+                        <h4>⏰ Active Support Desk</h4>
+                        <p>Monday – Saturday: 10:00 AM – 7:00 PM IST</p>
+                        <p style="color: var(--text-muted); font-size: 0.775rem; margin-top: 4px;">Form responses are evaluated within 24 hours.</p>
+                    </div>
+                </div>
+
+                <!-- PREMIUM FOUNDER MINI CARD (Correction 4 & 5) -->
+                <div class="founder-trust-card">
+                    <div class="founder-card-header">
+                        <img src="/static/founder.png" alt="Rajesh Kanna — Founder of LEVIX" class="founder-avatar" aria-label="Rajesh Kanna" loading="lazy">
+                        <div class="founder-meta">
+                            <h4>Rajesh Kanna <span class="founder-verified-badge" aria-label="Verified Profile">Verified</span></h4>
+                            <p>Founder &amp; CEO — LEVIX Technologies</p>
+                        </div>
+                    </div>
+                    <p class="founder-card-desc">Building practical business operations software for Indian businesses.</p>
+                    <div class="founder-card-ctas">
+                        <a href="https://www.linkedin.com/in/rajeshkanna-levix/" class="btn-founder-primary" target="_blank" rel="noopener noreferrer" aria-label="Connect with Rajesh Kanna on LinkedIn (opens in new tab)">
+                            <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true" style="margin-right: 2px;"><path d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .633-.526 1.146-1.175 1.146H1.175C.526 16 0 15.487 0 14.854V1.146zm4.943 12.248V6.169H2.542v7.225h2.401zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248-.822 0-1.359.54-1.359 1.248 0 .694.521 1.248 1.327 1.248h.016zm10.92 8.212V9.302c0-2.285-1.217-3.349-2.847-3.349-1.314 0-1.897.722-2.227 1.232v-.986H7.135c.032.678 0 7.225 0 7.225h2.4v-4.03c0-.215.015-.43.078-.584.17-.42.553-.855 1.2-1.2.846-.644 1.944-.644 1.944 1.763v4.051h2.4z"/></svg>
+                            Connect on LinkedIn
+                        </a>
+                        <a href="/founder" class="btn-founder-secondary" aria-label="Visit Rajesh Kanna's founder page">
+                            Meet the Founder
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN: ACCESS FORM -->
+            <div class="contact-form">
+                <div class="contact-form-box">
+                    <h2>Send a Direct Message</h2>
+                    <form id="contact-form" onsubmit="handleContactSubmit(event)" novalidate>
+                        <div class="form-group">
+                            <label class="form-label" for="contact-name">Your Name <span style="color:#e11d48;" aria-hidden="true">*</span></label>
+                            <input type="text" id="contact-name" class="form-input" placeholder="Enter your name" required maxlength="100" autocomplete="name">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="contact-email">Email Address <span style="color:#e11d48;" aria-hidden="true">*</span></label>
+                            <input type="email" id="contact-email" class="form-input" placeholder="you@example.com" required autocomplete="email">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="contact-subject">Subject <span style="color:#e11d48;" aria-hidden="true">*</span></label>
+                            <input type="text" id="contact-subject" class="form-input" placeholder="How can we help you?" required maxlength="200">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="contact-message">Message Details <span style="color:#e11d48;" aria-hidden="true">*</span></label>
+                            <textarea id="contact-message" class="form-textarea" placeholder="Describe your question or operational requirements in detail..." required maxlength="5000"></textarea>
+                        </div>
+                        <button type="submit" class="btn-submit click-affordance-btn" id="contact-submit-btn">Send Message</button>
+                        <div id="form-status" class="form-status" role="alert" aria-live="polite"></div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- FOOTER INCLUSION -->
+    {% include 'partials/footer.html' %}
+
+    <script>
+    async function handleContactSubmit(e) {
+        e.preventDefault();
+        var status = document.getElementById('form-status');
+        var btn = document.getElementById('contact-submit-btn');
+        status.style.display = 'none';
+        status.className = 'form-status';
+        var name = document.getElementById('contact-name').value.trim();
+        var email = document.getElementById('contact-email').value.trim();
+        var subject = document.getElementById('contact-subject').value.trim();
+        var message = document.getElementById('contact-message').value.trim();
+        
+        if (!name || !email || !subject || !message) {
+            status.className = 'form-status form-error';
+            status.textContent = 'Please fill in all required fields.';
+            status.style.display = 'block';
+            return;
+        }
+        
+        btn.disabled = true;
+        btn.textContent = 'Sending Message\u2026';
+        
+        try {
+            var response = await fetch('/api/contact', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({name, email, subject, message})
+            });
+            var data = await response.json();
+            if (response.ok && data.success) {
+                status.className = 'form-status form-success';
+                status.textContent = data.message || 'Message sent. We will reply within 48 hours on working days.';
+                status.style.display = 'block';
+                document.getElementById('contact-form').reset();
+                btn.textContent = 'Sent Successfully \u2713';
+                setTimeout(function() { btn.disabled = false; btn.textContent = 'Send Message'; }, 4000);
+            } else {
+                throw new Error(data.detail || 'Something went wrong.');
+            }
+        } catch (err) {
+            status.className = 'form-status form-error';
+            var msg = err.message || '';
+            if (msg.toLowerCase().includes('too many')) {
+                status.textContent = 'Too many messages sent. Please wait before trying again.';
+            } else if (msg.toLowerCase().includes('unavailable')) {
+                status.textContent = 'Email service is temporarily unavailable. Please email us directly: levixsupport@gmail.com';
+            } else {
+                status.textContent = msg || 'Failed to send. Please email us at levixsupport@gmail.com';
+            }
+            status.style.display = 'block';
+            btn.disabled = false;
+            btn.textContent = 'Send Message';
+        }
+    }
+    </script>
+</body>
+</html>

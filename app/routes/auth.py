@@ -2,7 +2,7 @@ import os
 from datetime import datetime, timezone, timedelta
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Request
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 import smtplib
 from email.message import EmailMessage
 import secrets
@@ -35,7 +35,7 @@ async def get_current_shop(token: Optional[str] = Depends(oauth2_scheme), token_
     try:
         payload = auth.jwt.decode(actual_token, auth.SECRET_KEY, algorithms=[auth.ALGORITHM])
         email: str = payload.get("sub")
-        team_member_id: int = payload.get("team_member_id")
+        team_member_id: str = payload.get("team_member_id")
         if email is None:
             raise credentials_exception
     except auth.JWTError:
@@ -46,7 +46,10 @@ async def get_current_shop(token: Optional[str] = Depends(oauth2_scheme), token_
         member = db.query(models.TeamMember).filter(models.TeamMember.id == team_member_id).first()
         if not member or not member.is_active or member.status == 'disabled':
             raise HTTPException(status_code=403, detail="Account is disabled. Contact your shop owner.")
-        shop = db.query(models.Shop).filter(models.Shop.id == member.shop_id).first()
+        shop = db.query(models.Shop).options(
+            joinedload(models.Shop.activated_addons).joinedload(models.ShopAddon.addon),
+            joinedload(models.Shop.subscription)
+        ).filter(models.Shop.id == member.shop_id).first()
         if shop is None:
             raise credentials_exception
         return UserIdentity(
@@ -59,7 +62,10 @@ async def get_current_shop(token: Optional[str] = Depends(oauth2_scheme), token_
         )
 
     # ── Owner login path
-    shop = db.query(models.Shop).filter(models.Shop.email == email).first()
+    shop = db.query(models.Shop).options(
+        joinedload(models.Shop.activated_addons).joinedload(models.ShopAddon.addon),
+        joinedload(models.Shop.subscription)
+    ).filter(models.Shop.email == email).first()
     if shop is None:
         raise credentials_exception
     return UserIdentity(
@@ -78,6 +84,17 @@ def require_permission(permission: str):
             raise HTTPException(status_code=403, detail="Insufficient permissions")
         return identity
     return dependency
+
+def require_active_subscription(identity: UserIdentity = Depends(get_current_shop)):
+    """Enforces that the shop has an active subscription.
+    This should be used as a dependency for all dashboard 'write' and 'core' operations.
+    """
+    if not identity.is_subscription_active:
+        raise HTTPException(
+            status_code=402, 
+            detail="Subscription expired or inactive. Please renew to continue using this feature."
+        )
+    return identity
 
 @router.get("/me", response_model=schemas.MeResponse)
 def get_current_user_info(
@@ -225,7 +242,7 @@ def send_email_otp(email: str, otp: str):
             </div>
             
             <div class="footer">
-                <p><strong>Powered by Levix</strong></p>
+                <p><strong>Powered by LEVIX</strong></p>
                 <p>Helping businesses automate smarter.</p>
             </div>
         </div>
@@ -234,9 +251,9 @@ def send_email_otp(email: str, otp: str):
     """
 
     data = {
-        "from": "Levix <support@levixapp.in>",
+        "from": "LEVIX <support@levixapp.in>",
         "to": [email],
-        "subject": "Levix OTP Verification",
+        "subject": "LEVIX OTP Verification",
         "html": html_content
     }
 
@@ -331,15 +348,20 @@ def register_shop(shop: schemas.ShopCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Phone number already registered")
     
     hashed_password = auth.hash_password(shop.password)
+    import uuid
     new_shop = models.Shop(
+        id=str(uuid.uuid4()),
         shop_name=shop.shop_name,
         owner_name=shop.owner_name,
         email=shop.email,
         phone_number=shop.phone_number,
-        password_hash=hashed_password
+        password_hash=hashed_password,
+        approval_status="pending"
     )
+    print(f"[AUTH DEBUG] Registering new shop: {shop.shop_name} ({shop.email}) - Status set to: pending")
     db.add(new_shop)
     db.commit()
+    print(f"[AUTH DEBUG] Shop {new_shop.id} committed to database.")
     db.refresh(new_shop)
     return new_shop
 
@@ -352,6 +374,32 @@ def login_for_access_token(request: Request, form_data: OAuth2PasswordRequestFor
     # ── 1. Try owner (Shop) login first
     shop = db.query(models.Shop).filter(models.Shop.email == email).first()
     if shop and auth.verify_password(password, shop.password_hash):
+
+        # ── Approval gate ──────────────────────────────────────────────────
+        approval = getattr(shop, 'approval_status', 'approved')  # safe fallback for legacy rows
+        if approval == 'pending':
+            raise HTTPException(
+                status_code=403,
+                detail="Your shop is under review. You will be notified by email once activated. For queries contact levixsupport@gmail.com"
+            )
+        if approval == 'rejected':
+            reason = getattr(shop, 'rejection_reason', None) or "Please contact support for details."
+            raise HTTPException(
+                status_code=403,
+                detail=f"Your shop registration was not approved. Reason: {reason}"
+            )
+        if approval == 'banned':
+            raise HTTPException(
+                status_code=403,
+                detail="This account has been suspended. Contact levixsupport@gmail.com for assistance."
+            )
+        if shop.deleted_at is not None:
+            raise HTTPException(
+                status_code=403,
+                detail="This account has been deactivated. Contact levixsupport@gmail.com to restore within 30 days."
+            )
+        # ──────────────────────────────────────────────────────────────────
+
         access_token = auth.create_access_token(data={
             "sub": shop.email,
             "shop_id": shop.id,
@@ -370,6 +418,7 @@ def login_for_access_token(request: Request, form_data: OAuth2PasswordRequestFor
             metadata={"ip": ip, "browser": request.headers.get("user-agent")},
         )
         
+        print(f"[AUTH SUCCESS] Owner logged in: {shop.email} from {ip}")
         return {"access_token": access_token, "token_type": "bearer"}
 
     # ── 2. Try team member login
@@ -407,6 +456,7 @@ def login_for_access_token(request: Request, form_data: OAuth2PasswordRequestFor
             metadata={"ip": ip, "browser": request.headers.get("user-agent")},
         )
         
+        print(f"[AUTH SUCCESS] Team Member logged in: {member.email} (Shop: {shop.id}) from {ip}")
         return {"access_token": access_token, "token_type": "bearer"}
 
     # ── 3. Both failed

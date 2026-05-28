@@ -1,0 +1,153 @@
+[
+  {
+    "scenario": "S1: Multi-line and Alias",
+    "steps": [
+      {
+        "message": "Add 2 coca cola\\nno ice",
+        "replies": [
+          "I see you want to *add item* \u263a But first, what's your name?"
+        ],
+        "state": {
+          "message_timestamps": [
+            1777655923.2667449
+          ],
+          "retry_count": 0,
+          "onboarding_step": "collect_name",
+          "retry_phone_count": 0,
+          "shop_category": "General"
+        }
+      },
+      {
+        "message": "what's in cart",
+        "replies": [
+          "I see you want to *show cart* \u263a But first, what's your name?"
+        ],
+        "state": {
+          "message_timestamps": [
+            1777655923.2667449,
+            1777655925.2850716
+          ],
+          "retry_count": 0,
+          "onboarding_step": "collect_name",
+          "retry_phone_count": 0,
+          "shop_category": "General"
+        }
+      }
+    ]
+  },
+  {
+    "scenario": "S2: Confirmation Guard",
+    "steps": [
+      {
+        "message": "add 2 chicken biryani",
+        "replies": [
+          "I see you want to *add item* \u263a But first, what's your name?"
+        ],
+        "state": {
+          "message_timestamps": [
+            1777655927.6320438
+          ],
+          "retry_count": 0,
+          "onboarding_step": "collect_name",
+          "retry_phone_count": 0,
+          "shop_category": "General"
+        }
+      },
+      {
+        "message": "pickup",
+        "replies": [
+          "I see you want to *select pickup* \u263a But first, what's your name?"
+        ],
+        "state": {
+          "message_timestamps": [
+            1777655927.6320438,
+            1777655929.4350142
+          ],
+          "retry_count": 0,
+          "onboarding_step": "collect_name",
+          "retry_phone_count": 0,
+          "shop_category": "General"
+        }
+      },
+      {
+        "message": "change",
+        "replies": [
+          "Nice to meet you, Change! \ud83d\ude0a\nCould I get your phone number? (10 digits)"
+        ],
+        "state": {
+          "customer_name": "Change",
+          "message_timestamps": [
+            1777655927.6320438,
+            1777655929.4350142,
+            1777655931.2434642
+          ],
+          "retry_count": 0,
+          "onboarding_step": "collect_phone",
+          "retry_phone_count": 0,
+          "shop_category": "General"
+        }
+      }
+    ]
+  },
+  {
+    "scenario": "S3: Combo Priority",
+    "steps": [
+      {
+        "message": "Need dinner for 5 under 700",
+        "replies": [
+          "For a budget of *\u20b9700*, here's what I'd suggest:\n\u2022 Chicken Biryani \u2014 \u20b9200\n\u2022 Coke \u2014 \u20b950\n\nTotal: *\u20b9250*\n\nShall I add these to your cart? _(yes / no)_"
+        ],
+        "state": {
+          "cart": [
+            {
+              "product_id": "499213b4-14b2-4eae-b364-2e557c2132d3",
+              "name": "Chicken Biryani",
+              "unit_price": 200.0,
+              "quantity": 1,
+              "qty": 1,
+              "subtotal": 200.0,
+              "spice_level": null,
+              "special_note": null
+            },
+            {
+              "product_id": "cad2ba85-15f3-4974-b47e-70369a643c8d",
+              "name": "Coke",
+              "unit_price": 50.0,
+              "quantity": 1,
+              "qty": 1,
+              "subtotal": 50.0,
+              "spice_level": null,
+              "special_note": null
+            }
+          ],
+          "message_timestamps": [
+            1777655933.5429523
+          ],
+          "retry_count": 0,
+          "retry_phone_count": 0,
+          "shop_category": "General"
+        }
+      }
+    ]
+  },
+  {
+    "scenario": "S4: Multi-line modifiers",
+    "steps": [
+      {
+        "message": "Add biryani\\nless spicy\\nno onion\\nextra gravy",
+        "replies": [
+          "Sorry, *Biryani Less Spicy No Onion Extra Gravy* isn't on our catalogue right now \ud83d\ude14\n\nWhat would you like to do?\n1\ufe0f\u20e3 Type *inquire* \u2014 I'll send your request to the owner\n2\ufe0f\u20e3 Type *menu* \u2014 See what's available"
+        ],
+        "state": {
+          "message_timestamps": [
+            1777655935.8608515
+          ],
+          "retry_count": 0,
+          "retry_phone_count": 0,
+          "pending_inquiry_product": "Biryani Less Spicy No Onion Extra Gravy",
+          "shop_category": "General"
+        }
+      }
+    ]
+  }
+]

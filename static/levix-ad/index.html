@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LEVIX - 40s Cinematic Ad</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #050914;
+      --slate: #0f172a;
+      --slate-2: #172033;
+      --blue: #2563eb;
+      --blue-2: #60a5fa;
+      --green: #10b981;
+      --amber: #f59e0b;
+      --paper: #f8fafc;
+      --muted: #94a3b8;
+      --line: rgba(219, 234, 254, 0.18);
+      --duration: 40s;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #000;
+      font-family: "Plus Jakarta Sans", Inter, system-ui, sans-serif;
+      color: var(--paper);
+      overflow: hidden;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-start;
+    }
+
+    [data-composition-id="levix-ad-40"] {
+      width: 1920px;
+      height: 1080px;
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 72% 22%, rgba(37, 99, 235, 0.22), transparent 24%),
+        radial-gradient(circle at 20% 76%, rgba(16, 185, 129, 0.10), transparent 22%),
+        linear-gradient(145deg, #030711 0%, #07101f 50%, #02050c 100%);
+      transform-origin: top left;
+      flex: 0 0 auto;
+    }
+
+    .grain {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: .11;
+      background-image: linear-gradient(0deg, rgba(255,255,255,.035) 1px, transparent 1px);
+      background-size: 100% 4px;
+      z-index: 80;
+    }
+
+    .scene {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      animation-duration: var(--duration);
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+    }
+
+    .content {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      padding: 104px 132px;
+    }
+
+    .eyebrow {
+      color: var(--blue-2);
+      font-size: 22px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .11em;
+    }
+
+    h1, h2, p { margin: 0; }
+    .title {
+      font-size: 86px;
+      line-height: 1.02;
+      font-weight: 800;
+      max-width: 1040px;
+      letter-spacing: 0;
+    }
+    .subtitle {
+      color: #b6c3d7;
+      font-size: 31px;
+      line-height: 1.45;
+      max-width: 850px;
+      margin-top: 24px;
+      font-weight: 600;
+    }
+
+    .logo-word {
+      font-size: 95px;
+      font-weight: 800;
+      color: white;
+      letter-spacing: 0;
+    }
+    .logo-word span { color: var(--blue); font-weight: 900; }
+
+    .panel {
+      background: rgba(248, 250, 252, .98);
+      color: var(--slate);
+      border: 1px solid rgba(219, 234, 254, .7);
+      box-shadow: 0 42px 120px rgba(0, 0, 0, .38);
+      border-radius: 18px;
+    }
+
+    .site-shot {
+      position: absolute;
+      width: 920px;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.16);
+      box-shadow: 0 34px 120px rgba(0,0,0,.5);
+    }
+    .site-shot img { display: block; width: 100%; }
+
+    .device {
+      position: absolute;
+      width: 1180px;
+      height: 720px;
+      right: 92px;
+      bottom: 88px;
+      border-radius: 32px;
+      background: #f8fafc;
+      color: #0f172a;
+      overflow: hidden;
+      box-shadow: 0 45px 140px rgba(0,0,0,.48);
+      border: 1px solid rgba(255,255,255,.38);
+    }
+    .sidebar {
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 260px;
+      background: #0f172a;
+      padding: 28px 24px;
+      color: white;
+    }
+    .brand {
+      font-size: 27px;
+      font-weight: 800;
+      margin-bottom: 32px;
+    }
+    .brand span { color: var(--blue); }
+    .nav {
+      display: grid;
+      gap: 10px;
+    }
+    .nav div {
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      padding: 0 15px;
+      color: #94a3b8;
+      font-size: 16px;
+      font-weight: 800;
+    }
+    .nav div.active {
+      background: var(--blue);
+      color: white;
+      box-shadow: 0 12px 24px rgba(37,99,235,.22);
+    }
+    .dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 6px;
+      background: currentColor;
+      opacity: .88;
+    }
+    .dash {
+      margin-left: 260px;
+      padding: 34px;
+      height: 100%;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 26px;
+    }
+    .topbar h3 {
+      margin: 0;
+      font-size: 30px;
+      font-weight: 800;
+    }
+    .live {
+      border: 1px solid #dbeafe;
+      color: #2563eb;
+      background: #eff6ff;
+      padding: 10px 15px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 13px;
+      text-transform: uppercase;
+    }
+    .grid4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+    .stat {
+      padding: 20px;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      background: white;
+    }
+    .stat small {
+      display: block;
+      color: #64748b;
+      font-weight: 800;
+      text-transform: uppercase;
+      font-size: 11px;
+      margin-bottom: 8px;
+    }
+    .stat strong {
+      font-size: 30px;
+      font-weight: 800;
+    }
+    .workflow {
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 18px;
+      height: 468px;
+    }
+    .card {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 18px;
+      padding: 22px;
+      overflow: hidden;
+    }
+    .card h4 {
+      margin: 0 0 16px;
+      font-size: 19px;
+      font-weight: 800;
+    }
+    .order-row, .stock-row, .chat-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 16px;
+      padding: 16px;
+      border-radius: 14px;
+      background: #f8fafc;
+      margin-bottom: 12px;
+      border: 1px solid #e2e8f0;
+    }
+    .order-row b, .stock-row b, .chat-row b { display: block; font-size: 16px; }
+    .order-row span, .stock-row span, .chat-row span { color: #64748b; font-weight: 700; font-size: 13px; }
+    .pill {
+      color: #166534;
+      background: #dcfce7;
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+    .pill.blue { color: #1d4ed8; background: #dbeafe; }
+    .pill.amber { color: #92400e; background: #fef3c7; }
+    .chart {
+      height: 180px;
+      display: flex;
+      align-items: end;
+      gap: 12px;
+      padding: 18px 6px 4px;
+    }
+    .bar {
+      flex: 1;
+      border-radius: 10px 10px 4px 4px;
+      background: linear-gradient(180deg, #60a5fa, #2563eb);
+      min-height: 40px;
+      transform-origin: bottom;
+    }
+    .insight {
+      margin-top: 16px;
+      padding: 16px;
+      background: linear-gradient(135deg, #eff6ff, white);
+      border: 1px solid #dbeafe;
+      border-radius: 14px;
+      color: #0f172a;
+      font-weight: 800;
+    }
+
+    .overlay-text {
+      position: absolute;
+      left: 132px;
+      bottom: 132px;
+      z-index: 30;
+      max-width: 780px;
+    }
+    .overlay-text .kicker {
+      color: var(--blue-2);
+      font-size: 22px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      margin-bottom: 14px;
+    }
+    .overlay-text .line {
+      font-size: 58px;
+      line-height: 1.05;
+      font-weight: 800;
+    }
+
+    .chaos-card {
+      position: absolute;
+      width: 380px;
+      border-radius: 18px;
+      padding: 22px;
+      background: rgba(255,255,255,.94);
+      color: #0f172a;
+      box-shadow: 0 26px 80px rgba(0,0,0,.42);
+      border: 1px solid rgba(255,255,255,.5);
+      animation: jitter var(--duration) linear both;
+    }
+    .chaos-card small {
+      color: #64748b;
+      font-weight: 900;
+      text-transform: uppercase;
+      font-size: 12px;
+    }
+    .chaos-card b {
+      display: block;
+      margin-top: 10px;
+      font-size: 27px;
+      line-height: 1.16;
+    }
+    .chaos-card p {
+      margin-top: 12px;
+      color: #475569;
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .message-stack {
+      position: absolute;
+      right: 132px;
+      top: 150px;
+      width: 470px;
+      display: grid;
+      gap: 15px;
+    }
+    .msg {
+      padding: 18px 20px;
+      border-radius: 18px;
+      background: #dcfce7;
+      color: #14532d;
+      font-weight: 800;
+      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+    }
+
+    .calm-human {
+      position: absolute;
+      right: 190px;
+      bottom: 160px;
+      width: 420px;
+      height: 420px;
+      border-radius: 34px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02)),
+        linear-gradient(145deg, #121b2d, #060a14);
+      border: 1px solid rgba(255,255,255,.13);
+      box-shadow: 0 36px 120px rgba(0,0,0,.45);
+      overflow: hidden;
+    }
+    .calm-human:before {
+      content: "";
+      position: absolute;
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background: #1e293b;
+      top: 72px;
+      left: 135px;
+      box-shadow: inset 0 -20px 40px rgba(0,0,0,.25);
+    }
+    .calm-human:after {
+      content: "";
+      position: absolute;
+      width: 270px;
+      height: 180px;
+      border-radius: 120px 120px 34px 34px;
+      background: linear-gradient(160deg, #2563eb, #0f172a);
+      bottom: 36px;
+      left: 75px;
+    }
+
+    #scene-hook { animation-name: showHook; }
+    #scene-shift { animation-name: showShift; }
+    #scene-showcase { animation-name: showShowcase; }
+    #scene-emotion { animation-name: showEmotion; }
+    #scene-close { animation-name: showClose; }
+
+    @keyframes showHook {
+      0%, 12% { opacity: 1; }
+      12.5%, 100% { opacity: 0; }
+    }
+    @keyframes showShift {
+      0%, 12% { opacity: 0; }
+      13%, 30% { opacity: 1; }
+      30.5%, 100% { opacity: 0; }
+    }
+    @keyframes showShowcase {
+      0%, 29.5% { opacity: 0; }
+      31%, 65% { opacity: 1; }
+      65.5%, 100% { opacity: 0; }
+    }
+    @keyframes showEmotion {
+      0%, 64.5% { opacity: 0; }
+      66%, 84% { opacity: 1; }
+      85%, 100% { opacity: 0; }
+    }
+    @keyframes showClose {
+      0%, 84% { opacity: 0; }
+      86%, 100% { opacity: 1; }
+    }
+    @keyframes jitter {
+      0%, 3% { transform: translate3d(0,0,0) rotate(var(--r)); }
+      4% { transform: translate3d(8px,-4px,0) rotate(calc(var(--r) + 1deg)); }
+      5% { transform: translate3d(-7px,5px,0) rotate(calc(var(--r) - 1deg)); }
+      9% { transform: translate3d(5px,0,0) rotate(var(--r)); }
+      12%, 100% { transform: translate3d(0,0,0) rotate(var(--r)); }
+    }
+
+    .push-slow { animation: pushSlow var(--duration) ease both; }
+    @keyframes pushSlow {
+      0% { transform: translate3d(0, 0, 0) scale(1); }
+      100% { transform: translate3d(-22px, -12px, 0) scale(1.035); }
+    }
+    .bars .bar { animation: growBars var(--duration) cubic-bezier(.16,1,.3,1) both; }
+    .bars .bar:nth-child(2) { animation-delay: .08s; }
+    .bars .bar:nth-child(3) { animation-delay: .16s; }
+    .bars .bar:nth-child(4) { animation-delay: .24s; }
+    @keyframes growBars {
+      0%, 52% { transform: scaleY(.1); }
+      61%, 100% { transform: scaleY(1); }
+    }
+  </style>
+</head>
+<body>
+  <div data-composition-id="levix-ad-40" data-width="1920" data-height="1080" data-duration="40">
+    <div class="grain"></div>
+
+    <section id="scene-hook" class="scene">
+      <div class="content">
+        <div class="chaos-card" style="left:130px;top:160px;--r:-4deg;">
+          <small>WhatsApp</small>
+          <b>12 unread order messages</b>
+          <p>Sizes, addresses, payment notes, and follow ups all mixed together.</p>
+        </div>
+        <div class="chaos-card" style="left:560px;top:310px;--r:3deg;">
+          <small>Inventory</small>
+          <b>Stock count uncertain</b>
+          <p>Notebook says 18. Shelf says 11. Customer wants delivery today.</p>
+        </div>
+        <div class="chaos-card" style="left:330px;bottom:300px;--r:2deg;">
+          <small>Reports</small>
+          <b>Yesterday's sales still pending</b>
+          <p>Manual totals, missing entries, no clear picture.</p>
+        </div>
+        <div class="message-stack">
+          <div class="msg">"Is my order confirmed?"</div>
+          <div class="msg">"Do you have 2kg rice?"</div>
+          <div class="msg">"Please send bill."</div>
+          <div class="msg">"Can I pay later?"</div>
+        </div>
+        <div class="overlay-text">
+          <div class="kicker">The everyday problem</div>
+          <div class="line">Running a business should not feel chaotic.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="scene-shift" class="scene">
+      <div class="content">
+        <div class="logo-word" style="position:absolute;left:132px;top:130px;">LEVI<span>X</span></div>
+        <h1 class="title" style="position:absolute;left:132px;top:268px;">The smarter way to manage your business.</h1>
+        <p class="subtitle" style="position:absolute;left:132px;top:474px;">Orders, inventory, customers, WhatsApp, reports, and team operations in one calm operating system.</p>
+        <div class="site-shot push-slow" style="right:110px;top:150px;transform:rotateY(-14deg) rotateX(4deg);">
+          <img src="assets/captures/home-hero.png" alt="LEVIX homepage hero">
+        </div>
+        <div class="site-shot" style="right:270px;bottom:94px;width:760px;opacity:.72;transform:rotateY(-10deg) rotateX(4deg) scale(.94);">
+          <img src="assets/captures/home-features.png" alt="LEVIX features">
+        </div>
+      </div>
+    </section>
+
+    <section id="scene-showcase" class="scene">
+      <div class="device">
+        <aside class="sidebar">
+          <div class="brand">LEVI<span>X</span></div>
+          <div class="nav">
+            <div class="active"><i class="dot"></i> Inbox</div>
+            <div><i class="dot"></i> Orders</div>
+            <div><i class="dot"></i> Inventory</div>
+            <div><i class="dot"></i> Sales</div>
+            <div><i class="dot"></i> Analytics</div>
+            <div><i class="dot"></i> Team</div>
+          </div>
+        </aside>
+        <main class="dash">
+          <div class="topbar">
+            <h3>Store Intelligence</h3>
+            <div class="live">Live operations synced</div>
+          </div>
+          <div class="grid4">
+            <div class="stat"><small>Orders today</small><strong>42</strong></div>
+            <div class="stat"><small>Inventory alerts</small><strong>3</strong></div>
+            <div class="stat"><small>Revenue</small><strong>INR 18.4k</strong></div>
+            <div class="stat"><small>Customers</small><strong>219</strong></div>
+          </div>
+          <div class="workflow">
+            <div class="card">
+              <h4>Order workflow</h4>
+              <div class="order-row"><div><b>#LX-2041 - Priya S.</b><span>2x basmati rice, 1x oil pack</span></div><div class="pill blue">Received</div></div>
+              <div class="order-row"><div><b>Stock updated automatically</b><span>Basmati rice: 12 to 10 units</span></div><div class="pill">Synced</div></div>
+              <div class="order-row"><div><b>Customer notified on WhatsApp</b><span>Confirmation and delivery estimate sent</span></div><div class="pill">Sent</div></div>
+              <div class="stock-row"><div><b>Low stock alert</b><span>Sunflower oil below threshold</span></div><div class="pill amber">Restock</div></div>
+            </div>
+            <div class="card">
+              <h4>Reports and insights</h4>
+              <div class="chart bars">
+                <div class="bar" style="height:42%;"></div>
+                <div class="bar" style="height:68%;"></div>
+                <div class="bar" style="height:52%;"></div>
+                <div class="bar" style="height:86%;"></div>
+                <div class="bar" style="height:74%;"></div>
+              </div>
+              <div class="chat-row"><div><b>Best seller</b><span>Rice category up 18% this week</span></div><div class="pill blue">Insight</div></div>
+              <div class="insight">LEVIX AI: Restock top-moving items before Friday demand.</div>
+            </div>
+          </div>
+        </main>
+      </div>
+      <div class="overlay-text">
+        <div class="kicker">Real workflow logic</div>
+        <div class="line">Manage orders. Track stock. Understand your business clearly.</div>
+      </div>
+    </section>
+
+    <section id="scene-emotion" class="scene">
+      <div class="content">
+        <div class="eyebrow" style="margin-bottom:22px;">After the shift</div>
+        <h1 class="title">Less stress. More control.</h1>
+        <p class="subtitle">Modern business systems for everyday shops, built around the way real owners work.</p>
+        <div class="site-shot" style="left:132px;bottom:112px;width:670px;opacity:.82;">
+          <img src="assets/captures/pricing.png" alt="LEVIX pricing and trust section">
+        </div>
+        <div class="calm-human"></div>
+        <div class="device" style="right:460px;bottom:110px;width:720px;height:440px;transform:scale(.72);transform-origin:bottom right;opacity:.78;">
+          <aside class="sidebar"><div class="brand">LEVI<span>X</span></div><div class="nav"><div class="active"><i class="dot"></i> Analytics</div><div><i class="dot"></i> Orders</div><div><i class="dot"></i> Inventory</div></div></aside>
+          <main class="dash"><div class="topbar"><h3>Calm dashboard</h3><div class="live">Clear</div></div><div class="grid4"><div class="stat"><small>Open work</small><strong>5</strong></div><div class="stat"><small>Alerts</small><strong>1</strong></div><div class="stat"><small>Growth</small><strong>12%</strong></div><div class="stat"><small>Team</small><strong>4</strong></div></div></main>
+        </div>
+      </div>
+    </section>
+
+    <section id="scene-close" class="scene">
+      <div class="content" style="display:flex;align-items:center;justify-content:center;text-align:center;flex-direction:column;">
+        <div class="site-shot" style="left:120px;top:120px;width:520px;opacity:.23;filter:grayscale(.2);"><img src="assets/captures/home-workflow.png" alt=""></div>
+        <div class="site-shot" style="right:120px;bottom:112px;width:560px;opacity:.21;filter:grayscale(.2);"><img src="assets/captures/home-features.png" alt=""></div>
+        <img src="assets/brand/levix-logo.png" alt="LEVIX" style="width:270px;margin-bottom:32px;">
+        <h1 class="title" style="font-size:102px;max-width:1100px;">Modern business management.</h1>
+        <p class="subtitle" style="font-size:34px;max-width:760px;">Start simplifying your business.</p>
+      </div>
+    </section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    (function fitForBrowserPreview() {
+      const root = document.querySelector('[data-composition-id="levix-ad-40"]');
+      const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+      if (scale < 1) {
+        root.style.transform = "scale(" + scale + ")";
+        root.style.transformOrigin = "top left";
+      }
+      const previewTime = Number(new URLSearchParams(window.location.search).get("t"));
+      if (Number.isFinite(previewTime) && previewTime >= 0) {
+        window.__LEVIX_PREVIEW_FRAME = true;
+        document.querySelectorAll("*").forEach((el) => {
+          const name = getComputedStyle(el).animationName;
+          if (name && name !== "none") {
+            el.style.animationDelay = "-" + previewTime + "s";
+            el.style.animationPlayState = "paused";
+          }
+        });
+      }
+    })();
+    window.__timelines = window.__timelines || {};
+    if (window.gsap && !window.__LEVIX_PREVIEW_FRAME) {
+      const tl = gsap.timeline({ paused: true });
+      tl.from("#scene-hook .overlay-text", { y: 38, opacity: 0, duration: .7, ease: "power3.out" }, 0.3);
+      tl.from("#scene-hook .chaos-card", { y: 55, opacity: 0, stagger: .12, duration: .55, ease: "power3.out" }, 0.2);
+      tl.from("#scene-hook .msg", { x: 70, opacity: 0, stagger: .11, duration: .45, ease: "power2.out" }, 0.8);
+      tl.to("#scene-hook", { opacity: 0, duration: .18, ease: "power2.in" }, 4.82);
+
+      tl.from("#scene-shift .logo-word", { scale: .92, opacity: 0, y: 25, duration: .65, ease: "power3.out" }, 5.05);
+      tl.from("#scene-shift .title", { y: 42, opacity: 0, duration: .72, ease: "power3.out" }, 5.45);
+      tl.from("#scene-shift .subtitle", { y: 28, opacity: 0, duration: .62, ease: "power3.out" }, 6.0);
+      tl.from("#scene-shift .site-shot", { x: 120, y: 24, scale: .92, opacity: 0, stagger: .18, duration: .9, ease: "power3.out" }, 5.7);
+      tl.to("#scene-shift .site-shot", { x: -28, y: -12, scale: 1.03, duration: 5.6, ease: "sine.inOut" }, 6.4);
+
+      tl.from("#scene-showcase .device", { y: 80, scale: .92, opacity: 0, duration: .9, ease: "power3.out" }, 12.1);
+      tl.from("#scene-showcase .stat", { y: 24, opacity: 0, stagger: .08, duration: .45, ease: "power2.out" }, 12.75);
+      tl.from("#scene-showcase .order-row, #scene-showcase .stock-row", { x: -45, opacity: 0, stagger: .28, duration: .55, ease: "power3.out" }, 13.45);
+      tl.from("#scene-showcase .overlay-text", { y: 42, opacity: 0, duration: .7, ease: "power3.out" }, 14.0);
+      tl.from("#scene-showcase .bar", { scaleY: .1, stagger: .08, transformOrigin: "bottom", duration: .65, ease: "power3.out" }, 19.5);
+      tl.from("#scene-showcase .insight", { y: 25, opacity: 0, duration: .55, ease: "power3.out" }, 21.3);
+      tl.to("#scene-showcase .device", { x: -42, y: -18, scale: 1.025, duration: 12.2, ease: "sine.inOut" }, 13.0);
+
+      tl.from("#scene-emotion .eyebrow, #scene-emotion .title, #scene-emotion .subtitle", { y: 42, opacity: 0, stagger: .14, duration: .6, ease: "power3.out" }, 26.15);
+      tl.from("#scene-emotion .site-shot, #scene-emotion .calm-human", { y: 60, opacity: 0, stagger: .18, duration: .82, ease: "power3.out" }, 27.0);
+      tl.to("#scene-emotion .calm-human", { y: -18, duration: 5.5, ease: "sine.inOut" }, 28.0);
+
+      tl.from("#scene-close img", { scale: .86, opacity: 0, duration: .6, ease: "power3.out" }, 34.2);
+      tl.from("#scene-close .title", { y: 34, opacity: 0, duration: .7, ease: "power3.out" }, 34.65);
+      tl.from("#scene-close .subtitle", { y: 24, opacity: 0, duration: .55, ease: "power3.out" }, 35.25);
+      tl.to("#scene-close", { opacity: 0, duration: .8, ease: "power2.in" }, 39.2);
+      window.__timelines["levix-ad-40"] = tl;
+    } else {
+      window.__timelines["levix-ad-40"] = { duration: function () { return 40; } };
+    }
+  </script>
+</body>
+</html>

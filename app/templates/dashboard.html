@@ -8,7 +8,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     <script>console.log("BOOT 1 html loaded");</script>
-    <link rel="icon" type="image/png" href="/static/favicon.png">
+    <link rel="icon" type="image/png" href="/static/favicon.png?v=20260528b">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -886,6 +886,21 @@
             to { transform: translateY(0); opacity: 1; } 
         }
 
+    
+        /* CRM V2 Styles */
+        #crm-layout { display: flex; height: calc(100vh - 120px); background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; margin: -24px -24px 0 -24px;}
+        #crm-sidebar { width: 340px; border-right: 1px solid var(--border); display: flex; flex-direction: column; background: #f8fafc; }
+        #crm-sidebar-header { padding: 16px; border-bottom: 1px solid var(--border); background: white; }
+        #crm-conversation-list { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+        .crm-card { background: white; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; cursor: pointer; transition: all 0.2s ease; position: relative; }
+        .crm-card:hover { border-color: var(--accent); box-shadow: var(--shadow-sm); transform: translateY(-1px); }
+        .crm-card.active-card { border-color: var(--accent) !important; background: var(--accent-soft) !important; box-shadow: 0 4px 12px rgba(37,99,235,0.08) !important; }
+        .ping-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block; position: relative; animation: pulse-ping 2s infinite; }
+        @keyframes pulse-ping { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
+        .micro-spinner { width: 16px; height: 16px; border: 2px solid rgba(255, 255, 255, 0.3); border-top: 2px solid white; border-radius: 50%; animation: crm-spin 0.6s linear infinite; }
+        @keyframes crm-spin { to { transform: rotate(360deg); } }
+        @media (max-width: 768px) { #crm-sidebar { width: 100% !important; } #crm-workspace { display: none !important; } }
+
     </style>
 </head>
 <body>
@@ -989,20 +1004,76 @@
             </div>
         </header>
 
-        <!-- Tab: Inbox -->
-        <div id="tab-content-inbox" class="tab-content active">
-             <div id="inbox-bulk-bar" style="display:none; padding:14px 20px; background:var(--accent-soft); border-radius:var(--radius-md); margin-bottom:24px; align-items:center; justify-content:space-between">
-                <div style="display:flex; align-items:center; gap:12px">
-                    <input type="checkbox" id="inbox-select-all" onchange="toggleSelectAllInbox(this.checked)" style="width:20px; height:20px">
-                    <span id="inbox-selected-count" style="font-weight:800; color:var(--accent)">0 Requests Selected</span>
-                </div>
-                <button class="btn btn-danger" style="padding:8px 16px" onclick="bulkDeleteInbox()">DELETE SELECTED</button>
-             </div>
-             <div id="inbox-list" class="inventory-list"></div>
-             <div id="inbox-empty" class="empty-state" style="display:none">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                <h3>No customer messages yet</h3>
-                <p>New inquiries from WhatsApp will appear here as they arrive.</p>
+        <!-- Tab: Inbox (CRM V2) -->
+        <div id="tab-content-inbox" class="tab-content active" style="padding: 0;">
+             <div id="crm-layout">
+                 <!-- Left Sidebar -->
+                 <div id="crm-sidebar">
+                     <div id="crm-sidebar-header">
+                         <h3 style="font-size:1.1rem; font-weight:800; margin:0">Active Inquiries</h3>
+                         <div style="display:flex; gap:8px; margin-top:12px;">
+                             <select id="crm-status-filter" onchange="fetchConversations()" style="flex:1; padding:8px; border-radius:var(--radius-md); border:1px solid var(--border); font-size:0.8rem; font-weight:700; outline:none;">
+                                 <option value="">All Active</option>
+                                 <option value="NEW">New</option>
+                                 <option value="WAITING_CUSTOMER">Waiting</option>
+                                 <option value="PAUSED">Paused</option>
+                             </select>
+                         </div>
+                     </div>
+                     <div id="crm-conversation-list"></div>
+                 </div>
+                 
+                 <!-- Right Workspace -->
+                 <div id="crm-workspace" style="flex:1; display:flex; flex-direction:column; background:white; position:relative;">
+                     <!-- Empty State -->
+                     <div id="workspace-empty" style="display:flex; flex-direction:column; align-items:center; justify-content:center; flex:1; color:var(--text-muted);">
+                         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:16px; opacity:0.5;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                         <h3 style="font-weight:700; margin-bottom:8px">Select a conversation</h3>
+                         <p style="font-size:0.9rem">Choose an inquiry from the sidebar to start responding.</p>
+                     </div>
+                     
+                     <!-- Active State -->
+                     <div id="workspace-active" style="display:none; flex-direction:row; flex:1; overflow:hidden; box-sizing:border-box;">
+                          <!-- Chat Timeline Column -->
+                          <div style="display:flex; flex-direction:column; flex:1; overflow:hidden;">
+                              <div style="padding:16px 24px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; background:#f8fafc; box-shadow:0 1px 3px rgba(0,0,0,0.02); z-index:10;">
+                                  <div>
+                                      <h3 id="active-customer-name" style="font-size:1.1rem; font-weight:800; margin:0; color:var(--text-main);">Customer</h3>
+                                      <div style="font-size:0.8rem; color:var(--text-muted); font-weight:600; margin-top:4px; display:flex; align-items:center; gap:8px;">
+                                          <span id="active-inquiry-id" style="background:var(--accent-soft); color:var(--accent); padding:2px 6px; border-radius:4px; font-weight:800;">INQ-000</span>
+                                          <span id="active-customer-phone">Phone</span> • <span id="active-status">Status</span>
+                                      </div>
+                                  </div>
+                                  <div style="display:flex; gap:8px; align-items:center;">
+                                      <button id="active-pause-btn" class="btn btn-outline" style="padding:8px 12px; border-color:#ea580c; color:#ea580c; font-size:0.85rem; display:none;" onclick="updateActiveConversationStatus('PAUSED')">Pause</button>
+                                      <button id="active-resume-btn" class="btn btn-outline" style="padding:8px 12px; border-color:#16a34a; color:#16a34a; font-size:0.85rem; display:none;" onclick="updateActiveConversationStatus('ONGOING')">Resume</button>
+                                      <button id="active-complete-btn" class="btn btn-outline" style="padding:8px 16px; border-color:var(--accent); color:var(--accent); font-size:0.85rem;" onclick="completeActiveConversation()">COMPLETE</button>
+                                  </div>
+                              </div>
+                              <div id="crm-chat-timeline" style="flex:1; overflow-y:auto; padding:24px; display:flex; flex-direction:column; gap:16px; background:#f1f5f9;"></div>
+                              <div id="crm-chat-composer" style="padding:16px 24px; border-top:1px solid var(--border); background:white;">
+                                  <div style="display:flex; gap:12px;">
+                                      <textarea id="active-chat-input" placeholder="Type your reply here..." style="flex:1; border:1px solid var(--border); border-radius:var(--radius-md); padding:12px; font-family:inherit; font-size:0.95rem; resize:none; outline:none; height:80px;"></textarea>
+                                      <button id="active-send-btn" class="btn" style="padding:0 24px; height:80px;" onclick="sendActiveReply()">
+                                          <span>SEND</span>
+                                          <div class="micro-spinner" style="display:none;"></div>
+                                      </button>
+                                  </div>
+                              </div>
+                          </div>
+                          
+                          <!-- Orders Pane Column -->
+                          <div id="crm-orders-pane" style="width:340px; display:flex; flex-direction:column; background:var(--bg-card); box-sizing:border-box; overflow-y:auto; border-left:1px solid var(--border);">
+                               <div style="padding:16px; border-bottom:1px solid var(--border); font-weight:800; font-size:0.95rem; color:var(--text-main); display:flex; justify-content:space-between; align-items:center; background:var(--bg-card);">
+                                    <span>Customer Orders</span>
+                                    <span id="crm-orders-count" style="font-size:0.75rem; background:var(--accent-soft); color:var(--accent); font-weight:800; padding:2px 8px; border-radius:12px;">0</span>
+                               </div>
+                               <div id="crm-orders-list" style="padding:16px; display:flex; flex-direction:column; gap:16px;">
+                                    <div style="text-align:center; color:var(--text-muted); font-size:0.85rem; padding:20px;">No associated orders</div>
+                               </div>
+                          </div>
+                     </div>
+                 </div>
              </div>
         </div>
 
@@ -5012,6 +5083,263 @@
         setTimeout(initCustomSelects, 500);
         setTimeout(initCustomSelects, 2000);
         setInterval(initCustomSelects, 5000);
-    </script>
+    
+// CRM V2 Javascript
+let currentActiveSessionId = null;
+let currentActiveCustomerPhone = null;
+
+async function fetchConversations() {
+    const status = document.getElementById('crm-status-filter')?.value || '';
+    let url = '/api/conversations?';
+    if(status) url += `status=${status}`;
+    
+    try {
+        const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + getAuthToken() } });
+        if(res.ok) {
+            const data = await res.json();
+            renderConversations(data);
+        }
+    } catch(e) { console.error('Failed to fetch CRM list', e); }
+}
+
+function renderConversations(data) {
+    const list = document.getElementById('crm-conversation-list');
+    if(!list) return;
+    list.innerHTML = '';
+    
+    // Update badge
+    document.getElementById('badge-inbox').textContent = data.length || '0';
+    
+    if(data.length === 0) {
+        list.innerHTML = `<div style="text-align:center; padding:32px 16px; color:var(--text-muted);">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:12px; opacity:0.5;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            <p style="font-size:0.85rem; font-weight:600;">No active inquiries</p>
+        </div>`;
+        return;
+    }
+    
+    data.forEach(s => {
+        let statusBadge = '';
+        if(s.status === 'NEW') statusBadge = `<span style="font-size:0.7rem; font-weight:800; color:#10b981; background:#d1fae5; padding:2px 6px; border-radius:4px;">NEW <span class="ping-dot" style="margin-left:4px;"></span></span>`;
+        else if(s.status === 'WAITING_CUSTOMER') statusBadge = `<span style="font-size:0.7rem; font-weight:800; color:#8b5cf6; background:#ede9fe; padding:2px 6px; border-radius:4px;">WAITING</span>`;
+        else if(s.status === 'PAUSED') statusBadge = `<span style="font-size:0.7rem; font-weight:800; color:#ea580c; background:#ffedd5; padding:2px 6px; border-radius:4px;">PAUSED</span>`;
+        else statusBadge = `<span style="font-size:0.7rem; font-weight:800; color:#64748b; background:#f1f5f9; padding:2px 6px; border-radius:4px;">${s.status}</span>`;
+        
+        let msgPreview = s.last_message || '';
+        if(msgPreview.length > 50) msgPreview = msgPreview.substring(0, 50) + '...';
+        
+        const isActive = currentActiveSessionId === s.id;
+        
+        list.innerHTML += `
+            <div class="crm-card ${isActive ? 'active-card' : ''}" onclick="openActiveConversation('${s.id}')">
+                <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                    <div style="font-weight:800; color:var(--text-main); font-size:0.95rem;">${s.customer_name}</div>
+                    ${statusBadge}
+                </div>
+                <div style="font-size:0.75rem; color:var(--text-muted); font-weight:700; margin-bottom:8px;">
+                    <span style="color:var(--accent);">${s.inquiry_number}</span> • ${s.customer_phone}
+                </div>
+                <div style="font-size:0.85rem; color:var(--text-muted); line-height:1.4;">${msgPreview}</div>
+            </div>
+        `;
+    });
+}
+
+async function openActiveConversation(sessionId) {
+    currentActiveSessionId = sessionId;
+    
+    document.getElementById('workspace-empty').style.display = 'none';
+    document.getElementById('workspace-active').style.display = 'flex';
+    
+    fetchConversations();
+    
+    try {
+        const crmListRes = await fetch('/api/conversations', { headers: { 'Authorization': 'Bearer ' + getAuthToken() } });
+        if(crmListRes.ok) {
+            const list = await crmListRes.json();
+            const sessionInfo = list.find(s => s.id === sessionId);
+            if(sessionInfo) {
+                document.getElementById('active-customer-name').textContent = sessionInfo.customer_name;
+                document.getElementById('active-customer-phone').textContent = sessionInfo.customer_phone;
+                document.getElementById('active-inquiry-id').textContent = sessionInfo.inquiry_number;
+                document.getElementById('active-status').textContent = sessionInfo.status;
+                currentActiveCustomerPhone = sessionInfo.customer_phone;
+                
+                const btnPause = document.getElementById('active-pause-btn');
+                const btnResume = document.getElementById('active-resume-btn');
+                
+                if (sessionInfo.status === 'PAUSED') {
+                    btnPause.style.display = 'none';
+                    btnResume.style.display = 'flex';
+                } else {
+                    btnPause.style.display = 'flex';
+                    btnResume.style.display = 'none';
+                }
+                
+                fetchCustomerOrders(sessionInfo.customer_phone);
+            }
+        }
+        
+        const res = await fetch(`/api/conversations/${sessionId}/messages`, { headers: { 'Authorization': 'Bearer ' + getAuthToken() } });
+        if(res.ok) {
+            const messages = await res.json();
+            renderChatTimeline(messages);
+        }
+    } catch(e) { console.error('Error fetching conversation', e); }
+}
+
+function renderChatTimeline(messages) {
+    const timeline = document.getElementById('crm-chat-timeline');
+    timeline.innerHTML = '';
+    
+    messages.forEach(m => {
+        const isOwner = m.sender_type === 'OWNER';
+        const isSystem = m.sender_type === 'SYSTEM';
+        
+        if (isSystem) {
+             timeline.innerHTML += `
+                 <div style="display:flex; justify-content:center; margin:16px 0;">
+                     <div style="background:#f1f5f9; border:1px solid var(--border); padding:6px 16px; border-radius:100px; font-size:0.75rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;">
+                         ${m.message}
+                     </div>
+                 </div>
+             `;
+             return;
+        }
+        
+        const align = isOwner ? 'align-self:flex-end;' : 'align-self:flex-start;';
+        const bg = isOwner ? 'background:var(--accent); color:white;' : 'background:white; border:1px solid var(--border); color:var(--text-main);';
+        const br = isOwner ? 'border-radius:16px 16px 4px 16px;' : 'border-radius:16px 16px 16px 4px;';
+        const timeColor = isOwner ? 'rgba(255,255,255,0.7)' : 'var(--text-muted)';
+        
+        const tDate = new Date(m.timestamp);
+        const timeStr = tDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        timeline.innerHTML += `
+            <div style="max-width:70%; ${align} ${bg} ${br} padding:12px 16px; box-shadow:var(--shadow-sm); position:relative;">
+                <div style="font-size:0.95rem; line-height:1.5; white-space:pre-wrap;">${m.message}</div>
+                <div style="font-size:0.65rem; font-weight:700; margin-top:8px; text-align:right; color:${timeColor};">${timeStr}</div>
+            </div>
+        `;
+    });
+    
+    timeline.scrollTop = timeline.scrollHeight;
+}
+
+async function fetchCustomerOrders(phone) {
+    if (!phone) return;
+    try {
+        const res = await fetch('/api/orders?status=all', { headers: { 'Authorization': 'Bearer ' + getAuthToken() } });
+        if(res.ok) {
+            const data = await res.json();
+            const cOrders = data.filter(o => o.phone && o.phone.includes(phone.replace('+', '')));
+            
+            document.getElementById('crm-orders-count').textContent = cOrders.length;
+            const list = document.getElementById('crm-orders-list');
+            list.innerHTML = '';
+            
+            if (cOrders.length === 0) {
+                 list.innerHTML = '<div style="text-align:center; color:var(--text-muted); font-size:0.85rem; padding:20px;">No associated orders</div>';
+                 return;
+            }
+            
+            cOrders.forEach(o => {
+                 let sColor = o.status === 'completed' ? '#10b981' : (o.status === 'accepted' ? '#3b82f6' : (o.status === 'rejected' ? '#ef4444' : '#f59e0b'));
+                 list.innerHTML += `
+                     <div style="background:white; border:1px solid var(--border); border-radius:var(--radius-md); padding:12px; font-size:0.85rem;">
+                          <div style="display:flex; justify-content:space-between; margin-bottom:8px; align-items:center;">
+                               <span style="font-weight:800; color:var(--text-main);">${o.order_id}</span>
+                               <span style="color:${sColor}; font-weight:800; font-size:0.7rem; text-transform:uppercase;">${o.status}</span>
+                          </div>
+                          <div style="color:var(--text-muted); font-weight:600; margin-bottom:4px;">${new Date(o.created_at).toLocaleDateString()}</div>
+                          <div style="font-weight:800; color:var(--accent);">₹${o.total_amount} <span style="font-weight:600; color:var(--text-muted); font-size:0.75rem;">(${o.items.length} items)</span></div>
+                     </div>
+                 `;
+            });
+        }
+    } catch(e) { console.error('Failed to fetch customer orders', e); }
+}
+
+async function sendActiveReply() {
+    if(!currentActiveSessionId) return;
+    const input = document.getElementById('active-chat-input');
+    const msg = input.value.trim();
+    if(!msg) return;
+    
+    const btn = document.getElementById('active-send-btn');
+    const spinner = btn.querySelector('.micro-spinner');
+    const textSpan = btn.querySelector('span');
+    
+    btn.disabled = true;
+    textSpan.style.display = 'none';
+    spinner.style.display = 'block';
+    
+    try {
+        const res = await fetch(`/api/conversations/${currentActiveSessionId}/reply`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getAuthToken() },
+            body: JSON.stringify({ message: msg })
+        });
+        
+        if(res.ok) {
+            input.value = '';
+            openActiveConversation(currentActiveSessionId);
+        } else {
+            const err = await res.json();
+            showToast(err.detail || 'Failed to send message', 'error');
+        }
+    } catch(e) {
+        showToast('Network error', 'error');
+    } finally {
+        btn.disabled = false;
+        textSpan.style.display = 'block';
+        spinner.style.display = 'none';
+    }
+}
+
+async function updateActiveConversationStatus(newStatus) {
+    if(!currentActiveSessionId) return;
+    try {
+        const res = await fetch(`/api/conversations/${currentActiveSessionId}/status`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getAuthToken() },
+            body: JSON.stringify({ status: newStatus })
+        });
+        if(res.ok) {
+            showToast(`Conversation marked as ${newStatus}`, 'success');
+            openActiveConversation(currentActiveSessionId);
+        } else {
+            const err = await res.json();
+            showToast(err.detail || 'Update failed', 'error');
+        }
+    } catch(e) { console.error(e); }
+}
+
+async function completeActiveConversation() {
+    if(!currentActiveSessionId) return;
+    try {
+        const res = await fetch(`/api/conversations/${currentActiveSessionId}/complete`, {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + getAuthToken() }
+        });
+        if(res.ok) {
+            showToast('Conversation completed', 'success');
+            currentActiveSessionId = null;
+            document.getElementById('workspace-empty').style.display = 'flex';
+            document.getElementById('workspace-active').style.display = 'none';
+            fetchConversations();
+        } else {
+            const err = await res.json();
+            showToast(err.detail || 'Failed to complete', 'error');
+        }
+    } catch(e) { console.error(e); }
+}
+
+// Override fetchInbox for backward compatibility if any legacy code calls it
+window.fetchInbox = function() {
+    fetchConversations();
+};
+
+</script>
 </body>
 </html>

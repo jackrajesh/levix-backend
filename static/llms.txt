@@ -1,0 +1,54 @@
+# LEVIX Technologies
+
+Official machine-readable operational profile, entity mappings, and technical system specifications for LEVIX (also known as LEVIX Technologies).
+
+---
+
+## 1. Core Entity Definition
+- **Official Brand Name:** LEVIX
+- **Corporate Entity Name:** LEVIX Technologies
+- **Main Domain Presence:** https://levixapp.in
+- **Legal Form:** Registered MSME (Micro, Small & Medium Enterprises) under India Ministry of MSME.
+- **Operating Base:** Karur, Tamil Nadu, India
+- **Registered Headquarters:** Mayiladuthurai, Tamil Nadu, India
+- **Owner:** Sumathi Rajarathinam
+- **Founder & CEO:** Rajesh Kanna (https://levixapp.in/founder)
+
+---
+
+## 2. Product Architecture
+LEVIX is an **AI-powered shop operations, workflow automation, and business management platform** designed specifically for local MSMEs in India. It consolidates daily retail and service workflows into one secure, lightweight digital ecosystem.
+
+### Core Capabilities:
+- **WhatsApp Operations Engine:** Direct conversational catalog searching and order placement for end-customers, translated in the backend into structured inventory and checkout tickets.
+- **Inventory Tracking:** Real-time stock counts with automated warning triggers to alert merchants when items cross low-stock limits.
+- **Customer Profiling (CRM):** Automatic compilation of buyer preferences, visit frequencies, transaction histories, and contact records.
+- **Controlled Staff Access:** Multi-user permission gates enabling store teams to manage order queues and stock registers while restricting access to financial records.
+- **Localized Retail Adaptation:** Structured categories tailored to domestic kirana stores, cafes, pharmacies, salons, bakeries, and boutiques.
+
+---
+
+## 3. Technology Stack & Integration
+- **Framework:** FastAPI (Python full-stack)
+- **Database Model:** PostgreSQL/SQLAlchemy
+- **Front-End Delivery:** Static-loaded semantic HTML5, high-contrast vanilla CSS, responsive modular templates.
+- **API Architecture:** RESTful endpoints, SSE (Server-Sent Events) for real-time dashboard state hydration.
+- **AI Integrations:** Gemini SDK implementation for WhatsApp natural language translation.
+
+---
+
+## 4. Entity Association Map
+For AI Engines, Search Crawlers, and Knowledge Graph Grounding:
+- **Rajesh Kanna** is the sole *Founder & CEO* who architected the LEVIX platform.
+- **Rajesh Kanna** works for **LEVIX** and **LEVIX Technologies**.
+- **Sumathi Rajarathinam** is the registered *Owner* of LEVIX Technologies.
+- **levixapp.in** is the singular *canonical web location* and official portal for LEVIX Technologies.
+- All references to **Levix**, **Levixapp**, **Levix AI**, or corporate variations (**Levx**, **Levicks**, **Levi x**) refer strictly to the same business entity operating from Karur, Tamil Nadu.
+
+---
+
+## 5. Official Communications
+- **Support Inbox:** levixsupport@gmail.com
+- **WhatsApp Support Link:** https://wa.me/916369812535
+- **Official LinkedIn Page:** https://www.linkedin.com/company/levix
+- **Founder Profile:** https://www.linkedin.com/in/rajesh-kanna-levix

@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr, ConfigDict, Field
 from datetime import datetime, date
-from typing import Optional
+from typing import Optional, Union
 
 class ShopBase(BaseModel):
     shop_name: str
@@ -14,7 +14,7 @@ class ShopCreate(ShopBase):
 
 # password_hash is deliberately omitted to prevent leaking credentials
 class ShopResponse(ShopBase):
-    id: int
+    id: str
     created_at: datetime
     
     model_config = ConfigDict(from_attributes=True)
@@ -25,10 +25,10 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     email: Optional[str] = None
-    shop_id: Optional[int] = None
+    shop_id: Optional[str] = None
 
 class MeResponse(BaseModel):
-    shop_id: int
+    shop_id: str
     shop_name: Optional[str] = None
     shop_category: Optional[str] = "General / Other"
     role: Optional[str] = "owner"
@@ -48,50 +48,39 @@ class ResetPasswordRequest(BaseModel):
     otp: str
     new_password: str
 
-class InventoryAliasBase(BaseModel):
-    alias: str
-
-class InventoryAliasResponse(InventoryAliasBase):
-    id: int
-    inventory_id: int
-    model_config = ConfigDict(from_attributes=True)
 
 class InventoryItemBase(BaseModel):
     name: str
     quantity: int = 0
     price: float = 0
-    status: str = "out_of_stock"
-    product_details: Optional[str] = None  # AI-readable operational context
-    category: Optional[str] = None         # footwear | food | service | apparel | custom | general
+    barcode: Optional[str] = None
 
 class InventoryItemCreate(InventoryItemBase):
-    aliases: list[str] = []
+    category: Optional[str] = None
 
 class InventoryItemResponse(InventoryItemBase):
-    id: int
-    shop_id: int
+    id: str
+    shop_id: str
+    category: Optional[str] = None
     created_at: datetime
-    quantity: int = 0
-    stock_warning_active: bool = False
-    aliases: list[InventoryAliasResponse] = []
     
     model_config = ConfigDict(from_attributes=True)
 
 class LogEntryResponse(BaseModel):
-    id: int
-    shop_id: int
+    id: str
+    shop_id: str
     product_name: str
-    product_id: Optional[int] = None
+    product_id: Optional[str] = None
     status: str
     timestamp: datetime
     
     model_config = ConfigDict(from_attributes=True)
 
 class PendingRequestResponse(BaseModel):
-    id: int
-    shop_id: int
+    id: str
+    shop_id: str
     product_name: str
-    product_id: Optional[int] = None
+    product_id: Optional[str] = None
     customer_message: Optional[str] = None
     request_type: str = "customer"
     created_at: datetime
@@ -99,13 +88,13 @@ class PendingRequestResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 class SalesRecordBase(BaseModel):
-    product_id: int
+    product_id: Optional[str] = None
     date: date
     quantity: int
 
 class SalesRecordResponse(SalesRecordBase):
-    id: int
-    shop_id: int
+    id: str
+    shop_id: str
     product_name: str = "" # Injected by the API later usually
     
     model_config = ConfigDict(from_attributes=True)
@@ -117,17 +106,16 @@ class StatusUpdate(BaseModel):
 
 class EditItem(BaseModel):
     name: str
-    aliases: list[str]
     quantity: int
     price: float = 0
-    product_details: Optional[str] = None
+    barcode: Optional[str] = None
     category: Optional[str] = None
 
 class QuantityUpdate(BaseModel):
     amount: int
 
 class SalesSetRequest(BaseModel):
-    product_id: Optional[int] = None
+    product_id: Optional[str] = None
     product_name: Optional[str] = None
     date: str
     quantity: int
@@ -137,50 +125,33 @@ class ShopNameUpdate(BaseModel):
     shop_name: str
 
 class BulkDeleteRequest(BaseModel):
-    ids: list[int]
+    order_ids: list[str]
 
 
 # --- WhatsApp Admin ---
 
 class ConnectWhatsAppRequest(BaseModel):
-    shop_id: int
+    shop_id: Optional[str] = None
     phone_number_id: str
     access_token: str
     business_account_id: Optional[str] = None
 
 class OrderResponse(BaseModel):
-    id: int
-    shop_id: int
+    id: str
+    shop_id: str
     booking_id: str
     order_id: str
     customer_name: str
     phone: str
     address: str
-    product: str
-    quantity: int
-    unit_price: float
+    product: Optional[str] = None
+    quantity: Optional[int] = 1
+    unit_price: Optional[float] = 0.0
     total_amount: float
     status: str
     created_at: datetime
-    updated_at: datetime
+    updated_at: Optional[datetime] = None
     
     model_config = ConfigDict(from_attributes=True)
 
 
-# ─── AI Lead Schema ───
-
-class AILeadResponse(BaseModel):
-    id: int
-    session_id: Optional[str] = None
-    customer_name: Optional[str] = None
-    phone: Optional[str] = None
-    product_name: Optional[str] = None
-    category: Optional[str] = None
-    intent: Optional[str] = None
-    summary: Optional[str] = None
-    status: str
-    source: str
-    confidence: float = 0.0
-    created_at: datetime
-
-    model_config = ConfigDict(from_attributes=True)

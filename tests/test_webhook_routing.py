@@ -85,14 +85,14 @@ def test_known_phone_number_id_resolves_shop():
                 "changes": [{
                     "value": {
                         "metadata": {"phone_number_id": "TEST_PHONE_ID"},
-                        "messages": [{"from": "911234567890", "text": {"body": "hello"}}]
+                        "messages": [{"id": "msg_happy", "from": "911234567890", "type": "text", "text": {"body": "hello"}}]
                     }
                 }]
             }]
         }
         response = client.post("/webhook", json=payload)
         assert response.status_code == 200
-        assert response.json() == {"status": "ok"}
+        assert response.json() == {"status": "success"}
         # Ensure WhatsApp API was called
         mock_post.assert_called_once()
         call_headers = mock_post.call_args.kwargs["headers"]
@@ -108,14 +108,14 @@ def test_unknown_phone_number_id_returns_ok():
                 "changes": [{
                     "value": {
                         "metadata": {"phone_number_id": "UNKNOWN_ID_999"},
-                        "messages": [{"from": "911234567890", "text": {"body": "rice"}}]
+                        "messages": [{"id": "msg_unknown", "from": "911234567890", "type": "text", "text": {"body": "rice"}}]
                     }
                 }]
             }]
         }
         response = client.post("/webhook", json=payload)
         assert response.status_code == 200
-        assert response.json() == {"status": "ok"}
+        assert response.json() == {"status": "no_shop"}
         mock_post.assert_not_called()  # No send attempted
 
 
@@ -126,11 +126,11 @@ def test_missing_metadata_returns_ok():
         "entry": [{
             "changes": [{
                 "value": {
-                    "messages": [{"from": "911234567890", "text": {"body": "hello"}}]
+                    "messages": [{"id": "msg_missing", "from": "911234567890", "type": "text", "text": {"body": "hello"}}]
                 }
             }]
         }]
     }
     response = client.post("/webhook", json=payload)
     assert response.status_code == 200
-    assert response.json() == {"status": "ok"}
+    assert response.json() == {"status": "no_phone_id"}

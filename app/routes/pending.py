@@ -35,13 +35,15 @@ def get_pending(identity: UserIdentity = Depends(require_permission("inbox_view"
         "id": p.id, 
         "product": p.product_name, 
         "customer_message": p.customer_message, 
+        "customer_name": p.customer_name,
+        "customer_phone": p.customer_phone,
         "request_type": p.request_type, 
         "created_at": p.created_at.isoformat() if p.created_at else None,
         "timestamp": p.created_at.isoformat() if p.created_at else None
     } for p in pending]
 
 @router.delete("/pending/{request_id}")
-def delete_pending(request_id: int, identity: UserIdentity = Depends(require_permission("inbox_reply")), db: Session = Depends(get_db)):
+def delete_pending(request_id: str, identity: UserIdentity = Depends(require_permission("inbox_reply")), db: Session = Depends(get_db)):
     current_shop = identity.shop
     found_req = db.query(models.PendingRequest).filter(
         models.PendingRequest.id == request_id,
@@ -57,7 +59,7 @@ def delete_pending(request_id: int, identity: UserIdentity = Depends(require_per
     return {"status": "success", "message": "Pending request removed"}
 
 @router.post("/yes/{request_id}")
-def resolve_yes(request_id: int, identity: UserIdentity = Depends(require_permission("inbox_reply")), db: Session = Depends(get_db)):
+def resolve_yes(request_id: str, identity: UserIdentity = Depends(require_permission("inbox_reply")), db: Session = Depends(get_db)):
     current_shop = identity.shop
     found_req = db.query(models.PendingRequest).filter(
         models.PendingRequest.id == request_id,
@@ -96,11 +98,6 @@ def resolve_yes(request_id: int, identity: UserIdentity = Depends(require_permis
             stock_warning_active=False
         )
         db.add(new_item)
-        db.flush()
-        db.add(models.InventoryAlias(
-            inventory_id=new_item.id,
-            alias=found_req.product_name.lower()
-        ))
     
     db.delete(found_req)
     db.commit()
@@ -108,7 +105,7 @@ def resolve_yes(request_id: int, identity: UserIdentity = Depends(require_permis
     return {"status": "success", "message": f"{found_req.product_name} marked as available"}
 
 @router.post("/no/{request_id}")
-def resolve_no(request_id: int, identity: UserIdentity = Depends(require_permission("inbox_reply")), db: Session = Depends(get_db)):
+def resolve_no(request_id: str, identity: UserIdentity = Depends(require_permission("inbox_reply")), db: Session = Depends(get_db)):
     current_shop = identity.shop
     found_req = db.query(models.PendingRequest).filter(
         models.PendingRequest.id == request_id,
@@ -147,11 +144,6 @@ def resolve_no(request_id: int, identity: UserIdentity = Depends(require_permiss
             stock_warning_active=True
         )
         db.add(new_item)
-        db.flush()
-        db.add(models.InventoryAlias(
-            inventory_id=new_item.id,
-            alias=found_req.product_name.lower()
-        ))
         add_log_db(db, current_shop.id, new_item.name, "low_stock", new_item.id, performed_by=identity.name, user_type=identity.user_type)
     
     db.delete(found_req)

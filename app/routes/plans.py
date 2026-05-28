@@ -92,7 +92,7 @@ async def get_usage_limits(db: Session = Depends(get_db), identity: UserIdentity
     }
 
 @router.post("/upgrade")
-async def upgrade_plan(plan_id: int = None, addon_type: str = None, db: Session = Depends(get_db), identity: UserIdentity = Depends(require_permission("billing_manage"))):
+async def upgrade_plan(plan_id: str = None, addon_type: str = None, db: Session = Depends(get_db), identity: UserIdentity = Depends(require_permission("billing_manage"))):
     if identity.user_type != 'owner' and not identity.has_permission("billing_manage"):
         raise HTTPException(status_code=403, detail="Insufficient permissions")
     user = identity.shop
@@ -174,7 +174,7 @@ async def upgrade_plan(plan_id: int = None, addon_type: str = None, db: Session 
                     "plan_name": plan.name,
                     "amount": float(plan.price) if plan.price is not None else 0.0,
                     "payment_status": "paid",
-                    "transaction_id": sub.razorpay_subscription_id,
+                    "transaction_id": sub.cashfree_subscription_id,
                     "renewal_date": sub.renewal_date.isoformat() if sub.renewal_date else None,
                 },
                 metadata={"event_kind": "billing"}

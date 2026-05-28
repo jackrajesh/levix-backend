@@ -53,8 +53,10 @@ class WebhookGuard:
             
             # Must have either messages or statuses
             if not value.get("messages") and not value.get("statuses"):
+                logger.warning(f"[GUARD] Payload missing messages and statuses. Value: {value}")
                 return False
                 
             return True
-        except (IndexError, KeyError, TypeError):
+        except (IndexError, KeyError, TypeError) as e:
+            logger.warning(f"[GUARD] Payload structure invalid: {e}. Payload snapshot: {str(payload)[:200]}")
             return False

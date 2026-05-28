@@ -1,10 +1,10 @@
 User-agent: *
 Allow: /
+
 Disallow: /dashboard
 Disallow: /admin
+Disallow: /levix-admin
 Disallow: /api
 Disallow: /private
-Disallow: /login
-Disallow: /register
 
 Sitemap: https://levixapp.in/sitemap.xml

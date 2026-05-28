@@ -69,11 +69,17 @@ class SalesEngine:
                 db.commit()
                 return existing
 
+            import json
+            fields = session.collected_fields
+            if isinstance(fields, str):
+                try: fields = json.loads(fields)
+                except: fields = {}
+            
             new_lead = models.AILead(
                 shop_id=shop_id,
                 session_id=session.session_id,
                 phone=session.customer_phone,
-            customer_name=((session.collected_fields or {}).get("customer_name", "Valued Customer")),
+                customer_name=(fields or {}).get("customer_name", "Valued Customer"),
                 product_name=matched_product.name if matched_product else "Inquiry",
                 intent=intent,
                 summary=summary,

@@ -75,7 +75,7 @@ async def get_logs(
         return {
             "logs": [
                 {
-                    "id": l.id,
+                    "id": str(l.id),
                     "timestamp": l.created_at.isoformat() if l.created_at else None,
                     "user_name": l.user_name,
                     "role": l.role,

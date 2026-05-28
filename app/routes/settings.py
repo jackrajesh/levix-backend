@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 from sqlalchemy.orm import Session
 from typing import Dict, Any, Optional
 
@@ -9,8 +9,15 @@ from .. import models, schemas
 from ..database import get_db
 from .auth import get_current_shop, require_permission, UserIdentity
 
+import os
 router = APIRouter(prefix="/settings", tags=["settings"])
-templates = Jinja2Templates(directory="templates")
+
+base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+templates_dir = os.path.join(base_dir, "templates")
+app_templates_dir = os.path.join(base_dir, "app", "templates")
+templates_dirs = [path for path in (templates_dir, app_templates_dir, "templates") if os.path.exists(path)]
+templates_dir = templates_dirs or "templates"
+templates = Jinja2Templates(directory=templates_dir)
 
 # ── Shop Category constants ────────────────────────────────────────────────────
 SHOP_CATEGORIES = [
@@ -34,7 +41,8 @@ class ShopProfileUpdate(BaseModel):
     business_category: Optional[str] = None
     business_subnote: Optional[str] = None
 
-    @validator("shop_category")
+    @field_validator("shop_category")
+    @classmethod
     def validate_shop_category(cls, v):
         if v is not None and v not in SHOP_CATEGORIES:
             raise ValueError(f"shop_category must be one of: {', '.join(SHOP_CATEGORIES)}")
@@ -52,9 +60,9 @@ async def shop_profile_page(
     """Render the Shop Profile settings page."""
     shop = identity.shop
     return templates.TemplateResponse(
-        "settings/shop_profile.html",
-        {
-            "request": request,
+        request=request,
+        name="settings/shop_profile.html",
+        context={
             "shop_name": shop.shop_name,
             "shop_id": shop.id,
             "user_name": identity.name,
@@ -74,9 +82,9 @@ async def ai_settings_page(
     """Render the AI Assistant settings page for the shop owner."""
     shop = identity.shop
     return templates.TemplateResponse(
-        "settings/ai.html",
-        {
-            "request": request,
+        request=request,
+        name="settings/ai.html",
+        context={
             "shop_name": shop.shop_name,
             "shop_id": shop.id,
             "user_name": identity.name,
@@ -120,7 +128,7 @@ def get_shop_profile(
     db: Session = Depends(get_db)
 ):
     """Return the shop profile settings including shop_category."""
-    shop = db.query(models.Shop).filter_by(id=identity.shop_id).first()
+    shop = db.query(models.Shop).filter_by(id=identity.id).first()
     if not shop:
         raise HTTPException(status_code=404, detail="Shop not found")
     return {
@@ -142,7 +150,7 @@ def update_shop_profile(
     db: Session = Depends(get_db)
 ):
     """Update shop profile fields, including shop_category."""
-    shop = db.query(models.Shop).filter_by(id=identity.shop_id).first()
+    shop = db.query(models.Shop).filter_by(id=identity.id).first()
     if not shop:
         raise HTTPException(status_code=404, detail="Shop not found")
 

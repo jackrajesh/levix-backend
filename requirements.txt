@@ -6,7 +6,7 @@ requests
 python-dotenv
 cryptography
 python-jose[cryptography]
-passlib
+passlib[argon2]
 argon2-cffi
 python-multipart
 pydantic[email]
@@ -16,3 +16,4 @@ google-genai
 jinja2
 pandas
 openpyxl
+resend

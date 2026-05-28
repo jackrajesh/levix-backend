@@ -1,0 +1,395 @@
+{% set seo_url = "https://levixapp.in" ~ seo_path %}
+{% set seo_image = seo_image|default("https://levixapp.in/static/logo.png") %}
+{% set seo_type = seo_type|default("website") %}
+{% set seo_robots = seo_robots|default("index,follow,max-image-preview:large") %}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="LEVIX">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>{{ seo_title }}</title>
+<meta name="description" content="{{ seo_description }}">
+<meta name="robots" content="{{ seo_robots }}">
+<link rel="canonical" href="{{ seo_url }}">
+<meta property="og:locale" content="en_IN">
+<meta property="og:type" content="{{ seo_type }}">
+<meta property="og:site_name" content="LEVIX Technologies">
+<meta property="og:title" content="{{ seo_title }}">
+<meta property="og:description" content="{{ seo_description }}">
+<meta property="og:url" content="{{ seo_url }}">
+<meta property="og:image" content="{{ seo_image }}">
+<meta property="og:image:alt" content="{{ seo_image_alt|default('LEVIX Technologies brand image') }}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ seo_title }}">
+<meta name="twitter:description" content="{{ seo_description }}">
+<meta name="twitter:image" content="{{ seo_image }}">
+<link rel="manifest" href="/static/manifest.json?v=20260528b">
+<link rel="icon" type="image/png" href="/static/favicon.png?v=20260528b">
+<link rel="apple-touch-icon" href="/static/icons/icon-192.png?v=20260528b">
+{% include 'partials/seo_schema.html' %}
+<script>
+(() => {
+  const path = window.location.pathname || "/";
+  const isDashboardRoute = path.startsWith("/dashboard");
+
+  const loadMobileFixes = () => {
+    if (document.getElementById("levix-mobile-fixes")) return;
+    const link = document.createElement("link");
+    link.id = "levix-mobile-fixes";
+    link.rel = "stylesheet";
+    link.href = "/static/mobile-fixes.css";
+    document.head.appendChild(link);
+  };
+
+  const setupAnimationSystem = () => {
+    if (isDashboardRoute) return;
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("motion") === "on") {
+      try { localStorage.setItem("levix-motion-force", "1"); } catch (_) {}
+    }
+    if (params.get("motion") === "off") {
+      try { localStorage.setItem("levix-motion-force", "0"); } catch (_) {}
+    }
+    const motionOff = (() => {
+      try { return localStorage.getItem("levix-motion-force") === "0"; } catch (_) { return false; }
+    })();
+    if (motionOff) return;
+
+    document.documentElement.classList.add("levix-smooth-scroll");
+    document.documentElement.classList.add("levix-force-motion");
+    if (document.body) {
+      document.body.classList.add("levix-motion-enabled");
+      if (path === "/") document.body.classList.add("levix-home");
+    }
+
+    // smooth anchors
+    document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+      anchor.addEventListener("click", (event) => {
+        const targetId = anchor.getAttribute("href");
+        if (!targetId || targetId === "#") return;
+        const target = document.querySelector(targetId);
+        if (!target) return;
+        event.preventDefault();
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+
+    // page-out transition
+    document.querySelectorAll("a[href]").forEach((a) => {
+      a.addEventListener("click", (event) => {
+        const href = a.getAttribute("href");
+        if (!href || href.startsWith("#")) return;
+        if (a.target === "_blank" || a.hasAttribute("download")) return;
+        const to = new URL(a.href, window.location.href);
+        if (to.origin !== window.location.origin) return;
+        if (to.pathname === window.location.pathname && to.search === window.location.search) return;
+        event.preventDefault();
+        document.body.classList.add("levix-page-leaving");
+        setTimeout(() => { window.location.href = to.href; }, 200);
+      });
+    });
+
+    // Assign fade-up targets
+    const revealTargets = [
+      ...document.querySelectorAll("main section, .page-header, .content, .content-box, .profile-card, .value-card, .timeline-item, .pricing-card, .feature-card, .who-card, .step, .hero-badge, .hero h1, .hero p, .hero-actions, .hero-trust, main img")
+    ];
+    revealTargets.forEach((el) => {
+      if (!el.hasAttribute("data-animate")) el.setAttribute("data-animate", "fade-up");
+    });
+
+    // Checklist debug hook: add ?animdebug=1 to URL
+    if (params.get("animdebug") === "1") {
+      const all = document.querySelectorAll("[data-animate]");
+      console.log("Elements found:", all.length);
+      const testEl = document.querySelector("[data-animate]");
+      if (testEl) {
+        testEl.classList.add("is-visible");
+        testEl.style.opacity = "1";
+        testEl.style.transform = "translate3d(0,0,0)";
+        console.log("Force test passed");
+      }
+    }
+
+    // Assign stagger parents
+    document.querySelectorAll(".features-grid, .steps-grid, .who-grid, .footer-grid, .hero-actions").forEach((parent) => {
+      parent.setAttribute("data-animate", "stagger");
+    });
+
+    // Avoid double-animating children of stagger containers
+    document.querySelectorAll('[data-animate="stagger"] > [data-animate]').forEach((child) => {
+      child.removeAttribute("data-animate");
+    });
+
+    // typewriter headings
+    document.querySelectorAll(".hero h1, .section-header h2, .page-header h1").forEach((heading) => {
+      if (!heading.hasAttribute("data-typewriter")) {
+        heading.setAttribute("data-typewriter", heading.textContent.trim().length > 50 ? "words" : "chars");
+      }
+    });
+
+    // Avoid animation conflicts: typed headings should not also run fade-up reveal.
+    document.querySelectorAll("[data-typewriter][data-animate]").forEach((el) => {
+      el.removeAttribute("data-animate");
+    });
+
+    const animDuration = "760ms";
+    const animEase = "cubic-bezier(0.22, 1, 0.36, 1)";
+    const primeFadeUp = (el) => {
+      if (el.dataset.animPrimed === "1") return;
+      el.dataset.animPrimed = "1";
+      el.style.opacity = "0";
+      el.style.transform = "translate3d(0, 56px, 0)";
+      el.style.transition = `opacity ${animDuration} ${animEase}, transform ${animDuration} ${animEase}`;
+    };
+
+    const markVisible = (el) => {
+      el.style.willChange = "transform, opacity";
+      // Force style flush so transition definitely runs.
+      void el.getBoundingClientRect();
+      requestAnimationFrame(() => {
+        el.classList.add("is-visible");
+        el.style.opacity = "1";
+        el.style.transform = "translate3d(0, 0, 0)";
+      });
+      const cleanup = () => {
+        el.style.willChange = "";
+        el.removeEventListener("transitionend", cleanup);
+        el.removeEventListener("animationend", cleanup);
+      };
+      el.addEventListener("transitionend", cleanup, { once: true });
+      el.addEventListener("animationend", cleanup, { once: true });
+    };
+
+    // reveal observer (once behavior via unobserve)
+    let revealIndex = 0;
+    const revealObserver = new IntersectionObserver((entries, obs) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const delay = Math.min(revealIndex * 60, 320);
+        revealIndex += 1;
+        setTimeout(() => markVisible(entry.target), delay);
+        obs.unobserve(entry.target);
+      });
+    }, { threshold: 0.15, rootMargin: "0px 0px -4% 0px" });
+
+    // Paint-safe observe to ensure CSS transition always fires
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        document.querySelectorAll('[data-animate="fade-up"]').forEach((el) => {
+          primeFadeUp(el);
+          revealObserver.observe(el);
+        });
+      });
+    });
+
+    // stagger observer
+    const staggerObserver = new IntersectionObserver((entries, obs) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const children = Array.from(entry.target.children || []);
+        children.forEach((child, index) => {
+          child.style.willChange = "transform, opacity";
+          child.style.opacity = "0";
+          child.style.transform = "translate3d(0, 24px, 0) scale(0.97)";
+          child.style.transition = `opacity ${animDuration} ${animEase}, transform ${animDuration} ${animEase}`;
+          const delay = index < 5 ? index * 100 : 0;
+          child.style.transitionDelay = `${delay}ms`;
+          void child.getBoundingClientRect();
+          requestAnimationFrame(() => {
+            child.style.opacity = "1";
+            child.style.transform = "translate3d(0, 0, 0) scale(1)";
+          });
+          const cleanup = () => {
+            child.style.willChange = "";
+            child.style.transitionDelay = "";
+          };
+          child.addEventListener("transitionend", cleanup, { once: true });
+        });
+        entry.target.classList.add("is-visible");
+        obs.unobserve(entry.target);
+      });
+    }, { threshold: 0.15, rootMargin: "0px 0px -4% 0px" });
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        document.querySelectorAll('[data-animate="stagger"]').forEach((el) => staggerObserver.observe(el));
+      });
+    });
+
+    // typewriter observer
+    const typeObserver = new IntersectionObserver((entries, obs) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const el = entry.target;
+        if (el.dataset.twDone === "1") {
+          obs.unobserve(el);
+          return;
+        }
+        const twKey = `levix-tw:${window.location.pathname}:${(el.textContent || "").trim()}`;
+        if (sessionStorage.getItem(twKey) === "1") {
+          el.dataset.twDone = "1";
+          obs.unobserve(el);
+          return;
+        }
+        const mode = el.getAttribute("data-typewriter");
+        const original = el.textContent || "";
+        const tokens = mode === "words" ? original.split(/(\s+)/) : original.split("");
+        el.textContent = "";
+        const parts = [];
+        tokens.forEach((token, i) => {
+          if (/^\s+$/.test(token)) {
+            // Preserve natural word spacing while animating.
+            el.appendChild(document.createTextNode(token));
+            return;
+          }
+          const span = document.createElement("span");
+          span.className = mode === "words" ? "tw-word" : "tw-char";
+          span.textContent = token;
+          span.style.transitionDelay = `${parts.length * 30}ms`;
+          span.style.opacity = "0";
+          span.style.transform = "translate3d(0, 8px, 0)";
+          span.style.transition = "opacity 300ms ease, transform 300ms ease";
+          el.appendChild(span);
+          parts.push(span);
+        });
+
+        // Smooth progressive letter reveal (no harsh cursor flash/jump).
+        parts.forEach((part, i) => {
+          setTimeout(() => {
+            part.classList.add("tw-visible");
+            part.style.opacity = "1";
+            part.style.transform = "translate3d(0, 0, 0)";
+          }, i * 30);
+        });
+
+        const total = Math.max(900, parts.length * 30 + 300);
+        setTimeout(() => {
+          // Restore plain text to avoid long-lived span wrappers and spacing artifacts.
+          el.textContent = original;
+          el.dataset.twDone = "1";
+          sessionStorage.setItem(twKey, "1");
+        }, total);
+        obs.unobserve(el);
+      });
+    }, { threshold: 0.15, rootMargin: "0px 0px -4% 0px" });
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        document.querySelectorAll("[data-typewriter]").forEach((el) => typeObserver.observe(el));
+      });
+    });
+
+    // No forced fallback reveal: keep animations strictly scroll-triggered.
+
+    // counters
+    const counterObserver = new IntersectionObserver((entries, obs) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const el = entry.target;
+        const raw = el.getAttribute("data-counter");
+        const target = Number(raw);
+        if (Number.isNaN(target)) {
+          obs.unobserve(el);
+          return;
+        }
+        const start = performance.now();
+        const duration = 1200;
+        const fmt = new Intl.NumberFormat();
+        const easeOutExpo = (t) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
+        const step = (now) => {
+          const progress = Math.min((now - start) / duration, 1);
+          const value = Math.round(target * easeOutExpo(progress));
+          el.textContent = fmt.format(value);
+          if (progress < 1) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+        obs.unobserve(el);
+      });
+    }, { threshold: 0.25 });
+    document.querySelectorAll("[data-counter]").forEach((el) => counterObserver.observe(el));
+
+    // progress bar
+    if (!document.querySelector(".levix-scroll-progress")) {
+      const bar = document.createElement("div");
+      bar.className = "levix-scroll-progress";
+      document.body.appendChild(bar);
+      const updateProgress = () => {
+        const max = document.documentElement.scrollHeight - window.innerHeight;
+        const ratio = max > 0 ? window.scrollY / max : 0;
+        bar.style.width = `${Math.max(0, Math.min(1, ratio)) * 100}%`;
+      };
+      let ticking = false;
+      const onScroll = () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+          updateProgress();
+          ticking = false;
+        });
+      };
+      updateProgress();
+      window.addEventListener("scroll", onScroll, { passive: true });
+      let resizeTimer = null;
+      window.addEventListener("resize", () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(updateProgress, 120);
+      });
+    }
+
+    // subtle parallax decorative blobs only (no text/interactive)
+    if (window.innerWidth >= 768 && path === "/") {
+      const hero = document.querySelector(".hero");
+      if (hero) {
+        const blobA = document.createElement("div");
+        blobA.className = "levix-blob levix-blob-a";
+        const blobB = document.createElement("div");
+        blobB.className = "levix-blob levix-blob-b";
+        hero.append(blobA, blobB);
+        const blobs = [blobA, blobB];
+        let ticking = false;
+        const updateParallax = () => {
+          const y = Math.max(-60, Math.min(60, window.scrollY * 0.15));
+          blobs[0].style.transform = `translate3d(0, ${y}px, 0)`;
+          blobs[1].style.transform = `translate3d(0, ${-y * 0.6}px, 0)`;
+          ticking = false;
+        };
+        const onScroll = () => {
+          if (ticking) return;
+          ticking = true;
+          requestAnimationFrame(updateParallax);
+        };
+        window.addEventListener("scroll", onScroll, { passive: true });
+      }
+    }
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => {
+      loadMobileFixes();
+      setupAnimationSystem();
+    }, { once: true });
+  } else {
+    loadMobileFixes();
+    setupAnimationSystem();
+  }
+})();
+</script>
+<script>
+(() => {
+  if (!("serviceWorker" in navigator)) return;
+
+  const registerLevixSW = async () => {
+    try {
+      await navigator.serviceWorker.register("/static/sw.js", {
+        scope: "/static/",
+        updateViaCache: "none"
+      });
+    } catch (_) {
+      // Intentionally silent to avoid impacting UX.
+    }
+  };
+
+  window.addEventListener("load", registerLevixSW, { once: true });
+})();
+</script>

@@ -129,7 +129,7 @@ class CartItem:
     @classmethod
     def from_dict(cls, d: dict) -> "CartItem":
         return cls(
-            product_id   = int(d.get("product_id", 0)),
+            product_id   = d.get("product_id", None),
             name         = str(d.get("name", "")),
             unit_price   = float(d.get("unit_price", 0)),
             quantity     = max(1, int(d.get("quantity", d.get("qty", 1)))),
@@ -231,52 +231,6 @@ class OrderEngine:
         if not corrected_tokens:
             corrected_tokens = hint_tokens
 
-        # FAIL 3.3: Seed aliases if table is empty
-        alias_count = db.query(models.InventoryAlias).join(models.InventoryItem).filter(models.InventoryItem.shop_id == shop_id).count()
-        if alias_count == 0:
-            seed_aliases = [
-                ("coke", "Coco Cola"),
-                ("cola", "Coco Cola"), 
-                ("cold drink", "Coco Cola"),
-                ("briyani", "biryani"),
-                ("biriyani", "biryani"),
-                ("mashroom", "mushroom"),
-                ("icecream", "ice cream"),
-                ("chiken", "chicken")
-            ]
-            for alias_txt, target_name in seed_aliases:
-                # Find target product
-                target_p = db.query(models.InventoryItem).filter(
-                    models.InventoryItem.shop_id == shop_id,
-                    func.lower(models.InventoryItem.name) == target_name.lower()
-                ).first()
-                if target_p:
-                    new_alias = models.InventoryAlias(
-                        inventory_id=target_p.id,
-                        alias=alias_txt
-                    )
-                    db.add(new_alias)
-            db.commit()
-
-        # FAIL 3.3: Step 1: Check InventoryAlias table for exact alias match (Score 95)
-        for token in corrected_tokens:
-            alias_match = (
-                db.query(models.InventoryAlias)
-                .join(models.InventoryItem)
-                .filter(models.InventoryItem.shop_id == shop_id)
-                .filter(func.lower(models.InventoryAlias.alias) == token.lower())
-                .first()
-            )
-            if alias_match:
-                product = db.query(models.InventoryItem).filter(
-                    models.InventoryItem.id == alias_match.inventory_id,
-                    models.InventoryItem.shop_id == shop_id,
-                    models.InventoryItem.quantity > 0,
-                ).first()
-                if product:
-                    # Return directly with high score to bypass fuzzy
-                    return [{**OrderEngine._product_to_dict(product), "match_score": 95}]
-
         # Step 3-6: Fuzzy match
         filters = []
         for token in corrected_tokens:
@@ -366,7 +320,7 @@ class OrderEngine:
                 )
 
         new_item = CartItem(
-            product_id   = int(product["id"]),
+            product_id   = product["id"],
             name         = str(product["name"]),
             unit_price   = float(product["price"]),
             quantity     = min(quantity, max_qty),

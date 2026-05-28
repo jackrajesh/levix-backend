@@ -29,12 +29,11 @@ BROWSING:
 
 ADDING TO CART (add_item / multi_add_items):
   1. Normalise: _apply_typo_corrections() + category aliases
-  2. Alias lookup  (InventoryAlias table)
-  3. Fuzzy match   (name / category / product_details)
-  4. If score == 0 → NOT added → treated as stock_check → pending inquiry
-  5. If out of stock → suggest replacement
-  6. If ambiguous (multiple matches) → ask clarification
-  7. Add to cart → confirm with upsell
+  2. Fuzzy match   (name / category / product_details)
+  3. If score == 0 → NOT added → treated as stock_check → pending inquiry
+  4. If out of stock → suggest replacement
+  5. If ambiguous (multiple matches) → ask clarification
+  6. Add to cart → confirm with upsell
 
   Multi-item phrases:
     "X and Y", "X with Y", "X, Y and Z"  → multi_add_items
@@ -57,12 +56,8 @@ POST ORDER:
   status check  → booking ID + order ID + status + items
   cancel order  → 2-step confirm → DB update + SSE broadcast
 
-PRODUCT MATCHING PIPELINE (7 steps in order_engine.find_products):
+PRODUCT MATCHING PIPELINE (order_engine.find_products):
   1. Exact name match
-  2. InventoryAlias exact match
-  3. Typo-corrected alias match (_TYPO_CORRECTIONS)
-  4. Fuzzy name / category / product_details
-  5. InventoryAlias fuzzy match
   6. Keyword overlap scoring
   7. score == 0 → return [] → stock_check + pending_inquiry
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -121,226 +116,14 @@ class RouterEngine:
 
     @classmethod
     def process_message(cls, db: Session, shop_id: int, customer_phone: str, raw_message: str) -> str:
-        try:
-            vr = ValidationEngine.message(raw_message)
-            if not vr:
-                return MessageFormatter.unclear()
-
-            message = _normalise(vr.cleaned)
-            session   = ConversationEngine.get_session(db, shop_id, customer_phone)
-            shop      = db.query(models.Shop).get(shop_id)
-            shop_name = shop.shop_name if shop else "our shop"
-            shop_settings = (shop.settings or {}) if shop else {}
-            business_category = shop.business_category or ""
-            shop_category = getattr(shop, "shop_category", "General / Other")
-            business_subnote = shop.business_subnote or ""
-
-            mem   = MemoryEngine.load(db, session, customer_phone)
-            state = session.category or "idle"
-
-            # Gap 1: Rate Limiting (10 messages per 30 seconds)
-            now = time.time()
-            mem.session.message_timestamps = [t for t in (mem.session.message_timestamps or []) if now - t < 30]
-            if len(mem.session.message_timestamps) >= 10:
-                # Bypass for tests
-                is_test = customer_phone.endswith("7777") or customer_phone.startswith("9000") or customer_phone == "1111111111" or customer_phone == "2222222222"
-                if not is_test:
-                    # Log abuse
-                    try:
-                        log = models.ActivityLog(
-                            shop_id=shop_id, category="SECURITY", action="Rate limit exceeded",
-                            target=customer_phone, severity="warning", actor_name="System"
-                        )
-                        db.add(log)
-                        db.commit()
-                    except: pass
-                    return "Please slow down \u2014 I'm still processing your order \U0001f60a. Try again in a few seconds."
-            mem.session.message_timestamps.append(now)
-
-            # Gap 2: Checkout Timeout / Session Expiry
-            last_activity = session.updated_at
-            if last_activity:
-                # Ensure last_activity is timezone-aware
-                if last_activity.tzinfo is None:
-                    last_activity = last_activity.replace(tzinfo=timezone.utc)
-                
-                delta = datetime.now(timezone.utc) - last_activity
-                
-                # 15 Minute Checkout Timeout
-                if state in ("awaiting_confirmation", "awaiting_address", "awaiting_delivery_mode") and delta > timedelta(minutes=15):
-                    ConversationEngine.transition(db, session, "cart_active")
-                    mem.session.delivery_mode = None
-                    mem.session.delivery_address = None
-                    MemoryEngine.flush(db, session, mem)
-                    return "Your session timed out. Your cart is still saved \u2014 reply anything to continue."
-
-                # 60 Minute Global Expiry
-                if delta > timedelta(minutes=60):
-                    mem.session.cart = []
-                    ConversationEngine.transition(db, session, "idle")
-                    MemoryEngine.flush(db, session, mem)
-                    # Return normal flow response to the new message instead of blocking
-
-            from .thinking_layer import ThinkingLayer
-            history = session.conversation_history or []
-            t_res = ThinkingLayer.analyze(message, state, mem.session.cart, history)
-            
-            if t_res.primary_intent == "frustration":
-                return "I'm sorry about that \U0001f614 Let me help. What would you like to do?\nYou can type *menu*, *cart*, or *place order*."
-            
-            if t_res.primary_intent == "strip_no_and_reprocess":
-                message = t_res.entities["stripped_message"]
-                ie         = IntentEngine()
-                intent_obj = ie.classify(message, session_state=state, business_category=business_category)
-                intent     = intent_obj.name
-                entities   = intent_obj.entities
-                score      = intent_obj.understanding_score
-            elif t_res.primary_intent:
-                intent = t_res.primary_intent
-                entities = t_res.entities
-                score = 100
-                class DummyIntent: pass
-                intent_obj = DummyIntent()
-                intent_obj.name = intent
-                intent_obj.confidence = t_res.confidence
-            else:
-                ie         = IntentEngine()
-                intent_obj = ie.classify(message, session_state=state, business_category=business_category)
-                intent     = intent_obj.name
-                entities   = intent_obj.entities
-                score      = intent_obj.understanding_score
-
-            logger.info(f"[ROUTER] phone={customer_phone} state={state} intent={intent} score={score}")
-
-            ctx = _Context(
-                db=db, shop_id=shop_id, shop_name=shop_name,
-                shop_settings=shop_settings, business_category=business_category, 
-                shop_category=shop_category, business_subnote=business_subnote,
-                customer_phone=customer_phone, message=message, session=session, mem=mem,
-                state=state, entities=entities, intent=intent,
-            )
-
-            reply = cls._route(ctx, score)
-
-            ConversationEngine.set_last_intent(db, session, intent, intent_obj.confidence)
-            ConversationEngine.append_history(session, "user", raw_message)
-            ConversationEngine.append_history(session, "assistant", reply)
-            MemoryEngine.flush(db, session, mem)
-            ConversationEngine.flush(db, session)
-
-            return reply
-
-        except Exception as exc:
-            import traceback as _tb
-            print(f"[LEVIX ERROR] CRASH in process_message: {_tb.format_exc()}")
-            logger.error(f"[ROUTER] CRASH: {exc}\n{_tb.format_exc()}")
-            try:
-                db.rollback()
-            except Exception:
-                pass
-            return "Something went wrong on our end. Your cart is safe \u2014 reply *place order* to try again."
+        logger.info("[ROUTER] Using GuidedConversationEngine")
+        from .guided_conversation_engine import GuidedConversationEngine
+        return GuidedConversationEngine.process_message(db, str(shop_id), customer_phone, raw_message)
 
     @classmethod
     def _route(cls, ctx: "_Context", score: int) -> str:
-        # FAIL 2.2: Reject upsell triggers fallback instead of rejection
-        # This must run before state checks, before fallback, before everything.
-        if (ctx.intent == "pending_no" or ctx.intent == "reject") and ctx.mem.session.upsell_active:
-            ctx.mem.session.upsell_active = False
-            ctx.mem.session.upsell_product = None
-            summary = OrderEngine.cart_summary(ctx.mem.session.cart)
-            return "No problem! \U0001f60a " + MessageFormatter.cart_summary(summary.items, summary.total)
-
-        # 1. State-based High Priority Overrides
-        if ctx.state == "onboarding":
-            return cls._handle_onboarding(ctx)
-            
-        if ctx.state == "awaiting_yes_no":
-            # Force yes/no handlers regardless of intent name
-            if ctx.intent in ("confirm_order", "pending_yes", "clear_cart_confirmed") or ctx.message.lower() in ("yes", "yep", "yeah", "y"):
-                return cls._handle_pending_yes(ctx)
-            if ctx.intent in ("cancel_order", "pending_no", "reject_upsell", "reject_clear") or ctx.message.lower() in ("no", "nope", "nay", "n"):
-                return cls._handle_pending_no(ctx)
-
-        # FAIL 2.5 + 2.6: State string audit for clear cart confirmation
-        if ctx.state == "awaiting_clear_confirm":
-            if ctx.intent in ("pending_yes", "confirm_order") or ctx.message.lower() in ("yes", "y", "yep"):
-                return cls._handle_clear_cart_confirmed(ctx)
-            if ctx.intent in ("pending_no", "cancel_order") or ctx.message.lower() in ("no", "n", "nope"):
-                ctx.mem.session.category = "cart_active"
-                return "No problem! Your cart is safe \U0001f60a"
-
-        # FAIL 4.5: Awaiting inquiry or menu state
-        if ctx.state == "awaiting_inquiry_or_menu":
-            msg = ctx.message.lower()
-            if "inquire" in msg or "1" in msg:
-                return cls._handle_inquire_product(ctx)
-            if "menu" in msg or "2" in msg:
-                ctx.mem.session.category = "browsing"
-                return cls._handle_view_menu(ctx)
-            # Re-run normal intent classification if not 1/2
-
-        # 2. Score-based Fallback
-        if score < 20 and ctx.intent not in ("greet", "confirm_order", "cancel_order", "order_status", "pending_yes", "pending_no", "user_name_update", "cancel_existing_order", "stock_check"):
-            if ctx.mem.session.cart:
-                summary = OrderEngine.cart_summary(ctx.mem.session.cart)
-                return (
-                    f"I didn't quite catch that \U0001f60a You have *{summary.item_count} items* "
-                    f"(₹{summary.total:.0f}) in your cart.\n\n"
-                    f"Reply *place order* to checkout, or tell me what else to add!"
-                )
-            return MessageFormatter.unclear()
-
-        handler_map = {
-            "greet":                  cls._handle_greet,
-            "checkout_start":         cls._handle_checkout_start,
-            "pending_yes":            cls._handle_pending_yes,
-            "pending_no":             cls._handle_pending_no,
-            "pending_unclear":        cls._handle_unclear_in_confirmation,
-            "product_info":           cls._handle_product_info,
-            "add_item":               cls._handle_add_item,
-            "multi_add_items":        cls._handle_multi_add,
-            "remove_item":            cls._handle_remove_item,
-            "change_quantity":        cls._handle_change_quantity,
-            "set_preference":         cls._handle_set_preference,
-            "show_cart":              cls._handle_show_cart,
-            "view_cart":              cls._handle_show_cart,
-            "clear_cart":             cls._handle_clear_cart,
-            "clear_cart_confirmed":   cls._handle_clear_cart_confirmed,
-            "select_delivery":        cls._handle_select_delivery,
-            "select_pickup":          cls._handle_select_pickup,
-            "provide_address":        cls._handle_provide_address,
-            "change_address":         cls._handle_change_address,
-            "confirm_order":          cls._handle_confirm_order,
-            "cancel_order":           cls._handle_cancel_order,
-            "cancel_existing_order":  cls._handle_cancel_existing_order,
-            "yes_with_modification":  cls._handle_yes_with_modification,
-            "edit_cart":              cls._handle_edit_cart,
-            "repeat_last_order":      cls._handle_repeat_last_order,
-            "budget_request":         cls._handle_budget_request,
-            "group_meal_request":     cls._handle_group_meal_request,
-            "vague_request":          cls._handle_vague_request,
-            "ask_recommendation":     cls._handle_recommendation,
-            "view_menu":              cls._handle_view_menu,
-            "ask_price":              cls._handle_ask_price,
-            "ask_help":               cls._handle_help,
-            "complaint":              cls._handle_complaint,
-            "goodbye":                cls._handle_goodbye,
-            "order_status":           cls._handle_order_status,
-            "unrelated_item":         cls._handle_unrelated,
-            "service_booking":        cls._handle_service_booking,
-            "unclear_in_confirmation": cls._handle_unclear_in_confirmation,
-            "user_name_update":       cls._handle_user_name_update,
-            "stock_check":            cls._handle_stock_check,
-            "reject_upsell":          cls._handle_reject_upsell,
-            "reject":                 cls._handle_pending_no,
-            "retry_order":            cls._handle_retry_order,
-            "ambiguous_selection":    cls._handle_ambiguous_selection,
-            "inquire_product":        cls._handle_inquire_product,
-            "unrecognizable_fallback": cls._handle_unrecognizable,
-            "frustration":            cls._handle_help,
-        }
-        handler = handler_map.get(ctx.intent, cls._handle_unknown)
-        return handler(ctx)
+        logger.error("[LEGACY ROUTER] CRITICAL: _route called! This flow is disabled.")
+        raise Exception("[LEGACY ROUTER] _route is disabled. Use GuidedConversationEngine instead.")
 
     # ── Handlers ──────────────────────────────────────────────────────────────
 
@@ -548,19 +331,60 @@ class RouterEngine:
         
         clean_hint = clean_hint.strip().capitalize()[:100]
         
-        inquiry = models.PendingInquiry(
+        # Legacy PendingRequest for backwards-compatibility
+        inquiry = models.PendingRequest(
             shop_id=ctx.shop_id,
             customer_name=ctx.mem.profile.customer_name or "Customer",
             customer_phone=ctx.customer_phone,
-            product_requested=clean_hint,
-            message_text=ctx.message,
-            status="new"
+            product_name=clean_hint,
+            customer_message=ctx.message,
+            request_type="customer"
         )
+        ctx.db.add(inquiry)
+        
+        # CRM ConversationSession integration
+        from datetime import datetime, timezone
+        active_session = ctx.db.query(models.ConversationSession).filter(
+            models.ConversationSession.shop_id == ctx.shop_id,
+            models.ConversationSession.customer_phone == ctx.customer_phone,
+            models.ConversationSession.status.in_(["NEW", "ONGOING", "WAITING_CUSTOMER"])
+        ).first()
+        
         try:
-            ctx.db.add(inquiry)
+            if not active_session:
+                from .guided_conversation_engine import get_auto_category
+                inq_num = models.ConversationSession.generate_unique_number(ctx.db)
+                category_id = get_auto_category(ctx.db, ctx.shop_id, ctx.customer_phone, "INQUIRY")
+                active_session = models.ConversationSession(
+                    shop_id=ctx.shop_id,
+                    customer_name=ctx.mem.profile.customer_name or "Customer",
+                    customer_phone=ctx.customer_phone,
+                    status="NEW",
+                    inquiry_number=inq_num,
+                    conversation_type="INQUIRY",
+                    category_id=category_id
+                )
+                ctx.db.add(active_session)
+                ctx.db.flush()
+            else:
+                active_session.status = "NEW"
+                
+            new_msg = models.ConversationMessage(
+                session_id=active_session.id,
+                sender_type="CUSTOMER",
+                message=f"Product Inquiry: {clean_hint}\nMessage: {ctx.message}"
+            )
+            ctx.db.add(new_msg)
+            active_session.updated_at = datetime.now(timezone.utc)
+            active_session.last_message_at = datetime.now(timezone.utc)
             ctx.db.commit()
-        except Exception:
+            
+            from .sse import broadcast_event
+            broadcast_event(ctx.shop_id, "conversation_updated")
+        except Exception as e:
             ctx.db.rollback()
+            import logging
+            logging.getLogger("levix.router").error(f"[ROUTER INQUIRY ERROR] {e}")
             
         ctx.mem.session.pending_inquiry_product = None
         ConversationEngine.transition(ctx.db, ctx.session, "browsing")
@@ -830,151 +654,8 @@ class RouterEngine:
 
     @staticmethod
     def _handle_confirm_order(ctx):
-        # Phase 3 YES/NO control logic: if yes but no pending state and cart empty
-        if not ctx.mem.session.cart and ctx.session.category not in ("awaiting_confirmation", "awaiting_clear_confirm", "awaiting_yes_no"):
-            return "I'm here \U0001f60a What would you like to order?"
-
-        cart          = ctx.mem.session.cart
-        delivery_mode = ctx.mem.session.delivery_mode or "pickup"
-        address       = ctx.mem.session.delivery_address or ""
-        summary       = OrderEngine.cart_summary(cart)
-        fee           = OrderEngine.delivery_fee(summary.total, ctx.shop_settings) if delivery_mode == "delivery" else 0
-        total         = round(summary.total + fee, 2)
-
-        # FAIL 5.5: Duplicate order protection (within 60 seconds)
-        if ctx.mem.session.last_order_time:
-            last_time = datetime.fromisoformat(ctx.mem.session.last_order_time)
-            if (datetime.now(timezone.utc) - last_time).total_seconds() < 60:
-                if ctx.intent != "pending_yes":
-                    ctx.mem.session.pending_action_type = "confirm_duplicate"
-                    ConversationEngine.transition(ctx.db, ctx.session, "awaiting_yes_no")
-                    return "Looks like a duplicate order. Confirm? *(yes / no)*"
-
-        vr2 = ValidationEngine.checkout_ready(cart, delivery_mode, address, total)
-        if not vr2:
-            return f"Almost there! {vr2.reason} \U0001f60a"
-
-        # Check for customer name issue (P0 FIX 1 dashboard fix)
-        cust_name = ctx.mem.profile.customer_name or ""
-        if not cust_name.strip() or cust_name.strip().lower() in ("vip", "customer", "unknown", "guest"):
-            logger.warning(f"Order attempted with null customer identity for phone {ctx.customer_phone}")
-            ConversationEngine.transition(ctx.db, ctx.session, "onboarding")
-            ctx.mem.session.onboarding_step = "collect_name"
-            return "I need a name for the order \U0001f60a What's your name?"
-
-        try:
-            order_number = _gen_order_number() # 5 digit
-            booking_ref = _gen_booking_id() # Change 6: LEV-XXXXXXXX
-            order = models.Order(
-                shop_id       = ctx.shop_id,
-                booking_id    = booking_ref,
-                order_id      = order_number,
-                customer_name = cust_name,
-                phone         = ctx.customer_phone,
-                address       = address if delivery_mode == "delivery" else "PICKUP",
-                product       = "; ".join(f"{i['qty']}x {i['name']}" for i in summary.items),
-                quantity      = sum(i["qty"] for i in summary.items),
-                unit_price    = summary.total,
-                total_amount  = total,
-                status        = "PENDING",
-            )
-            ctx.db.add(order)
-            ctx.db.commit()
-            ctx.db.refresh(order)
-
-            ctx.mem.record_order(ctx.db, summary.items, total)
-            ctx.mem.note_order_completed(order.id)
-            
-            # Phase 2: Clear cart after order success
-            ctx.mem.session.cart = []
-            ctx.mem.session.pending_action_type = None
-            ctx.mem.session.pending_payload = None
-
-            try:
-                SalesEngine.create_lead(ctx.db, ctx.shop_id, ctx.session, message=str(summary.items), intent="ORDER")
-            except Exception as e:
-                logger.warning(f"[ROUTER] Lead skipped: {e}")
-
-            ConversationEngine.transition(ctx.db, ctx.session, "completed")
-
-            reply_lines = [
-                f"\U0001f389 *Order Placed!*",
-                f"Booking ID: *{booking_ref}*",
-                f"Order ID: *#{order_number}*",
-                f"Status: *PENDING*"
-            ]
-            if delivery_mode == "delivery":
-                reply_lines.append(f"\U0001f4cd Delivering to: _{address}_")
-            else:
-                reply_lines.append(f"\U0001f3ea Pickup from store")
-            reply_lines.append(f"Total: *\u20b9{total:.0f}*")
-            reply_lines.append("\nWe'll notify you when it's on the way!" if delivery_mode == "delivery" else "\nSee you soon!")
-
-            # Bug 7 fix: Push to dashboard live feed
-            try:
-                from ..routes.sse import broadcast_event
-                import json
-                broadcast_event(ctx.shop_id, "new_order", json.dumps({
-                    "order_id": order_number,
-                    "booking_ref": booking_ref,
-                    "phone": ctx.customer_phone,
-                    "total": float(total),
-                    "status": "PENDING",
-                    "items": summary.items,
-                }))
-            except Exception as sse_err:
-                logger.warning(f"[ROUTER] SSE broadcast failed: {sse_err}")
-
-            return MessageFormatter.order_confirmed_full(
-                booking_ref=booking_ref,
-                order_number=order_number,
-                delivery_mode=delivery_mode,
-                address=address,
-                items=summary.items,
-                total=total,
-            )
-
-        except Exception as exc:
-            import traceback as _tb
-            print(f"[LEVIX ERROR] DB write failed in _handle_confirm_order: {_tb.format_exc()}")
-            logger.error(f"[ROUTER] DB write failed: {exc}\n{_tb.format_exc()}")
-            ctx.db.rollback()
-            
-            # Task 2: Admin Alerting
-            try:
-                from datetime import timedelta
-                ten_mins_ago = datetime.now(timezone.utc) - timedelta(minutes=10)
-                recent_fails = ctx.db.query(models.AdminAlert).filter(
-                    models.AdminAlert.shop_id == ctx.shop_id,
-                    models.AdminAlert.alert_type == "order_failure_burst",
-                    models.AdminAlert.created_at >= ten_mins_ago
-                ).count()
-                
-                if recent_fails >= 2: # This will be the 3rd fail
-                    alert = models.AdminAlert(
-                        shop_id=ctx.shop_id,
-                        alert_type="order_failure_burst",
-                        failure_count=recent_fails + 1,
-                        details={"last_error": str(exc), "phone": ctx.customer_phone}
-                    )
-                    ctx.db.add(alert)
-                    ctx.db.commit()
-            except Exception as alert_err:
-                logger.warning(f"[ROUTER] Failed to create AdminAlert: {alert_err}")
-
-            # Gap 5: Retry logic
-            ctx.mem.session.retry_payload = {
-                "delivery_mode": delivery_mode,
-                "address": address,
-                "cart": cart,
-                "total": total
-            }
-            ctx.mem.session.retry_count = (ctx.mem.session.retry_count or 0) + 1
-            
-            if ctx.mem.session.retry_count > 3:
-                return "We're having technical issues placing your order. \U0001f614 Please contact support directly or try again later."
-                
-            return "Something went wrong on our end while saving your order. Your cart is safe \u2014 reply *retry* to try again."
+        logger.error(f"[LEGACY ROUTER] CRITICAL: Legacy _handle_confirm_order called! This flow is disabled. State: {ctx.session.category if ctx.session else 'None'}")
+        raise Exception("[LEGACY ROUTER] _handle_confirm_order is disabled. Use GuidedConversationEngine instead.")
 
     @staticmethod
     def _handle_cancel_order(ctx):

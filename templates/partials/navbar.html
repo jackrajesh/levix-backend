@@ -1,0 +1,107 @@
+<nav class="navbar">
+    <div class="nav-container">
+        <a href="/" class="logo-brand logo-light" aria-label="LEVIX home"><span class="logo-text">LEVI</span><span class="logo-x">X</span></a>
+        <div class="nav-menu" id="nav-menu">
+            <a href="/" class="nav-link" data-path="/">Home</a>
+            <a href="/pricing" class="nav-link" data-path="/pricing">Pricing</a>
+            <a href="/about" class="nav-link" data-path="/about">About</a>
+            <a href="/founder" class="nav-link" data-path="/founder">Founder</a>
+            <a href="/contact" class="nav-link" data-path="/contact">Contact</a>
+            <button type="button" class="btn-install" id="install-app-btn" hidden>Install App</button>
+            <a href="/login" class="btn-signin">Sign In</a>
+        </div>
+        <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu" aria-expanded="false" onclick="toggleNavMenu()">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+    </div>
+</nav>
+
+<script>
+    function toggleNavMenu(forceOpen) {
+        var menu = document.getElementById("nav-menu");
+        var toggle = document.getElementById("nav-toggle");
+        if (!menu || !toggle) return;
+
+        var isOpen = typeof forceOpen === "boolean" ? forceOpen : !menu.classList.contains("open");
+        menu.classList.toggle("open", isOpen);
+        toggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    }
+
+    // Dynamic navbar state + stable mobile interactions
+    document.addEventListener("DOMContentLoaded", function() {
+        var currentPath = window.location.pathname;
+        var currentHash = window.location.hash;
+        if (currentPath.length > 1 && currentPath.endsWith("/")) {
+            currentPath = currentPath.slice(0, -1);
+        }
+
+        var links = document.querySelectorAll(".nav-menu .nav-link");
+        links.forEach(function(link) { link.classList.remove("active"); });
+
+        var activeSelector = '.nav-menu a[data-path="/"]';
+        if (currentPath === "/about-levix" || currentPath === "/about") {
+            activeSelector = '.nav-menu a[data-path="/about"]';
+        } else if (currentPath && currentPath !== "/") {
+            activeSelector = '.nav-menu a[data-path="' + currentPath + '"]';
+        }
+
+        var activeLink = document.querySelector(activeSelector);
+        if (activeLink) activeLink.classList.add("active");
+
+        document.querySelectorAll(".nav-menu a, .nav-menu button").forEach(function(item) {
+            item.addEventListener("click", function() { toggleNavMenu(false); });
+        });
+
+        document.addEventListener("click", function(event) {
+            var menu = document.getElementById("nav-menu");
+            var toggle = document.getElementById("nav-toggle");
+            if (!menu || !toggle) return;
+            if (!menu.classList.contains("open")) return;
+            if (menu.contains(event.target) || toggle.contains(event.target)) return;
+            toggleNavMenu(false);
+        });
+
+        window.addEventListener("resize", function() {
+            if (window.innerWidth > 768) toggleNavMenu(false);
+        });
+    });
+</script>
+<script>
+    (() => {
+        let deferredInstallPrompt = null;
+        const installBtn = document.getElementById("install-app-btn");
+        if (!installBtn) return;
+
+        const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone;
+        if (isStandalone) {
+            installBtn.hidden = true;
+            return;
+        }
+
+        window.addEventListener("beforeinstallprompt", (event) => {
+            event.preventDefault();
+            deferredInstallPrompt = event;
+            installBtn.hidden = false;
+        });
+
+        window.addEventListener("appinstalled", () => {
+            deferredInstallPrompt = null;
+            installBtn.hidden = true;
+        });
+
+        installBtn.addEventListener("click", async () => {
+            if (!deferredInstallPrompt) return;
+            installBtn.disabled = true;
+            try {
+                deferredInstallPrompt.prompt();
+                await deferredInstallPrompt.userChoice;
+            } finally {
+                deferredInstallPrompt = null;
+                installBtn.hidden = true;
+                installBtn.disabled = false;
+            }
+        });
+    })();
+</script>

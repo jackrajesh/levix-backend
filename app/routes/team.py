@@ -11,7 +11,7 @@ router = APIRouter(prefix="/api/team", tags=["Team"])
 
 from .auth import get_current_shop, UserIdentity, require_permission
 
-def _migrate_legacy_permissions(owner_id: int, db: Session) -> None:
+def _migrate_legacy_permissions(owner_id: str, db: Session) -> None:
     updated = False
     members = db.query(TeamMember).filter(TeamMember.shop_id == owner_id).all()
     for member in members:
@@ -228,7 +228,7 @@ async def add_team_member(data: Dict, db: Session = Depends(get_db), identity: U
 
 
 @router.put("/members/{member_id}")
-async def update_team_member(member_id: int, data: Dict, db: Session = Depends(get_db), identity: UserIdentity = Depends(require_permission("team_edit_member"))):
+async def update_team_member(member_id: str, data: Dict, db: Session = Depends(get_db), identity: UserIdentity = Depends(require_permission("team_edit_member"))):
     owner = identity.shop
 
     member = db.query(TeamMember).filter(
@@ -300,7 +300,7 @@ async def update_team_member(member_id: int, data: Dict, db: Session = Depends(g
 
 
 @router.patch("/members/{member_id}/toggle-status")
-async def toggle_member_status(member_id: int, db: Session = Depends(get_db), identity: UserIdentity = Depends(require_permission("team_edit_member"))):
+async def toggle_member_status(member_id: str, db: Session = Depends(get_db), identity: UserIdentity = Depends(require_permission("team_edit_member"))):
     owner = identity.shop
 
     member = db.query(TeamMember).filter(
@@ -335,7 +335,7 @@ async def toggle_member_status(member_id: int, db: Session = Depends(get_db), id
 
 
 @router.patch("/members/{member_id}/reset-password")
-async def reset_member_password(member_id: int, data: Dict, db: Session = Depends(get_db), identity: UserIdentity = Depends(require_permission("team_edit_member"))):
+async def reset_member_password(member_id: str, data: Dict, db: Session = Depends(get_db), identity: UserIdentity = Depends(require_permission("team_edit_member"))):
     owner = identity.shop
 
     member = db.query(TeamMember).filter(
@@ -356,7 +356,7 @@ async def reset_member_password(member_id: int, data: Dict, db: Session = Depend
 
 
 @router.delete("/members/{member_id}")
-async def delete_team_member(member_id: int, db: Session = Depends(get_db), identity: UserIdentity = Depends(require_permission("team_remove_member"))):
+async def delete_team_member(member_id: str, db: Session = Depends(get_db), identity: UserIdentity = Depends(require_permission("team_remove_member"))):
     owner = identity.shop
 
     member = db.query(TeamMember).filter(
@@ -389,7 +389,7 @@ async def delete_team_member(member_id: int, db: Session = Depends(get_db), iden
     return {"message": "Member deleted"}
 
 @router.post("/members/{member_id}/impersonate")
-async def impersonate_member(member_id: int, db: Session = Depends(get_db), identity: UserIdentity = Depends(require_permission("owner_impersonation"))):
+async def impersonate_member(member_id: str, db: Session = Depends(get_db), identity: UserIdentity = Depends(require_permission("owner_impersonation"))):
     owner = identity.shop
     if identity.user_type != 'owner':
         raise HTTPException(status_code=403, detail="Only owners can switch to staff accounts")

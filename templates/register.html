@@ -1,313 +1,329 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-IN" data-theme="light">
 <head>
-    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-MC7H8XFN47"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-
       gtag('config', 'G-MC7H8XFN47');
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - Levix</title>
+    <meta name="theme-color" content="#1a56db">
+    <title>Create Your Shop – LEVIX</title>
+    <meta name="description" content="Join LEVIX and start managing your shop's orders, inventory, and customers with ease. Built for Indian local businesses.">
+    <link rel="icon" type="image/png" href="/static/favicon.png?v=20260528b">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Theme system (dark/light mode prep) -->
+    <script src="/static/theme.js"></script>
+    <!-- Multilingual architecture prep -->
+    <script src="/static/i18n.js" defer></script>
     <style>
         :root {
-            --bg-color: #f4f4f9;
-            --container-bg: #ffffff;
-            --text-main: #333333;
-            --text-muted: #666666;
-            --primary: #000000;
-            --primary-hover: #333333;
-            --border: #e0e0e0;
-            --border-focus: #000000;
-            --error: #d32f2f;
-            --success: #388e3c;
-            --transition: all 0.3s ease;
+            --primary: #1a56db;
+            --primary-hover: #1648b8;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --border: #e2e8f0;
+            --text: #1e293b;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --radius: 12px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
 
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg-color: #121212;
-                --container-bg: #1e1e1e;
-                --text-main: #ffffff;
-                --text-muted: #a0a0a0;
-                --primary: #ffffff;
-                --primary-hover: #e0e0e0;
-                --border: #333333;
-                --border-focus: #ffffff;
-                --error: #f44336;
-                --success: #4caf50;
-            }
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
-            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            -webkit-font-smoothing: antialiased;
         }
 
-        .container {
-            background-color: var(--container-bg);
-            padding: 2.5rem;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        .register-card {
+            background: var(--surface);
             width: 100%;
-            max-width: 400px;
+            max-width: 480px;
+            padding: 40px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .logo-wrapper {
             text-align: center;
-            transition: var(--transition);
+            margin-bottom: 32px;
         }
 
-        @media (prefers-color-scheme: dark) {
-            .container {
-                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-            }
+        .logo-brand{display:inline-flex;align-items:baseline;gap:0;text-decoration:none;font-family:'Inter',system-ui,sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:-0.05em;font-size:1.5rem;}
+        .logo-light{color:#0f172a;}
+        .logo-dark{color:#ffffff;}
+        .logo-x{color:#2563eb;font-weight:900;}
+
+        .card-header {
+            text-align: center;
+            margin-bottom: 32px;
         }
 
-        h1 {
-            font-size: 1.75rem;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
+        .card-header h1 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
         }
 
-        p.subtitle {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            margin-bottom: 2rem;
+        .card-header p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
         }
 
         .form-group {
-            margin-bottom: 1.25rem;
-            text-align: left;
+            margin-bottom: 20px;
         }
 
-        label {
+        .form-label {
             display: block;
-            margin-bottom: 0.5rem;
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: var(--text-muted);
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
         }
 
-        input {
+        .form-input {
             width: 100%;
-            padding: 0.75rem;
+            padding: 12px 16px;
+            background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 6px;
-            background-color: transparent;
-            color: var(--text-main);
+            border-radius: 8px;
+            font-family: inherit;
             font-size: 1rem;
-            transition: var(--transition);
+            color: var(--text);
             outline: none;
+            transition: all 0.2s;
         }
 
-        input:focus {
-            border-color: var(--border-focus);
-            box-shadow: 0 0 0 1px var(--border-focus);
+        .form-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.1);
         }
 
-        .btn {
+        .btn-submit {
             width: 100%;
-            padding: 0.85rem;
-            background-color: var(--primary);
-            color: var(--container-bg);
+            padding: 14px;
+            background: var(--primary);
+            color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
+            font-family: inherit;
             font-size: 1rem;
-            font-weight: 500;
+            font-weight: 700;
             cursor: pointer;
-            transition: var(--transition);
-            margin-top: 1rem;
+            transition: background 0.2s;
+            margin-top: 10px;
             display: flex;
-            justify-content: center;
             align-items: center;
-            gap: 0.5rem;
+            justify-content: center;
+            gap: 10px;
         }
 
-        .btn:hover:not(:disabled) {
-            background-color: var(--primary-hover);
+        .btn-submit:hover {
+            background: var(--primary-hover);
         }
 
-        .btn:disabled {
+        .btn-submit:disabled {
             opacity: 0.7;
             cursor: not-allowed;
         }
 
-        .message {
-            margin-top: 1.5rem;
-            padding: 0.75rem;
-            border-radius: 6px;
+        .status-msg {
+            margin-top: 24px;
+            padding: 12px 16px;
+            border-radius: 8px;
             font-size: 0.9rem;
+            font-weight: 600;
             display: none;
-            opacity: 0;
-            transition: opacity 0.3s ease;
         }
 
-        .message.show {
-            display: block;
-            opacity: 1;
+        .status-error { background: #fef2f2; border: 1px solid #fee2e2; color: #991b1b; }
+        .status-success { background: #f0fdf4; border: 1px solid #dcfce7; color: #166534; }
+
+        .card-footer {
+            margin-top: 32px;
+            text-align: center;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
         }
 
-        .message.error {
-            background-color: rgba(244, 67, 54, 0.1);
-            color: var(--error);
-            border: 1px solid rgba(244, 67, 54, 0.2);
-        }
-
-        .message.success {
-            background-color: rgba(76, 175, 80, 0.1);
-            color: var(--success);
-            border: 1px solid rgba(76, 175, 80, 0.2);
-        }
-        
-        .loader {
-            width: 16px;
-            height: 16px;
-            border: 2px solid var(--container-bg);
-            border-bottom-color: transparent;
-            border-radius: 50%;
-            display: inline-block;
-            box-sizing: border-box;
-            animation: rotation 1s linear infinite;
-        }
-
-        @keyframes rotation {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .login-link {
-            margin-top: 1.5rem;
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
-        
-        .login-link a {
-            color: #007bff; /* Standard blue link color */
+        .card-footer a {
+            color: var(--primary);
             text-decoration: none;
-            font-weight: 500;
-            cursor: pointer;
+            font-weight: 600;
         }
-        
-        .login-link a:hover {
+
+        .card-footer a:hover {
             text-decoration: underline;
+        }
+
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loading .spinner { display: block; }
+        .loading .btn-text { display: none; }
+
+        @media (max-width: 480px) {
+            .register-card {
+                padding: 30px 20px;
+                box-shadow: none;
+                border: none;
+                background: transparent;
+            }
+            body { background: var(--surface); padding-top: 20px; }
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>Create Account</h1>
-        <p class="subtitle">Join Levix to manage your shop</p>
+<script>
+    // --- AUTH GUARD ---
+    if (localStorage.getItem('token')) {
+        console.log("[AUTH] Token found, auto-redirecting to dashboard...");
+        window.location.href = '/dashboard';
+    }
+</script>
 
-        <form id="registerForm">
-            <div class="form-group">
-                <label for="shop_name">Shop Name</label>
-                <input type="text" id="shop_name" name="shop_name" required>
-            </div>
-
-            <div class="form-group">
-                <label for="owner_name">Owner Name</label>
-                <input type="text" id="owner_name" name="owner_name" required>
-            </div>
-
-            <div class="form-group">
-                <label for="email">Email Address</label>
-                <input type="email" id="email" name="email" required>
-            </div>
-
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-
-            <button type="submit" id="submitBtn" class="btn">
-                <span id="btnText">Register</span>
-            </button>
-        </form>
-
-        <div id="statusMessage" class="message"></div>
-        
-        <div class="login-link">
-            Already have an account? <a href="/login">Sign In</a>
-        </div>
+<div class="register-card">
+    <div class="logo-wrapper">
+        <a href="/" class="logo-brand logo-light"><span class="logo-text">LEVI</span><span class="logo-x">X</span></a>
     </div>
 
-    <script>
-        document.getElementById('registerForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const shop_name = document.getElementById('shop_name').value.trim();
-            const owner_name = document.getElementById('owner_name').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
-            
-            const submitBtn = document.getElementById('submitBtn');
-            const btnText = document.getElementById('btnText');
-            const statusMessage = document.getElementById('statusMessage');
+    <div class="card-header">
+        <h1>Create Your Shop</h1>
+        <p>Start managing your business today</p>
+    </div>
 
-            // Basic validation
-            if (!shop_name || !owner_name || !email || !password) {
-                showMessage('All fields are required.', 'error');
-                return;
-            }
+    <form id="register-form">
+        <div class="form-group">
+            <label class="form-label" for="shop_name">Shop Name</label>
+            <input type="text" id="shop_name" class="form-input" placeholder="e.g. Rahul Kirana Store" required maxlength="100">
+        </div>
 
-            // Set loading state
-            submitBtn.disabled = true;
-            btnText.innerHTML = '<span class="loader"></span> Registering...';
-            statusMessage.classList.remove('show');
+        <div class="form-group">
+            <label class="form-label" for="owner_name">Owner Name</label>
+            <input type="text" id="owner_name" class="form-input" placeholder="Your full name" required maxlength="100">
+        </div>
 
-            const payload = {
-                shop_name: shop_name,
-                owner_name: owner_name,
-                email: email,
-                password: password
-            };
+        <div class="form-group">
+            <label class="form-label" for="email">Email Address</label>
+            <input type="email" id="email" class="form-input" placeholder="you@example.com" required autocomplete="email">
+        </div>
 
-            try {
-                const response = await fetch('/register', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
-                });
+        <div class="form-group">
+            <label class="form-label" for="phone_number">Mobile Number</label>
+            <input type="tel" id="phone_number" class="form-input" placeholder="10-digit mobile number" required autocomplete="tel" maxlength="10" pattern="[0-9]{10}" inputmode="numeric">
+        </div>
 
-                const data = await response.json().catch(() => null);
+        <div class="form-group">
+            <label class="form-label" for="password">Password</label>
+            <input type="password" id="password" class="form-input" placeholder="Create a strong password" required autocomplete="new-password" minlength="8">
+        </div>
 
-                if (response.ok) {
-                    showMessage(data?.message || 'Registration successful! You can now log in.', 'success');
-                    document.getElementById('registerForm').reset();
-                } else {
-                    showMessage(data?.detail || data?.message || 'Registration failed. Please try again.', 'error');
-                }
-            } catch (error) {
-                showMessage('Network error. Please check your connection and try again.', 'error');
-            } finally {
-                // Reset button state
-                submitBtn.disabled = false;
-                btnText.textContent = 'Register';
-            }
-        });
+        <button type="submit" class="btn-submit" id="submit-btn">
+            <span class="spinner"></span>
+            <span class="btn-text">Register My Shop</span>
+        </button>
 
-        function showMessage(text, type) {
-            const statusMessage = document.getElementById('statusMessage');
-            statusMessage.textContent = text;
-            statusMessage.className = 'message ' + type + ' show';
+        <div id="status-msg" class="status-msg"></div>
+    </form>
+
+    <div class="card-footer">
+        Already have an account? <a href="/login">Sign In</a>
+    </div>
+</div>
+
+<script>
+    const form = document.getElementById('register-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const statusMsg = document.getElementById('status-msg');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const shop_name = document.getElementById('shop_name').value.trim();
+        const owner_name = document.getElementById('owner_name').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const phone_number = document.getElementById('phone_number').value.trim();
+        const password = document.getElementById('password').value;
+
+        // Client-side phone validation
+        if (!/^[0-9]{10}$/.test(phone_number)) {
+            statusMsg.textContent = 'Please enter a valid 10-digit mobile number.';
+            statusMsg.className = 'status-msg status-error';
+            statusMsg.style.display = 'block';
+            return;
         }
-    </script>
+
+        // Reset state
+        statusMsg.style.display = 'none';
+        statusMsg.className = 'status-msg';
+        submitBtn.classList.add('loading');
+        submitBtn.disabled = true;
+
+        try {
+            const response = await fetch('/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    shop_name,
+                    owner_name,
+                    email,
+                    phone_number,
+                    password
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                statusMsg.textContent = 'Account created successfully! Redirecting...';
+                statusMsg.className = 'status-msg status-success';
+                statusMsg.style.display = 'block';
+                
+                // Optional: Auto-login or redirect
+                setTimeout(() => {
+                    window.location.href = '/login?registered=true';
+                }, 1500);
+            } else {
+                throw new Error(data.detail || data.message || 'Registration failed');
+            }
+        } catch (err) {
+            statusMsg.textContent = err.message;
+            statusMsg.className = 'status-msg status-error';
+            statusMsg.style.display = 'block';
+            submitBtn.classList.remove('loading');
+            submitBtn.disabled = false;
+        }
+    });
+</script>
+
 </body>
 </html>

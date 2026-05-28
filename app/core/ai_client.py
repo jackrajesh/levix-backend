@@ -61,8 +61,8 @@ class AIClient:
         return pool
 
     @classmethod
-    def generate_content(cls, contents: str, config: Dict[str, Any] = None, system_instruction: str = None) -> str:
-        """ONE SOURCE OF TRUTH."""
+    def generate_content(cls, contents: Any, config: Dict[str, Any] = None, system_instruction: str = None) -> str:
+        """ONE SOURCE OF TRUTH (Supports Multimodal)."""
         config = config or {}
         pool = cls._get_priority_pool()
         now = time.time()
@@ -87,7 +87,13 @@ class AIClient:
                 elif model_id == "local-engine":
                     res = cls._try_local_engine(contents, config)
                 else:
-                    res = cls._try_openrouter(model_id, contents, config, system_instruction)
+                    # OpenRouter and Local don't support multimodal in this wrapper yet
+                    if isinstance(contents, list):
+                        # Filter to text only for now if list
+                        text_only = " ".join([c for c in contents if isinstance(c, str)])
+                        res = cls._try_openrouter(model_id, text_only, config, system_instruction)
+                    else:
+                        res = cls._try_openrouter(model_id, contents, config, system_instruction)
                 
                 if res:
                     elapsed = int((time.time() - start_time) * 1000)
@@ -101,7 +107,6 @@ class AIClient:
                 err_msg = str(e)
                 all_errors.append(f"[{model_id}]: {err_msg}")
                 logger.warning(f"FAIL_PROVIDER: {model_id} ({err_msg[:80]})")
-                logger.info(f"FAILOVER_USED: Switching to next provider in pool")
                 
                 if any(x in err_msg.lower() for x in ["429", "limit", "exhausted", "quota"]):
                     cls._failed_models[model_id] = now + cls._cooldown_period
@@ -109,36 +114,35 @@ class AIClient:
                     cls._failed_models[model_id] = now + 60 
 
         logger.error(f"CHAIN_EXHAUSTED: All providers failed. Errors: {all_errors}")
-        return cls._smart_commerce_fallback(contents, config.get("intent", "UNKNOWN"))
+        return cls._smart_commerce_fallback(str(contents), config.get("intent", "UNKNOWN"))
 
     @classmethod
-    def _try_gemini(cls, contents: str, config: Dict[str, Any], system_instruction: str) -> Optional[str]:
+    def _try_gemini(cls, contents: Any, config: Dict[str, Any], system_instruction: str) -> Optional[str]:
         client = cls.get_client()
         if not client: return None
         
         try:
             from google.genai import types
             
-            # Rebuild config to be strictly compliant with new SDK types
-            # Note: response_mime_type should be 'application/json' (literal)
             gen_config = {
                 'temperature': config.get('temperature', 0.1),
                 'max_output_tokens': config.get('max_output_tokens', 500)
             }
             
-            # Only add response_mime_type if specifically requested
             if config.get('response_mime_type') == 'application/json':
                 gen_config['response_mime_type'] = 'application/json'
             
-            # System instruction handling for new SDK
+            # contents can be str or list of parts (str or Part)
+            logger.info(f"[GEMINI] Generating content with model: gemini-2.5-flash")
             response = client.models.generate_content(
-                model="gemini-2.0-flash",
+                model="gemini-2.5-flash",
                 contents=contents,
                 config=types.GenerateContentConfig(
                     system_instruction=system_instruction,
                     **gen_config
                 )
             )
+            logger.info(f"[GEMINI] Response received successfully")
             return response.text.strip() if response.text else None
         except Exception as e:
             # Re-raise to let generate_content handle failover
@@ -203,6 +207,4 @@ class AIClient:
         failed_count = len([m for m, t in cls._failed_models.items() if t > now])
         return f"AI Status: {cls._status} | Active: {active} | Failed: {failed_count}"
 
-# Auto-Boot
-if not os.getenv("SKIP_AI_INIT"):
-    AIClient.initialize()
+# Selective initialization handled in main.py lifespan

@@ -10,14 +10,17 @@ from fastapi.responses import StreamingResponse
 
 from .. import models, schemas
 from ..database import get_db
-from .auth import get_current_shop, UserIdentity, require_permission
+from .auth import get_current_shop, UserIdentity, require_permission, require_active_subscription
 from ..services.product_service import sync_stock_status
 from ..services.logger import LoggerService
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/sales", tags=["sales"])
 
 @router.post("/set")
-def set_sales(req: schemas.SalesSetRequest, identity: UserIdentity = Depends(require_permission("sales_create")), db: Session = Depends(get_db)):
+def set_sales(req: schemas.SalesSetRequest, identity: UserIdentity = Depends(require_permission("sales_create")), _sub: UserIdentity = Depends(require_active_subscription), db: Session = Depends(get_db)):
     current_shop = identity.shop
     if req.quantity < 0:
         raise HTTPException(status_code=400, detail="Quantity must be >= 0")
@@ -87,17 +90,6 @@ def set_sales(req: schemas.SalesSetRequest, identity: UserIdentity = Depends(req
             models.InventoryItem.shop_id == current_shop.id,
             sa_func.lower(models.InventoryItem.name) == product_name.lower()
         ).first()
-        
-        # Also check aliases
-        if not item:
-            alias_match = db.query(models.InventoryAlias).filter(
-                sa_func.lower(models.InventoryAlias.alias) == product_name.lower()
-            ).first()
-            if alias_match:
-                item = db.query(models.InventoryItem).filter(
-                    models.InventoryItem.id == alias_match.inventory_id, # Verified field name
-                    models.InventoryItem.shop_id == current_shop.id
-                ).first()
         
         if item:
             # Matched! Redirect to inventory sale logic
@@ -211,7 +203,7 @@ def set_sales(req: schemas.SalesSetRequest, identity: UserIdentity = Depends(req
     return {"status": "success", "message": "Sale recorded"}
 
 @router.get("")
-def get_sales(start_date: Optional[str] = None, end_date: Optional[str] = None, identity: UserIdentity = Depends(require_permission("sales_create")), db: Session = Depends(get_db)):
+def get_sales(start_date: Optional[str] = None, end_date: Optional[str] = None, identity: UserIdentity = Depends(require_permission("sales_create")), _sub: UserIdentity = Depends(require_active_subscription), db: Session = Depends(get_db)):
     current_shop = identity.shop
     query = db.query(models.SalesRecord).options(
         joinedload(models.SalesRecord.inventory_item)
@@ -256,7 +248,7 @@ def get_sales(start_date: Optional[str] = None, end_date: Optional[str] = None, 
     return {"records": result, "totals": totals}
 
 @router.get("/export")
-def export_sales(start_date: Optional[str] = None, end_date: Optional[str] = None, identity: UserIdentity = Depends(require_permission("analytics_export")), db: Session = Depends(get_db)):
+def export_sales(start_date: Optional[str] = None, end_date: Optional[str] = None, identity: UserIdentity = Depends(require_permission("analytics_export")), _sub: UserIdentity = Depends(require_active_subscription), db: Session = Depends(get_db)):
     current_shop = identity.shop
     sales_resp = get_sales(start_date, end_date, identity, db)
     records = sales_resp["records"]
@@ -275,7 +267,7 @@ def export_sales(start_date: Optional[str] = None, end_date: Optional[str] = Non
     )
 
 @router.get("/export-excel")
-def export_sales_excel(start_date: Optional[str] = None, end_date: Optional[str] = None, identity: UserIdentity = Depends(require_permission("analytics_export")), db: Session = Depends(get_db)):
+def export_sales_excel(start_date: Optional[str] = None, end_date: Optional[str] = None, identity: UserIdentity = Depends(require_permission("analytics_export")), _sub: UserIdentity = Depends(require_active_subscription), db: Session = Depends(get_db)):
     current_shop = identity.shop
     """
     Professional Excel export for Sales History.
@@ -291,7 +283,14 @@ def export_sales_excel(start_date: Optional[str] = None, end_date: Optional[str]
             if 'id' in df.columns: df.drop(columns=['id'], inplace=True)
             if 'product_id' in df.columns: df.drop(columns=['product_id'], inplace=True)
             
-            df.columns = ["Product", "Date", "Quantity", "Unit Price", "Total Revenue"]
+            # Explicit rename by column name (safe against column order changes)
+            df.rename(columns={
+                "product_name": "Product",
+                "date": "Date",
+                "quantity": "Quantity",
+                "price": "Unit Price",
+                "revenue": "Total Revenue",
+            }, inplace=True)
             df.to_excel(writer, sheet_name='Sales History', index=False)
         else:
             pd.DataFrame([{"Message": "No sales records found"}]).to_excel(writer, index=False)
@@ -305,7 +304,7 @@ def export_sales_excel(start_date: Optional[str] = None, end_date: Optional[str]
     )
 
 @router.delete("/{sale_id}")
-def delete_sale(sale_id: int, identity: UserIdentity = Depends(require_permission("sales_delete")), db: Session = Depends(get_db)):
+def delete_sale(sale_id: str, identity: UserIdentity = Depends(require_permission("sales_delete")), _sub: UserIdentity = Depends(require_active_subscription), db: Session = Depends(get_db)):
     current_shop = identity.shop
     sale = db.query(models.SalesRecord).filter(
         models.SalesRecord.id == sale_id,
@@ -330,3 +329,77 @@ def delete_sale(sale_id: int, identity: UserIdentity = Depends(require_permissio
         severity="Warning"
     )
     return {"status": "success", "message": "Sale removed"}
+@router.post("/finalize")
+def finalize_sale(payload: dict, identity: UserIdentity = Depends(require_permission("sales_create")), _sub: UserIdentity = Depends(require_active_subscription), db: Session = Depends(get_db)):
+    """
+    Finalizes a retail sale with multiple items.
+    Deducts stock and records sales.
+    """
+    current_shop = identity.shop
+    items = payload.get("items", [])
+    if not items:
+        raise HTTPException(status_code=400, detail="Cart is empty")
+    
+    sale_date = datetime.now().date()
+    total_sale_amount = 0
+    recorded_items = []
+
+    for cart_item in items:
+        product_id = cart_item.get("product_id") or cart_item.get("id")
+        qty = int(cart_item.get("quantity", 0))
+        if qty <= 0: continue
+
+        # Lookup product
+        product = db.query(models.InventoryItem).filter(
+            models.InventoryItem.id == product_id,
+            models.InventoryItem.shop_id == current_shop.id
+        ).first()
+
+        if not product:
+            logger.warning(f"[FINALIZE] Product {product_id} not found for shop {current_shop.id}")
+            continue
+        
+        if product.quantity < qty:
+            raise HTTPException(status_code=400, detail=f"Insufficient stock for {product.name}. Available: {product.quantity}")
+
+        # Deduct stock
+        product.quantity -= qty
+        sync_stock_status(product, db)
+
+        # Record Sale
+        price_at_sale = float(cart_item.get("price", product.price))
+        total_item_amount = price_at_sale * qty
+        total_sale_amount += total_item_amount
+
+        # Check for existing record for same product on same day to update or create new
+        # For POS, we might want individual transaction records, but the existing schema seems to aggregate per day in some logic?
+        # Actually, SalesRecord has an ID, let's just create new records for each line item in this transaction.
+        new_record = models.SalesRecord(
+            shop_id=current_shop.id,
+            product_id=product.id,
+            product_name=product.name,
+            date=sale_date,
+            quantity=qty,
+            price=price_at_sale,
+            performed_by=identity.name,
+            user_type=identity.user_type
+        )
+        db.add(new_record)
+        recorded_items.append(f"{qty}x {product.name}")
+
+    db.commit()
+    
+    logger.info(f"[SALE FINALIZED] Shop: {current_shop.id} | Total: ₹{total_sale_amount} | Items: {len(recorded_items)}")
+    
+    LoggerService.log(
+        db, current_shop.id, identity, "Sales",
+        f"Completed sale: {', '.join(recorded_items)}",
+        action_type="sale_recorded",
+        severity="success",
+        new_values={
+            "total_amount": total_sale_amount,
+            "items_count": len(recorded_items)
+        }
+    )
+
+    return {"status": "success", "total_amount": total_sale_amount}

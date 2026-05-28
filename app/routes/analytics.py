@@ -3,11 +3,11 @@ import csv
 import io
 import os
 from decimal import Decimal
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
 
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import JSONResponse, StreamingResponse
-from sqlalchemy import func
+from sqlalchemy import func, case, Integer
 from sqlalchemy.orm import Session
 
 from .. import models
@@ -117,7 +117,25 @@ def _heuristic_insights(payload: Dict[str, Any]) -> list[str]:
     return [f"• {line}" for line in insights[:5]]
 
 
+SMART_INSIGHTS_ENABLED = False
+
+# ==============================================================================
+# FUTURE SMART INSIGHTS ARCHITECTURE PREPARATION:
+# The current live generation approach is temporarily paused to prevent 
+# realtime refresh recursion loops and excessive API consumption.
+#
+# Future Implementation Requirements:
+# 1. Scheduled AI Snapshots: Insights should be generated once daily via cron.
+# 2. Manual Generation: Provide a "Generate Insights" button with a cooldown.
+# 3. Cache-based Generation: Only regenerate if data drift exceeds X threshold.
+# 4. Quotas: Implement a shop-level monthly AI token quota.
+# 5. Background Processing: Move the LLM call to a background Celery/Redis queue.
+# ==============================================================================
+
 def _ai_insights(payload: Dict[str, Any], cache_key: str) -> list[str]:
+    if not SMART_INSIGHTS_ENABLED:
+        return ["• AI Smart Insights temporarily paused during realtime optimization.", "• Smart Insights will return after system stabilization.", "• Analytics numbers and metrics continue to update in realtime."]
+
     now = datetime.now(timezone.utc)
     cached = _AI_INSIGHT_CACHE.get(cache_key)
     if cached and (now - cached["created_at"]).total_seconds() < 1800:
@@ -205,7 +223,7 @@ def _bucket_key(dt_value: datetime | date, by: str) -> str:
 
 def _build_dashboard_payload(
     db: Session,
-    shop_id: int,
+    shop_id: str,
     start_date: date,
     end_date: date,
     compare: bool,
@@ -227,7 +245,7 @@ def _build_dashboard_payload(
 
     orders_rows = db.query(models.Order).filter(
         models.Order.shop_id == shop_id,
-        models.Order.status == "completed",
+        models.Order.status == "DELIVERED",
         models.Order.created_at >= start_dt,
         models.Order.created_at <= end_dt,
     ).all()
@@ -351,7 +369,7 @@ def _build_dashboard_payload(
             "product": row.product or "",
             "date": (row.created_at or datetime.now()).isoformat(),
             "amount": round(_safe_float(row.total_amount), 2),
-            "status": row.status or "pending",
+            "status": row.status or "PENDING",
         }
         for row in recent_sales
     ]
@@ -382,7 +400,7 @@ def _build_dashboard_payload(
         ).all()
         prev_orders = db.query(models.Order).filter(
             models.Order.shop_id == shop_id,
-            models.Order.status == "completed",
+            models.Order.status == "DELIVERED",
             models.Order.created_at >= prev_start_dt,
             models.Order.created_at <= prev_end_dt,
         ).count()
@@ -479,7 +497,7 @@ def _build_dashboard_payload(
     }
 
 
-def _build_basic_payload(db: Session, shop_id: int, start_date: date, end_date: date) -> Dict[str, Any]:
+def _build_basic_payload(db: Session, shop_id: str, start_date: date, end_date: date) -> Dict[str, Any]:
     sales_rows = db.query(models.SalesRecord).filter(
         models.SalesRecord.shop_id == shop_id,
         models.SalesRecord.date >= start_date,
@@ -663,12 +681,15 @@ def get_inventory_insights(start_date: Optional[str] = None, end_date: Optional[
         items = db.query(models.InventoryItem).filter(models.InventoryItem.shop_id == current_shop.id).all()
         item_stats = []
         
-        # Pre-calculate counts from LogEntry to avoid N+1 queries in loop
-        # But for limited inventory, a direct query is simpler to implement correctly
         for item in items:
             log_stats = db.query(
                 func.count(models.LogEntry.id),
-                func.sum(func.cast(models.LogEntry.status == 'out_of_stock', models.Integer)),
+                func.sum(
+                    case(
+                        (models.LogEntry.status == 'out_of_stock', 1),
+                        else_=0
+                    )
+                ),
                 func.max(models.LogEntry.timestamp),
                 func.min(models.LogEntry.timestamp)
             ).filter(
@@ -723,19 +744,24 @@ def get_inventory_insights(start_date: Optional[str] = None, end_date: Optional[
 def get_dashboard_counts(identity: UserIdentity = Depends(get_current_shop), db: Session = Depends(get_db)):
     """
     Lightweight endpoint for polling navigation badge counts.
+    Counts active CRM ConversationSessions (NEW, ONGOING, WAITING_CUSTOMER)
+    NOT legacy PendingRequests — those are the old AI Leads model.
     """
     current_shop = identity.shop
-    pending_inbox = db.query(models.PendingRequest).filter(
-        models.PendingRequest.shop_id == current_shop.id
+
+    # Count active CRM conversations (the Inbox tab now shows these)
+    active_inbox = db.query(models.ConversationSession).filter(
+        models.ConversationSession.shop_id == current_shop.id,
+        models.ConversationSession.status.in_(["NEW", "ONGOING", "WAITING_CUSTOMER"])
     ).count()
-    
+
     pending_orders = db.query(models.Order).filter(
         models.Order.shop_id == current_shop.id,
-        models.Order.status == "pending"
+        models.Order.status == "PENDING"
     ).count()
-    
+
     return {
-        "inbox": pending_inbox,
+        "inbox": active_inbox,
         "orders": pending_orders
     }
 

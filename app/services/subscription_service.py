@@ -5,7 +5,7 @@ from typing import List, Optional
 
 class SubscriptionService:
     @staticmethod
-    def get_shop_plan(db: Session, shop_id: int):
+    def get_shop_plan(db: Session, shop_id: str):
         sub = db.query(Subscription).filter(Subscription.shop_id == shop_id).first()
         if not sub:
             # Assign default Core Levix plan if not exists
@@ -34,11 +34,11 @@ class SubscriptionService:
         return sub
 
     @staticmethod
-    def get_activated_addons(db: Session, shop_id: int):
+    def get_activated_addons(db: Session, shop_id: str):
         return db.query(ShopAddon).filter(ShopAddon.shop_id == shop_id).all()
 
     @staticmethod
-    def has_addon(db: Session, shop_id: int, addon_name: str) -> bool:
+    def has_addon(db: Session, shop_id: str, addon_name: str) -> bool:
         addon = db.query(Addon).filter(Addon.name == addon_name).first()
         if not addon:
             return False
@@ -49,7 +49,7 @@ class SubscriptionService:
         return shop_addon is not None
 
     @staticmethod
-    def has_analytics_pro(db: Session, shop_id: int) -> bool:
+    def has_analytics_pro(db: Session, shop_id: str) -> bool:
         """
         Source-of-truth entitlement for premium analytics.
         Enabled if:

@@ -7,7 +7,7 @@ class LoggerService:
     @staticmethod
     def log(
         db: Session,
-        shop_id: int,
+        shop_id: str,
         identity: Optional[UserIdentity],
         category: str,
         action: str,

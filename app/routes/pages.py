@@ -1,64 +1,236 @@
-from fastapi import APIRouter
-from fastapi.responses import FileResponse
+from fastapi import APIRouter, Request
+from fastapi.responses import FileResponse, RedirectResponse, Response
+from fastapi.templating import Jinja2Templates
+from pathlib import Path
 
 router = APIRouter()
 
-@router.get("/", response_class=FileResponse)
-async def get_root():
-    return FileResponse("templates/index.html")
+# =========================================================
+# BASE PATHS
+# =========================================================
 
-@router.get("/about-levix", response_class=FileResponse)
-async def get_about():
-    return FileResponse("templates/about-levix.html")
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+TEMPLATES_DIR = BASE_DIR / "templates"
+STATIC_DIR = BASE_DIR / "static"
 
-@router.get("/levix-brand", response_class=FileResponse)
-async def get_brand_typo():
-    return FileResponse("templates/levix-brand.html")
+templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
-@router.get("/login", response_class=FileResponse)
-async def get_login():
-    return FileResponse("templates/login.html")
+# =========================================================
+# STATIC FILES
+# =========================================================
 
-@router.get("/dashboard", response_class=FileResponse)
-async def get_dashboard():
-    return FileResponse("templates/dashboard.html")
+SITEMAP_PATH = STATIC_DIR / "sitemap.xml"
+ROBOTS_PATH = STATIC_DIR / "robots.txt"
+FAVICON_PATH = STATIC_DIR / "favicon.png"
+LLMS_PATH = STATIC_DIR / "llms.txt"
 
-@router.get("/forgot-password", response_class=FileResponse)
-async def get_forgot_password():
-    return FileResponse("templates/forgot-password.html")
+# =========================================================
+# CACHE HEADERS
+# =========================================================
 
-@router.get("/reset-password", response_class=FileResponse)
-async def get_reset_password():
-    return FileResponse("templates/reset-password.html")
+COMMON_HEADERS = {
+    "Cache-Control": "public, max-age=3600",
+    "X-Content-Type-Options": "nosniff",
+}
+
+NO_CACHE_HEADERS = {
+    "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+    "Pragma": "no-cache",
+}
+
+# =========================================================
+# HELPERS
+# =========================================================
+
+def render_page(request: Request, template_name: str):
+    return templates.TemplateResponse(
+        request=request,
+        name=template_name,
+        context={}
+    )
+
+
+def get_sitemap_xml() -> bytes:
+
+    if not SITEMAP_PATH.exists():
+        return b'''<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+</urlset>'''
+
+    raw = SITEMAP_PATH.read_bytes()
+
+    # Remove UTF-8 BOM if exists
+    raw = raw.lstrip(b"\xef\xbb\xbf")
+
+    text = raw.decode("utf-8").strip()
+
+    # Force XML declaration
+    if not text.startswith("<?xml"):
+        text = (
+            '<?xml version="1.0" encoding="UTF-8"?>\n'
+            + text
+        )
+
+    return text.encode("utf-8")
+
+
+def get_robots_txt() -> str:
+
+    if not ROBOTS_PATH.exists():
+        return ""
+
+    return ROBOTS_PATH.read_text(
+        encoding="utf-8"
+    ).strip()
+
+# =========================================================
+# PUBLIC PAGES
+# =========================================================
+
+@router.get("/")
+async def home(request: Request):
+    return render_page(request, "index.html")
+
+
+@router.get("/about-levix")
+async def about_legacy():
+    return RedirectResponse(
+        url="/about",
+        status_code=301
+    )
+
+
+@router.get("/about")
+async def about(request: Request):
+    return render_page(request, "about.html")
+
+
+@router.get("/founder")
+async def founder(request: Request):
+    return render_page(request, "founder.html")
+
+
+@router.get("/what-is-levix")
+async def what_is_levix(request: Request):
+    return render_page(request, "what-is-levix.html")
+
+
+@router.get("/why-we-built-levix")
+async def why_we_built_levix(request: Request):
+    return render_page(request, "why-we-built-levix.html")
+
+
+@router.get("/register")
+async def register(request: Request):
+    return render_page(request, "register.html")
+
+
+@router.get("/login")
+async def login(request: Request):
+    return render_page(request, "login.html")
+
+
+@router.get("/dashboard")
+async def dashboard(request: Request):
+    return render_page(request, "dashboard.html")
+
+
+@router.get("/forgot-password")
+async def forgot_password(request: Request):
+    return render_page(request, "forgot-password.html")
+
+
+@router.get("/reset-password")
+async def reset_password(request: Request):
+    return render_page(request, "reset-password.html")
+
+
+@router.get("/pricing")
+async def pricing(request: Request):
+    return render_page(request, "pricing.html")
+
+
+@router.get("/privacy")
+async def privacy(request: Request):
+    return render_page(request, "privacy.html")
+
+
+@router.get("/terms")
+async def terms(request: Request):
+    return render_page(request, "terms.html")
+
+
+@router.get("/contact")
+async def contact(request: Request):
+    return render_page(request, "contact.html")
+
+# =========================================================
+# SEO FILES
+# =========================================================
 
 @router.get("/robots.txt", include_in_schema=False)
-async def get_robots():
-    return FileResponse("static/robots.txt")
+async def robots():
+
+    robots_text = get_robots_txt()
+
+    return Response(
+        content=robots_text,
+        media_type="text/plain",
+        headers=COMMON_HEADERS
+    )
+
+
+@router.head("/sitemap.xml", include_in_schema=False)
+async def sitemap_head():
+
+    sitemap_xml = get_sitemap_xml()
+
+    return Response(
+        content=sitemap_xml,
+        media_type="application/xml",
+        headers=COMMON_HEADERS
+    )
+
 
 @router.get("/sitemap.xml", include_in_schema=False)
-async def get_sitemap():
-    return FileResponse("static/sitemap.xml")
+async def sitemap():
 
-@router.get("/blog", response_class=FileResponse)
-async def get_blog_home():
-    return FileResponse("templates/blog/index.html")
+    sitemap_xml = get_sitemap_xml()
 
-@router.get("/blog/whatsapp-ordering-for-restaurants", response_class=FileResponse)
-async def get_blog_1():
-    return FileResponse("templates/blog/post.html")
+    return Response(
+        content=sitemap_xml,
+        media_type="application/xml",
+        headers=COMMON_HEADERS
+    )
 
-@router.get("/blog/how-small-shops-use-ai", response_class=FileResponse)
-async def get_blog_2():
-    return FileResponse("templates/blog/post.html")
+# =========================================================
+# STATIC SEO FILES
+# =========================================================
 
-@router.get("/blog/best-whatsapp-order-bot-india", response_class=FileResponse)
-async def get_blog_3():
-    return FileResponse("templates/blog/post.html")
+@router.get("/llms.txt", include_in_schema=False)
+async def llms():
+    return FileResponse(
+        path=LLMS_PATH,
+        media_type="text/plain"
+    )
 
-@router.get("/blog/how-to-grow-local-business-online", response_class=FileResponse)
-async def get_blog_4():
-    return FileResponse("templates/blog/post.html")
 
 @router.get("/favicon.ico", include_in_schema=False)
-async def get_favicon():
-    return FileResponse("static/favicon.png")
+async def favicon():
+    return FileResponse(
+        path=FAVICON_PATH
+    )
+
+# =========================================================
+# ADMIN
+# =========================================================
+
+@router.get("/levix-admin")
+async def levix_admin(request: Request):
+
+    return templates.TemplateResponse(
+        request=request,
+        name="levix-admin.html",
+        context={},
+        headers=NO_CACHE_HEADERS
+    )

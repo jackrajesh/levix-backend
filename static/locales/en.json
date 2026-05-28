@@ -1,0 +1,59 @@
+{
+  "__lang__": "en",
+  "__version__": "1.0",
+  "__note__": "English locale — base language. Add ta.json for Tamil support.",
+
+  "nav.features":    "Features",
+  "nav.pricing":     "Pricing",
+  "nav.about":       "About",
+  "nav.contact":     "Contact",
+  "nav.signin":      "Sign In",
+
+  "hero.badge":      "Simple shop management for India",
+  "hero.title":      "Manage Your Shop Orders, Inventory & Customers — All in One Place",
+  "hero.subtitle":   "Levix helps local businesses handle daily operations faster. Take orders via WhatsApp, track stock, manage customers, and run your shop without complexity.",
+  "hero.cta":        "Create Your Shop",
+  "hero.pricing":    "View Pricing",
+  "hero.trust1":     "Starts at ₹799/month",
+  "hero.trust2":     "MSME Registered",
+  "hero.trust3":     "Works on any device",
+
+  "features.title":  "Everything Your Shop Needs",
+  "features.sub":    "From taking orders to tracking inventory — Levix handles daily operations so you can focus on your customers.",
+
+  "feat1.title":     "Order Management",
+  "feat1.desc":      "Receive, track, and manage orders in real-time. Never miss a customer order with structured order tracking.",
+  "feat2.title":     "Inventory Tracking",
+  "feat2.desc":      "Keep track of your products, stock levels, and prices. Get alerts when items are running low.",
+  "feat3.title":     "WhatsApp Ordering",
+  "feat3.desc":      "Let customers browse your catalogue and place orders via WhatsApp. Simple and familiar for everyone.",
+  "feat4.title":     "Customer Management",
+  "feat4.desc":      "Build a customer database automatically. Track order history and contact details for better service.",
+  "feat5.title":     "Sales & Reports",
+  "feat5.desc":      "Understand your business with daily sales summaries, product performance, and simple analytics.",
+  "feat6.title":     "Team Access",
+  "feat6.desc":      "Add staff members with specific roles. Let your team manage orders and inventory with controlled permissions.",
+
+  "how.title":       "Up and Running in Minutes",
+  "how.sub":         "Getting started with Levix is straightforward. No technical setup required.",
+  "step1.title":     "Create Your Account",
+  "step1.desc":      "Sign up with your name, email, and shop details. It takes less than 2 minutes.",
+  "step2.title":     "Add Your Products",
+  "step2.desc":      "List your products with prices and stock quantities. Organise them by categories.",
+  "step3.title":     "Start Taking Orders",
+  "step3.desc":      "Share your shop link or connect WhatsApp. Customers order, you manage — all from your dashboard.",
+
+  "cta.title":       "Ready to organise your shop?",
+  "cta.sub":         "Set up your Levix account in minutes and start managing orders, stock, and customers from one place.",
+  "cta.btn":         "Create Your Shop",
+
+  "footer.desc":     "Simple, reliable shop management built for Indian businesses.",
+
+  "contact.name":    "Your Name",
+  "contact.email":   "Email Address",
+  "contact.subject": "Subject",
+  "contact.message": "Message",
+  "contact.send":    "Send Message",
+  "contact.sending": "Sending…",
+  "contact.sent":    "Sent ✓"
+}

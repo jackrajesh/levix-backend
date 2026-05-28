@@ -2,6 +2,7 @@ import asyncio
 import json
 from fastapi import Request
 from fastapi.responses import StreamingResponse
+from typing import Any
 
 # =================================================================
 # LEVIX REAL-TIME EVENT BUS (SSE)
@@ -55,8 +56,12 @@ async def sse_events_handler(request: Request, shop_id: int):
     
     async def event_stream():
         try:
-            # 1. Initial Handshake
+            # 1. Initial Handshake & Buffer Flush (CRITICAL FOR PROXIES)
             print(f"[SSE] Connection established for Shop {shop_id}")
+            # Yield 2KB of whitespace to force Nginx/Cloudflare to flush the buffer
+            padding = ":" + (" " * 2048) + "\n\n"
+            yield padding
+            
             yield f"event: connected\ndata: {json.dumps({'status': 'live', 'shop_id': shop_id})}\n\n"
             
             while True:
@@ -75,8 +80,8 @@ async def sse_events_handler(request: Request, shop_id: int):
                     yield f"event: {event_type}\ndata: {event_data}\n\n"
                     
                 except asyncio.TimeoutError:
-                    # 4. Stay-alive Ping (Prevents timeouts in proxies/load balancers)
-                    yield ": ping\n\n"
+                    # 4. Stay-alive Ping (Prevents timeouts in proxies and allows JS watchdog to reset)
+                    yield f"event: ping\ndata: {{}}\n\n"
                     
         except Exception as e:
             print(f"[SSE] Stream error for Shop {shop_id}: {e}")
@@ -95,6 +100,7 @@ async def sse_events_handler(request: Request, shop_id: int):
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
             "Content-Type": "text/event-stream",
+            "X-Accel-Buffering": "no",  # Disables Nginx buffering
         }
     )
 
@@ -103,7 +109,7 @@ def broadcast_event(shop_id: int, event_name: str, data: Any = ""):
     Triggers a real-time update across all active dashboard connections.
     Gap 7 fix: Persists event to DB to guarantee delivery.
     """
-    target_id = int(shop_id)
+    target_id = str(shop_id)
     
     from ..database import SessionLocal
     from .. import models
@@ -123,8 +129,8 @@ def broadcast_event(shop_id: int, event_name: str, data: Any = ""):
         
         # 2. Broadcast to active queues
         json_data = json.dumps(new_event.data)
-        if target_id in shop_queues:
-            for q in list(shop_queues[target_id]):
+        if shop_id in shop_queues:
+            for q in list(shop_queues[shop_id]):
                 try:
                     q.put_nowait({"event": event_name, "data": json_data})
                     # Mark as delivered if we have at least one active consumer
