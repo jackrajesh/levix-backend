@@ -193,7 +193,8 @@
     outline-offset: 2px;
 }
 
-.btn-install {
+.btn-install,
+a.btn-install {
     background: #0f172a;
     color: #ffffff;
     padding: 10px 16px;
@@ -206,6 +207,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 6px;
     cursor: pointer;
     min-height: 40px;
     line-height: 1;

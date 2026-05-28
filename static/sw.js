@@ -1,6 +1,6 @@
 /* LEVIX PWA service worker — root scope, install-safe */
 
-const STATIC_CACHE = "levix-static-v7";
+const STATIC_CACHE = "levix-static-v8";
 const OFFLINE_URL = "/static/offline.html";
 
 const PRECACHE_URLS = [
@@ -13,7 +13,8 @@ const PRECACHE_URLS = [
   "/static/favicon.png",
   "/static/global.css",
   "/static/mobile-fixes.css",
-  "/static/pwa-install.js"
+  "/static/pwa-install.js",
+  "/static/pwa-install-ui.css"
 ];
 
 const NETWORK_ONLY_PREFIXES = [

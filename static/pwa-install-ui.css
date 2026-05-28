@@ -1,0 +1,394 @@
+/* LEVIX install UI — full page + modal, no Chrome native popup */
+
+.levix-install-nav[hidden] {
+  display: none !important;
+}
+
+.levix-install-nav {
+  gap: 6px;
+}
+
+.levix-install-nav svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* ---- Full install page ---- */
+.levix-install-page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+  font-family: Inter, system-ui, sans-serif;
+  color: #0f172a;
+  padding: 24px 16px 40px;
+}
+
+.levix-install-page-inner {
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+.levix-install-brand {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.levix-install-brand img {
+  width: 72px;
+  height: 72px;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+}
+
+.levix-install-brand h1 {
+  margin: 12px 0 6px;
+  font-size: 1.45rem;
+  font-weight: 800;
+}
+
+.levix-install-brand p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.levix-install-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 20px 18px;
+  box-shadow: 0 8px 28px rgba(15, 23, 42, 0.06);
+  margin-bottom: 14px;
+}
+
+.levix-browser-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+.levix-browser-badge.is-ok {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.levix-browser-badge.is-warn {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.levix-browser-badge.is-bad {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.levix-install-cta {
+  width: 100%;
+  min-height: 48px;
+  border: none;
+  border-radius: 12px;
+  background: #0f172a;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.15s ease;
+}
+
+.levix-install-cta:hover:not(:disabled) {
+  background: #020617;
+}
+
+.levix-install-cta:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.levix-install-cta.is-secondary {
+  background: #fff;
+  color: #0f172a;
+  border: 1px solid #e2e8f0;
+  margin-top: 10px;
+}
+
+.levix-open-chrome-btn {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 10px;
+  border-radius: 10px;
+  border: 1px solid #2563eb;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+/* Progress */
+.levix-install-progress {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.levix-install-progress-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.88rem;
+  color: #94a3b8;
+}
+
+.levix-install-progress-item.is-active {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.levix-install-progress-item.is-done {
+  color: #059669;
+}
+
+.levix-install-progress-item.is-error {
+  color: #dc2626;
+}
+
+.levix-install-progress-icon {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.levix-ip-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #cbd5e1;
+}
+
+.levix-ip-check {
+  color: #059669;
+  font-weight: 700;
+}
+
+.levix-ip-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #e2e8f0;
+  border-top-color: #0f172a;
+  border-radius: 50%;
+  animation: levix-spin 0.7s linear infinite;
+}
+
+@keyframes levix-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.levix-install-status-text {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
+/* Chrome menu mock (our UI, not browser UI) */
+.levix-chrome-mock {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 14px 0;
+  background: #f8fafc;
+}
+
+.levix-chrome-mock-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.levix-chrome-mock-dots {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #0f172a;
+  border: 2px solid #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+
+.levix-chrome-mock-menu {
+  padding: 6px 0;
+  background: #fff;
+}
+
+.levix-chrome-mock-item {
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  color: #475569;
+  border-left: 3px solid transparent;
+}
+
+.levix-chrome-mock-item.is-target {
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 700;
+  border-left-color: #2563eb;
+}
+
+.levix-install-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.levix-install-steps li {
+  display: flex;
+  gap: 10px;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: #334155;
+}
+
+.levix-install-step-num {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: #0f172a;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.levix-install-note {
+  margin: 12px 0 0;
+  font-size: 0.82rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.levix-install-back-link {
+  display: block;
+  text-align: center;
+  margin-top: 18px;
+  font-size: 0.88rem;
+  color: #2563eb;
+  text-decoration: none;
+}
+
+/* Modal sheet (optional on marketing pages) */
+body.levix-install-sheet-open {
+  overflow: hidden;
+}
+
+.levix-install-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 14px;
+}
+
+.levix-install-sheet-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.28);
+}
+
+.levix-install-sheet-panel {
+  position: relative;
+  z-index: 2;
+  width: min(100%, 400px);
+  max-height: min(88vh, 560px);
+  overflow: auto;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 16px 48px rgba(15, 23, 42, 0.2);
+  animation: levix-sheet-in 0.2s ease-out;
+}
+
+@keyframes levix-sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.levix-install-sheet-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 14px 16px 8px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.levix-install-sheet-header h2 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.levix-install-sheet-x {
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 8px;
+  background: #f1f5f9;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.levix-install-sheet-body {
+  padding: 12px 16px;
+}
+
+.levix-install-sheet-footer {
+  padding: 10px 16px 14px;
+}
+
+.levix-install-panel-actions {
+  display: grid;
+  gap: 8px;
+}
+
+@media (max-width: 768px) {
+  .nav-menu .btn-install.levix-install-nav {
+    width: 100%;
+    margin-top: 6px;
+  }
+}

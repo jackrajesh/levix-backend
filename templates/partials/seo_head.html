@@ -22,7 +22,8 @@
 <meta name="twitter:description" content="{{ seo_description }}">
 <meta name="twitter:image" content="{{ seo_image }}">
 <link rel="icon" type="image/png" href="/static/favicon.png?v=20260529">
-<script src="/static/pwa-install.js?v=20260530" defer></script>
+<link rel="stylesheet" href="/static/pwa-install-ui.css?v=20260531">
+<script src="/static/pwa-install.js?v=20260531" defer></script>
 {% include 'partials/seo_schema.html' %}
 <script>
 (() => {
@@ -34,7 +35,7 @@
     const link = document.createElement("link");
     link.id = "levix-mobile-fixes";
     link.rel = "stylesheet";
-    link.href = "/static/mobile-fixes.css?v=20260530";
+    link.href = "/static/mobile-fixes.css?v=20260531";
     document.head.appendChild(link);
   };
 

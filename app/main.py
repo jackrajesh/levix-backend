@@ -482,6 +482,7 @@ async def add_production_headers(request: Request, call_next):
         "/static/sw.js",
         "/static/manifest.json",
         "/static/pwa-install.js",
+        "/static/pwa-install-ui.css",
     }
     pwa_no_cache_prefixes = (
         "/static/icons/",
