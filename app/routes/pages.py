@@ -224,9 +224,10 @@ async def llms():
 
 @router.get("/favicon.ico", include_in_schema=False)
 async def favicon():
-    return FileResponse(
-        path=FAVICON_PATH
-    )
+    ico_path = STATIC_DIR / "favicon.ico"
+    if ico_path.exists():
+        return FileResponse(path=ico_path, media_type="image/x-icon", headers=COMMON_HEADERS)
+    return FileResponse(path=FAVICON_PATH, media_type="image/png", headers=COMMON_HEADERS)
 
 
 @router.get("/sw.js", include_in_schema=False)

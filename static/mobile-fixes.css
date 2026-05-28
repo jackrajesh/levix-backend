@@ -101,32 +101,7 @@ textarea {
     opacity: 1 !important;
   }
 
-  /* Dashboard: stack CRM split panes vertically */
-  #tab-content-inbox > div[style*="display:flex"][style*="overflow:hidden"] {
-    display: flex !important;
-    flex-direction: column !important;
-    min-width: 0 !important;
-  }
-
-  #crm-sidebar,
-  #crm-workspace {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  #crm-sidebar {
-    max-height: 44vh !important;
-    border-right: none !important;
-    border-bottom: 1px solid var(--border) !important;
-  }
-
-  #crm-workspace {
-    min-height: 56vh !important;
-    height: auto !important;
-  }
-
+  /* Dashboard mobile: see dashboard-mobile.css (loaded on dashboard) */
   #crm-chat-messages {
     padding: 14px !important;
   }
@@ -135,7 +110,6 @@ textarea {
     font-size: 16px !important;
   }
 
-  /* Toolbar and filter controls should wrap instead of overflow */
   .toolbar,
   .filter-row,
   .analytics-toolbar,
@@ -149,13 +123,6 @@ textarea {
   .search-box {
     min-width: 0 !important;
     width: 100% !important;
-  }
-
-  button,
-  .btn,
-  .crm-filter-btn,
-  .crm-subtab {
-    min-height: 44px !important;
   }
 }
 

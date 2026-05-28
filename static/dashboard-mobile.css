@@ -1,0 +1,204 @@
+/* LEVIX Dashboard — mobile-first CRM & navigation fixes */
+
+@media (max-width: 1024px) {
+  .main-container {
+    margin-left: 0 !important;
+    padding: 12px !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
+  }
+
+  .sidebar-overlay.active {
+    display: block !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    z-index: 1100 !important;
+  }
+
+  .sidebar {
+    z-index: 1200 !important;
+  }
+
+  #profile-dropdown {
+    z-index: 1300 !important;
+    max-width: min(92vw, 280px) !important;
+  }
+}
+
+@media (max-width: 768px) {
+  header {
+    position: relative;
+    z-index: 100;
+    flex-wrap: wrap;
+    gap: 10px !important;
+    margin-bottom: 12px !important;
+    padding-top: 0 !important;
+  }
+
+  .header-left {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .header-right {
+    flex: 1 1 100%;
+    justify-content: space-between !important;
+    z-index: 101;
+  }
+
+  .hamburger {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 10px;
+    touch-action: manipulation;
+  }
+
+  #tab-content-inbox {
+    height: calc(100dvh - 140px) !important;
+    min-height: 400px;
+    overflow: hidden !important;
+  }
+
+  /* CRM toolbar: horizontal scroll for status tabs */
+  .crm-toolbar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding: 12px !important;
+    gap: 10px !important;
+  }
+
+  .crm-toolbar > div:first-child {
+    width: 100% !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  .crm-filters-scroll {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding: 4px 2px 8px;
+    scroll-snap-type: x proximity;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .crm-filters-scroll::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  .crm-filters-scroll .crm-filter-btn {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+    min-height: 44px;
+    padding: 10px 14px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .crm-toolbar .select-group {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .crm-toolbar .btn-outline {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Split panes: ONE view at a time (fixes overlap / unclickable) */
+  .crm-split {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    position: relative !important;
+  }
+
+  .crm-pane-list {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    flex: 1 1 auto !important;
+    max-height: none !important;
+    height: 100% !important;
+    border-right: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  .crm-pane-list.is-hidden {
+    display: none !important;
+  }
+
+  .crm-pane-workspace {
+    display: none !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+    height: 100% !important;
+    position: relative !important;
+    z-index: 1 !important;
+  }
+
+  .crm-pane-workspace.is-active {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .crm-subtabs-container {
+    flex-shrink: 0;
+    touch-action: pan-x;
+  }
+
+  .crm-subtab {
+    min-height: 44px !important;
+    padding: 10px 14px !important;
+    touch-action: manipulation;
+  }
+
+  #inbox-list {
+    flex: 1;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    min-height: 0;
+  }
+
+  .back-to-list-btn {
+    display: none !important;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .crm-pane-workspace.is-active .back-to-list-btn {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #workspace-empty {
+    padding: 24px 16px !important;
+  }
+
+  .nav-item {
+    min-height: 48px;
+    touch-action: manipulation;
+  }
+}
+
+@media (max-width: 430px) {
+  #tab-content-inbox {
+    height: calc(100dvh - 128px) !important;
+  }
+
+  .crm-filter-btn {
+    font-size: 0.8rem !important;
+    padding: 8px 12px !important;
+  }
+}

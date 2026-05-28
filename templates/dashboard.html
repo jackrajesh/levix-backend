@@ -18,8 +18,11 @@
             window.location.replace('/login');
         }
     </script>
-    <link rel="icon" type="image/png" href="/static/favicon.png?v=20260529">
+    {% include 'partials/favicon_head.html' %}
+    <link rel="stylesheet" href="/static/mobile-fixes.css?v=20260601">
+    <link rel="stylesheet" href="/static/dashboard-mobile.css?v=20260601">
     <script src="/static/pwa-install.js?v=20260531" defer></script>
+    <script src="/static/dashboard-mobile.js?v=20260601" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -1083,13 +1086,15 @@
              <div class="crm-toolbar" style="display:flex; justify-content:space-between; align-items:center; padding:16px 24px; border-bottom:1px solid var(--border); background:var(--bg-card); gap:16px; flex-wrap:wrap; box-sizing:border-box;">
                   <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
                        <!-- CRM Tab Filters -->
+                       <div class="crm-filters-scroll">
                        <div class="crm-filters" style="display:flex; background:var(--bg-secondary); border-radius:8px; padding:4px;">
-                            <button class="crm-filter-btn active" onclick="setCrmStatusFilter('')" data-status="">All Active</button>
-                            <button class="crm-filter-btn" onclick="setCrmStatusFilter('ACTIVE')" data-status="ACTIVE">Active</button>
-                            <button class="crm-filter-btn" onclick="setCrmStatusFilter('PAUSED')" data-status="PAUSED">Paused</button>
-                            <button class="crm-filter-btn" onclick="setCrmStatusFilter('WAITING')" data-status="WAITING">Waiting</button>
-                            <button class="crm-filter-btn" onclick="setCrmStatusFilter('RESOLVED')" data-status="RESOLVED">Resolved</button>
-                            <button class="crm-filter-btn" onclick="setCrmStatusFilter('CANCELLED')" data-status="CANCELLED">Cancelled</button>
+                            <button type="button" class="crm-filter-btn active" onclick="setCrmStatusFilter('')" data-status="">All Active</button>
+                            <button type="button" class="crm-filter-btn" onclick="setCrmStatusFilter('ACTIVE')" data-status="ACTIVE">Active</button>
+                            <button type="button" class="crm-filter-btn" onclick="setCrmStatusFilter('PAUSED')" data-status="PAUSED">Paused</button>
+                            <button type="button" class="crm-filter-btn" onclick="setCrmStatusFilter('WAITING')" data-status="WAITING">Waiting</button>
+                            <button type="button" class="crm-filter-btn" onclick="setCrmStatusFilter('RESOLVED')" data-status="RESOLVED">Resolved</button>
+                            <button type="button" class="crm-filter-btn" onclick="setCrmStatusFilter('CANCELLED')" data-status="CANCELLED">Cancelled</button>
+                       </div>
                        </div>
                        <!-- Category Filter -->
                        <div class="select-group" style="min-width: 160px; height: 38px;">
@@ -1108,9 +1113,9 @@
              </div>
 
              <!-- Main Split Container -->
-             <div style="display:flex; flex:1; overflow:hidden; position:relative;">
-                  <!-- Left: Conversation List (35%) -->
-                  <div id="crm-sidebar" style="width:35%; min-width:320px; border-right:1px solid var(--border); background:var(--bg-card); display:flex; flex-direction:column; overflow-y:auto; transition:all 0.3s ease; box-sizing:border-box;">
+             <div class="crm-split" style="display:flex; flex:1; overflow:hidden; position:relative;">
+                  <!-- Left: Conversation List -->
+                  <div id="crm-sidebar" class="crm-pane crm-pane-list" style="width:35%; min-width:0; border-right:1px solid var(--border); background:var(--bg-card); flex-direction:column; overflow:hidden; box-sizing:border-box;">
                        <!-- Sleek CRM horizontal category/type sub-tabs -->
                        <div class="crm-subtabs-container" style="display:flex; gap:8px; padding:12px 12px 4px 12px; overflow-x:auto; white-space:nowrap; border-bottom:1px solid var(--border); scrollbar-width:none; -ms-overflow-style:none;">
                             <style>
@@ -1134,13 +1139,13 @@
                                      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
                                  }
                             </style>
-                            <button class="crm-subtab active" onclick="selectCrmSubtab('ALL')" id="subtab-all">🗂 All</button>
-                            <button class="crm-subtab" onclick="selectCrmSubtab('ORDERS')" id="subtab-orders">🛒 Orders</button>
-                            <button class="crm-subtab" onclick="selectCrmSubtab('INQUIRIES')" id="subtab-inquiries">💬 Inquiries</button>
-                            <button class="crm-subtab" onclick="selectCrmSubtab('VIP')" id="subtab-vip">👑 VIP</button>
-                            <button class="crm-subtab" onclick="selectCrmSubtab('FOLLOWUP')" id="subtab-followup">📅 Follow-up</button>
-                            <button class="crm-subtab" onclick="selectCrmSubtab('SUPPORT')" id="subtab-support">🛠 Support</button>
-                            <button class="crm-subtab" onclick="selectCrmSubtab('DELETED')" id="subtab-deleted">🗑 Deleted</button>
+                            <button type="button" class="crm-subtab active" onclick="selectCrmSubtab('ALL')" id="subtab-all">🗂 All</button>
+                            <button type="button" class="crm-subtab" onclick="selectCrmSubtab('ORDERS')" id="subtab-orders">🛒 Orders</button>
+                            <button type="button" class="crm-subtab" onclick="selectCrmSubtab('INQUIRIES')" id="subtab-inquiries">💬 Inquiries</button>
+                            <button type="button" class="crm-subtab" onclick="selectCrmSubtab('VIP')" id="subtab-vip">👑 VIP</button>
+                            <button type="button" class="crm-subtab" onclick="selectCrmSubtab('FOLLOWUP')" id="subtab-followup">📅 Follow-up</button>
+                            <button type="button" class="crm-subtab" onclick="selectCrmSubtab('SUPPORT')" id="subtab-support">🛠 Support</button>
+                            <button type="button" class="crm-subtab" onclick="selectCrmSubtab('DELETED')" id="subtab-deleted">🗑 Deleted</button>
                        </div>
                        <div id="inbox-list" style="display:flex; flex-direction:column; padding:12px; gap:8px; box-sizing:border-box;"></div>
                        <div id="inbox-empty" class="empty-state" style="padding:40px 20px; text-align:center; display:none; flex-direction:column; align-items:center; justify-content:center;">
@@ -1151,7 +1156,7 @@
                   </div>
 
                   <!-- Right: Workspace Panel (65%) -->
-                  <div id="crm-workspace" style="width:65%; display:flex; flex-direction:column; background:var(--bg-main); overflow:hidden; position:relative; transition:all 0.3s ease; box-sizing:border-box;">
+                  <div id="crm-workspace" class="crm-pane crm-pane-workspace" style="width:65%; flex-direction:column; background:var(--bg-main); overflow:hidden; position:relative; box-sizing:border-box;">
                        <!-- Empty Workspace View -->
                        <div id="workspace-empty" style="display:flex; flex-direction:column; align-items:center; justify-content:center; flex:1; padding:40px; text-align:center; color:var(--text-muted); box-sizing:border-box;">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="width:80px; height:80px; margin-bottom:20px; opacity:0.3;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
@@ -3036,6 +3041,9 @@
             document.getElementById('tab-desc').textContent = mapping[id] ? mapping[id][1] : '';
             
             if (window.innerWidth <= 1024) toggleSidebar();
+            if (id === "inbox" && window.LevixMobileCrm) {
+                window.LevixMobileCrm.showList();
+            }
 
             // Permission Check
             const tabPermMapping = {
@@ -6538,24 +6546,16 @@
             await fetchConversationMessages(id, true);
             
             // On mobile viewports, toggle sidebar/workspace visibility
-            if (window.innerWidth <= 768) {
-                const crmSidebar = document.getElementById('crm-sidebar');
-                if (crmSidebar) crmSidebar.classList.add('hidden');
-                const crmWorkspace = document.getElementById('crm-workspace');
-                if (crmWorkspace) crmWorkspace.classList.add('active');
-                const backBtn = document.querySelector('.back-to-list-btn');
-                if (backBtn) backBtn.style.display = 'block';
+            if (window.LevixMobileCrm && window.LevixMobileCrm.isMobile()) {
+                window.LevixMobileCrm.showWorkspace();
             }
         }
 
         // ── Mobile Go Back to Conversation List view
         function showCrmSidebar() {
-            const crmSidebar = document.getElementById('crm-sidebar');
-            if (crmSidebar) crmSidebar.classList.remove('hidden');
-            const crmWorkspace = document.getElementById('crm-workspace');
-            if (crmWorkspace) crmWorkspace.classList.remove('active');
-            const backBtn = document.querySelector('.back-to-list-btn');
-            if (backBtn) backBtn.style.display = 'none';
+            if (window.LevixMobileCrm && window.LevixMobileCrm.isMobile()) {
+                window.LevixMobileCrm.showList();
+            }
             window.activeConversationId = null;
             fetchInbox(false);
         }
@@ -7297,20 +7297,26 @@
             border-color: var(--accent-hover);
         }
         
-        @media (max-width: 768px) {
-            #crm-sidebar {
-                width: 100% !important;
-            }
-            #crm-sidebar.hidden {
-                display: none !important;
-            }
-            #crm-workspace {
-                display: none;
-                width: 100% !important;
-            }
-            #crm-workspace.active {
-                display: flex !important;
-            }
+        /* Desktop: split panes side by side */
+        .crm-split {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+            overflow: hidden;
+        }
+        .crm-pane-list {
+            display: flex;
+            flex-direction: column;
+            width: 35%;
+            min-width: 280px;
+            overflow: hidden;
+        }
+        .crm-pane-workspace {
+            display: flex;
+            flex-direction: column;
+            width: 65%;
+            flex: 1;
+            overflow: hidden;
         }
     </style>
 </body>
